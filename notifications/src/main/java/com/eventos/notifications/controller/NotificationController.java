@@ -1,6 +1,6 @@
 package com.eventos.notifications.controller;
 
-import com.eventos.notifications.dto.Notification;
+import com.eventos.notifications.dto.NotificationDTO;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
@@ -9,9 +9,9 @@ import reactor.core.publisher.Mono;
 public class NotificationController {
 
     @GetMapping("/{notificationId}")
-    public Mono<Notification> obtenerNotificacion(@PathVariable("notificationId") String notificationId) {
+    public Mono<NotificationDTO> obtenerNotificacion(@PathVariable("notificationId") String notificationId) {
         return Mono.just(
-                new Notification(
+                new NotificationDTO(
                         notificationId,
                         "Nueva notificacion",
                         "Tienes una nueva notificación",

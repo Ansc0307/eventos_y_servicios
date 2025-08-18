@@ -5,17 +5,17 @@ package com.eventos.notifications.dto;
  }
  ***/
 
-public class Notification {
+public class NotificationDTO {
     private String id;
     private String titulo;
     private String mensaje;
     private boolean leido;
 
     // Constructor vacío
-    public Notification() {}
+    public NotificationDTO() {}
 
     // Constructor con parámetros
-    public Notification(String id, String titulo, String mensaje, boolean leido) {
+    public NotificationDTO(String id, String titulo, String mensaje, boolean leido) {
         this.id = id;
         this.titulo = titulo;
         this.mensaje = mensaje;
