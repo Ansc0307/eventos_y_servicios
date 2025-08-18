@@ -1,6 +1,9 @@
 package com.eventos.reservas.gestion.controller;
 
+import com.eventos.reservas.dto.EventoDTO;
 import com.eventos.reservas.gestion.model.Evento;
+import com.eventos.reservas.mapper.EventoMapper;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,8 +14,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class EventoController {
 
     @GetMapping("/{id}")
-    public Evento getEvento(@PathVariable String id) {
-        // Retorno estático para prueba
-        return new Evento(id, "Evento de prueba");
+    public EventoDTO obtenerEvento(@PathVariable String id) {
+        Evento evento = new Evento(id, "Evento de prueba");
+        return EventoMapper.toDTO(evento);
     }
 }
