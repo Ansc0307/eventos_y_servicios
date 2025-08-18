@@ -1,23 +1,25 @@
-package com.eventos.notificaciones.dto;
+package com.eventos.notifications.dto;
 
 /*** este con record es más corto, pero por si acaso lo dejo
-public record Notificacion(String id, String titulo, String mensaje) {
-}
+ public record Notificacion(String id, String titulo, String mensaje) {
+ }
  ***/
 
-public class Notificacion {
+public class Notification {
     private String id;
     private String titulo;
     private String mensaje;
+    private boolean leido;
 
     // Constructor vacío
-    public Notificacion() {}
+    public Notification() {}
 
     // Constructor con parámetros
-    public Notificacion(String id, String titulo, String mensaje) {
+    public Notification(String id, String titulo, String mensaje, boolean leido) {
         this.id = id;
         this.titulo = titulo;
         this.mensaje = mensaje;
+        this.leido = leido;
     }
 
     // Getters
@@ -33,6 +35,10 @@ public class Notificacion {
         return mensaje;
     }
 
+    public boolean isLeido() {
+        return leido;
+    }
+
     // Setters
     public void setId(String id) {
         this.id = id;
@@ -45,5 +51,10 @@ public class Notificacion {
     public void setMensaje(String mensaje) {
         this.mensaje = mensaje;
     }
+
+    public void setLeido(boolean leido) {
+        this.leido = leido;
+    }
 }
+
 
