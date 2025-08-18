@@ -9,13 +9,14 @@ import reactor.core.publisher.Mono;
 public class NotificacionController {
 
     @GetMapping("/{notificationId}")
-    public Mono<Notificacion> obtenerNotificacion(@PathVariable String notificationId) {
+    public Mono<Notificacion> obtenerNotificacion(@PathVariable("notificationId") String notificationId) {
         return Mono.just(
             new Notificacion(
-                "1",
+                notificationId,
                 "Nueva notificacion",
                 "Tienes una nueva notificación"
             )
         );
     }
+
 }
