@@ -1,10 +1,5 @@
 package com.eventos.notifications.dto;
 
-/*** este con record es más corto, pero por si acaso lo dejo
- public record Notificacion(String id, String titulo, String mensaje) {
- }
- ***/
-
 public class NotificationDTO {
     private String id;
     private String titulo;
