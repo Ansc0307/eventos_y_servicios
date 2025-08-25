@@ -1,6 +1,5 @@
 package com.eventos.reservas.exception;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -58,28 +57,23 @@ public class GlobalExceptionHandler {
         error.put("error", ex.getMessage());
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
-
-
-    
-    @ExceptionHandler(FechaInvalidaException.class)
-    public ResponseEntity<?> handleFechaInvalida(FechaInvalidaException ex) {
-        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+  @ExceptionHandler(FechaInvalidaException.class)
+    public ResponseEntity<Map<String, String>> handleEventoNotFound(FechaInvalidaException ex) {
+        LOG.error("Error en Fechas: {}", ex.getMessage());
+        Map<String, String> error = new HashMap<>();
+        error.put("error", ex.getMessage());
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
+
 
     @ExceptionHandler(DisponibleOcupadoException.class)
-    public ResponseEntity<?> handleDisponibleOcupado(DisponibleOcupadoException ex) {
-        return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
+    public ResponseEntity<Map<String, String>> handleEventoNotFound(DisponibleOcupadoException ex) {
+        LOG.error("Error en Estado de Disponibilidad: {}", ex.getMessage());
+        Map<String, String> error = new HashMap<>();
+        error.put("error", ex.getMessage());
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
-    // Método común para devolver errores
-    private ResponseEntity<Map<String, Object>> buildResponse(HttpStatus status, String message) {
-        Map<String, Object> error = new HashMap<>();
-        error.put("timestamp", LocalDateTime.now());
-        error.put("status", status.value());
-        error.put("error", status.getReasonPhrase());
-        error.put("message", message);
-        return new ResponseEntity<>(error, status);
-    }
 
     @ExceptionHandler(SolicitudNotFoundException.class)
     public ResponseEntity<Map<String, String>> handleEventoNotFound(SolicitudNotFoundException ex) {
@@ -89,12 +83,14 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
-public ResponseEntity<Map<String, String>> handleEventoNotFound(SolicitudPendienteException ex) {
-        LOG.error("Error en Estado de Solicitud: {}", ex.getMessage());
-        Map<String, String> error = new HashMap<>();
-        error.put("error", ex.getMessage());
-        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
-    }
+@ExceptionHandler(SolicitudPendienteException.class)
+public ResponseEntity<Map<String, String>> handleSolicitudPendiente(SolicitudPendienteException ex) {
+    LOG.error("Error en Estado de Solicitud: {}", ex.getMessage());
+    Map<String, String> error = new HashMap<>();
+    error.put("error", ex.getMessage());
+    return new ResponseEntity<>(error, HttpStatus.CONFLICT); // 409 más correcto
+}
+
 
 
 

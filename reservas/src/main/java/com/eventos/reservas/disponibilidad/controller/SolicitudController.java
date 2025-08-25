@@ -25,8 +25,8 @@ public class SolicitudController {
             throw new SolicitudNotFoundException("No se encontró la solicitud con id " + id);
         }
 
-        //  Aún pendiente
-        if (id.equals("pendiente")) {
+        //  Aún pendiente - por el momento
+        if (id.equals("5")) {
             throw new SolicitudPendienteException("La solicitud " + id + " aún está pendiente de respuesta");
         }
 

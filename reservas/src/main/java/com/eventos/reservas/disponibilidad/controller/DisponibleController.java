@@ -21,32 +21,34 @@ public class DisponibleController {
     @GetMapping("/{id}")
     public DisponibleDTO obtenerDisponible(@PathVariable String id) {
 
-        //No existe disponibilidad
+        // Caso: No existe disponibilidad
         if (id.equals("999")) {
             throw new DisponibleNotFoundException("No se encontró disponibilidad para el id " + id);
         }
 
-        //Fechas inválidas
-        LocalDateTime inicio = LocalDateTime.now();
-        LocalDateTime fin = inicio.minusHours(1);
-        if (fin.isBefore(inicio)) {
-            throw new FechaInvalidaException("La fecha de fin no puede ser anterior a la de inicio");
+        // Caso: Fechas inválidas solo si el id es "fechaInvalida"
+        if (id.equals("fechaInvalida")) {
+            LocalDateTime inicio = LocalDateTime.now();
+            LocalDateTime fin = inicio.minusHours(1);
+            if (fin.isBefore(inicio)) {
+                throw new FechaInvalidaException("La fecha de fin no puede ser anterior a la de inicio");
+            }
         }
 
-        //Ocupado
+        // Caso: Ocupado
         if (id.equals("ocupado")) {
             throw new DisponibleOcupadoException("El evento ya está reservado");
         }
 
-        // Si todo bien, devolver prueba
+        // Caso normal: devolver objeto válido
         Disponible disponible = new Disponible();
         disponible.setId(id);
-        disponible.setDescripcion("Eventos disponibles entre"+LocalDateTime.now()+" a "+LocalDateTime.now().plusDays(1)+":");
-        /*disponible.setFechaInicio(LocalDateTime.now());
+        disponible.setDescripcion("Eventos disponibles entre " 
+                + LocalDateTime.now() + " a " + LocalDateTime.now().plusDays(1) + ":");
+        disponible.setFechaInicio(LocalDateTime.now());
         disponible.setFechaFin(LocalDateTime.now().plusHours(1));
-        disponible.setDisponible(true);*/
+        disponible.setDisponible(true);
 
         return DisponibleMapper.toDTO(disponible);
     }
 }
-
