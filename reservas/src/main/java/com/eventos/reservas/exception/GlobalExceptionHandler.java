@@ -9,10 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-
-import com.eventos.reservas.exception.DisponibleExceptiones.DisponibleNotFoundException;
-import com.eventos.reservas.exception.DisponibleExceptiones.DisponibleOcupadoException;
-import com.eventos.reservas.exception.DisponibleExceptiones.FechaInvalidaException;
 /**
  * Manejo centralizado de excepciones para el microservicio de reservas.
  */
