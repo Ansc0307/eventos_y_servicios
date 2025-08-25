@@ -9,9 +9,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.eventos.reservas.disponibilidad.model.Disponible;
 import com.eventos.reservas.dto.DisponibleDTO;
-import com.eventos.reservas.exception.DisponibleExceptiones.DisponibleNotFoundException;
-import com.eventos.reservas.exception.DisponibleExceptiones.DisponibleOcupadoException;
-import com.eventos.reservas.exception.DisponibleExceptiones.FechaInvalidaException;
+import com.eventos.reservas.exception.DisponibleNotFoundException;
+import com.eventos.reservas.exception.DisponibleOcupadoException;
+import com.eventos.reservas.exception.FechaInvalidaException;
 import com.eventos.reservas.mapper.DisponibleMapper;
 
 @RestController
