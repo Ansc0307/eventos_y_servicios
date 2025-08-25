@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.eventos.reservas.disponibilidad.model.Solicitud;
 import com.eventos.reservas.dto.SolicitudDTO;
+import com.eventos.reservas.exception.SolicitudNotFoundException;
+import com.eventos.reservas.exception.SolicitudPendienteException;
 import com.eventos.reservas.mapper.SolicitudMapper;
 
 @RestController
@@ -17,12 +19,24 @@ public class SolicitudController {
 
     @GetMapping("/{id}")
     public SolicitudDTO obtenerSolicitud(@PathVariable String id) {
+
+        // No existe
+        if (id.equals("999")) {
+            throw new SolicitudNotFoundException("No se encontró la solicitud con id " + id);
+        }
+
+        //  Aún pendiente
+        if (id.equals("pendiente")) {
+            throw new SolicitudPendienteException("La solicitud " + id + " aún está pendiente de respuesta");
+        }
+
+        // Caso 4: Aceptada
         Solicitud solicitud = new Solicitud();
         solicitud.setId(id);
-        solicitud.setNombreRecurso("Solicitud de prueba");
-        solicitud.setFechaInicio(LocalDateTime.now());
-        solicitud.setFechaFin(LocalDateTime.now().plusHours(1));
-        solicitud.setEstado("pendiente");
+        solicitud.setNombreRecurso("Reserva de salón de eventos");
+        solicitud.setFechaInicio(LocalDateTime.now().plusDays(1));
+        solicitud.setFechaFin(LocalDateTime.now().plusDays(1).plusHours(3));
+        solicitud.setEstado("aceptada");
 
         return SolicitudMapper.toDTO(solicitud);
     }
