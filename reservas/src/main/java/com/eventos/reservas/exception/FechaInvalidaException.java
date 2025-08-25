@@ -1,4 +1,4 @@
-package com.eventos.reservas.exception.DisponibleExceptiones;
+package com.eventos.reservas.exception;
 
 // Fechas inválidas (ej. fechaInicio después de fechaFin)
 public class FechaInvalidaException extends RuntimeException {

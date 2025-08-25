@@ -1,4 +1,4 @@
-package com.eventos.reservas.exception.DisponibleExceptiones;
+package com.eventos.reservas.exception;
 
 public class DisponibleNotFoundException extends RuntimeException {
      public DisponibleNotFoundException(String message) {
