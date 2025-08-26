@@ -17,6 +17,7 @@ import com.eventos.ms_reservas.model.Disponible;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Tag(name = "Disponibilidad", description = "Operaciones relacionadas con la disponibilidad de eventos")
@@ -26,17 +27,21 @@ public class DisponibleController {
 
     @Operation(
         summary = "Obtener disponibilidad por ID",
-        description = "Devuelve la información de disponibilidad para un evento en base a su ID",
-        responses = {
-            @ApiResponse(responseCode = "200", description = "Disponibilidad encontrada"),
-            @ApiResponse(responseCode = "404", description = "No se encontró disponibilidad"),
-            @ApiResponse(responseCode = "400", description = "ID o fechas inválidas"),
-            @ApiResponse(responseCode = "409", description = "Disponibilidad ocupada")
-        }
+        description = "Devuelve la información de disponibilidad para un evento en base a su ID"
     )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Disponibilidad encontrada"),
+        @ApiResponse(responseCode = "400", description = "ID o fechas inválidas"),
+        @ApiResponse(responseCode = "404", description = "No se encontró disponibilidad"),
+        @ApiResponse(responseCode = "409", description = "Disponibilidad ocupada")
+    })
     @GetMapping("/{id}")
     public DisponibleDTO obtenerDisponible(
-        @Parameter(description = "ID de la disponibilidad", example = "1")
+        @Parameter(
+            description = "ID de la disponibilidad a consultar",
+            example = "1",
+            required = true
+        )
         @PathVariable String id
     ) {
 
