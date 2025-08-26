@@ -1,4 +1,4 @@
-package com.eventos.ms_reservas.disponibilidad.controller;
+package com.eventos.ms_reservas.controller;
 
 import java.time.LocalDateTime;
 
@@ -7,11 +7,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.eventos.ms_reservas.disponibilidad.model.Solicitud;
 import com.eventos.ms_reservas.dto.SolicitudDTO;
 import com.eventos.ms_reservas.exception.SolicitudNotFoundException;
 import com.eventos.ms_reservas.exception.SolicitudPendienteException;
 import com.eventos.ms_reservas.mapper.SolicitudMapper;
+import com.eventos.ms_reservas.model.Solicitud;
 
 @RestController
 @RequestMapping("/v1/solicitud")

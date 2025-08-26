@@ -1,3 +1,3 @@
-package com.eventos.ms_reservas.disponibilidad.repository;
+package com.eventos.ms_reservas.repository;
 
 

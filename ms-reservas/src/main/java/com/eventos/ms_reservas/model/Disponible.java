@@ -1,4 +1,4 @@
-package com.eventos.ms_reservas.disponibilidad.model;
+package com.eventos.ms_reservas.model;
 import java.time.LocalDateTime;
 
 public class Disponible {

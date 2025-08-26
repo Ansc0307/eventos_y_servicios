@@ -1,4 +1,4 @@
-package com.eventos.ms_reservas.disponibilidad.service;
+package com.eventos.ms_reservas.service;
 
 
 public class SolicitudService {

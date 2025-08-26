@@ -1,7 +1,7 @@
 package com.eventos.ms_reservas.mapper;
 
-import com.eventos.ms_reservas.disponibilidad.model.Disponible;
 import com.eventos.ms_reservas.dto.DisponibleDTO;
+import com.eventos.ms_reservas.model.Disponible;
 
 public class DisponibleMapper {
 

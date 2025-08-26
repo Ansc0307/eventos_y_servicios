@@ -1,7 +1,7 @@
 package com.eventos.ms_reservas.mapper;
 
-import com.eventos.ms_reservas.disponibilidad.model.Solicitud;
 import com.eventos.ms_reservas.dto.SolicitudDTO;
+import com.eventos.ms_reservas.model.Solicitud;
 
 public class SolicitudMapper {
 
