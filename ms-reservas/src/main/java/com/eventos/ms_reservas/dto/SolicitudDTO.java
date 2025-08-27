@@ -1,87 +1,63 @@
 package com.eventos.ms_reservas.dto;
-import java.time.LocalDateTime;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 public class SolicitudDTO {
 
+    @Schema(description = "Identificador de la solicitud", example = "101")
+    private Long id;
 
-      @Schema(description = "Identificador único de la solicitud", example = "1")
-    private String id;
+    @NotBlank(message = "El nombre del solicitante es obligatorio")
+    @Size(min = 3, max = 50, message = "El nombre debe tener entre 3 y 50 caracteres")
+    @Schema(description = "Nombre completo del solicitante", example = "Juan Pérez")
+    private String solicitante;
 
-    @NotBlank(message = "El nombre del recurso es obligatorio")
-    @Schema(description = "Nombre del recurso solicitado", example = "Reserva de salón de eventos")
-    private String nombreRecurso;
+    @NotBlank(message = "El evento es obligatorio")
+    @Size(min = 3, max = 100, message = "El evento debe tener entre 3 y 100 caracteres")
+    @Schema(description = "Nombre del evento solicitado", example = "Conferencia de Tecnología")
+    private String evento;
 
-    @NotNull(message = "La fecha de inicio no puede ser nula")
-    @Schema(description = "Fecha y hora de inicio de la reserva", example = "2025-08-26T18:00:00")
-    private LocalDateTime fechaInicio;
+    @NotNull(message = "La cantidad de asistentes no puede ser nula")
+    @Schema(description = "Número de asistentes esperados", example = "120")
+    private Integer asistentes;
 
-    @NotNull(message = "La fecha de fin no puede ser nula")
-    @Schema(description = "Fecha y hora de fin de la reserva", example = "2025-08-26T21:00:00")
-    private LocalDateTime fechaFin;
+    private String serviceAddress;
 
-    @Schema(description = "Estado actual de la solicitud", example = "aceptada")
-    private String estado;
-
-
-
-    /* 
-    private String id;
-    private String nombreRecurso;
-    private LocalDateTime fechaInicio;
-    private LocalDateTime fechaFin;
-    private String estado;
-
+    // Constructor vacío
     public SolicitudDTO() {}
 
-    public SolicitudDTO(String id, String nombreRecurso, LocalDateTime fechaInicio, LocalDateTime fechaFin, String estado) {
+    // Constructor con parámetros
+    public SolicitudDTO(Long id, String solicitante, String evento, Integer asistentes, String serviceAddress) {
         this.id = id;
-        this.nombreRecurso = nombreRecurso;
-        this.fechaInicio = fechaInicio;
-        this.fechaFin = fechaFin;
-        this.estado = estado;
-    }*/
-
-    public String getId() {
-        return id;
+        this.solicitante = solicitante;
+        this.evento = evento;
+        this.asistentes = asistentes;
+        this.serviceAddress = serviceAddress;
     }
 
-    public String getNombreRecurso() {
-        return nombreRecurso;
-    }
+    // Getters y Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public LocalDateTime getFechaInicio() {
-        return fechaInicio;
-    }
+    public String getSolicitante() { return solicitante; }
+    public void setSolicitante(String solicitante) { this.solicitante = solicitante; }
 
-    public LocalDateTime getFechaFin() {
-        return fechaFin;
-    }
+    public String getEvento() { return evento; }
+    public void setEvento(String evento) { this.evento = evento; }
 
-    public String getEstado() {
-        return estado;
-    }
+    public Integer getAsistentes() { return asistentes; }
+    public void setAsistentes(Integer asistentes) { this.asistentes = asistentes; }
 
-    public void setId(String id) {
-        this.id = id;
-    }
+    public String getServiceAddress() { return serviceAddress; }
+    public void setServiceAddress(String serviceAddress) { this.serviceAddress = serviceAddress; }
 
-    public void setNombreRecurso(String nombreRecurso) {
-        this.nombreRecurso = nombreRecurso;
-    }
-
-    public void setFechaInicio(LocalDateTime fechaInicio) {
-        this.fechaInicio = fechaInicio;
-    }
-
-    public void setFechaFin(LocalDateTime fechaFin) {
-        this.fechaFin = fechaFin;
-    }
-
-    public void setEstado(String estado) {
-        this.estado = estado;
+    @Override
+    public String toString() {
+        return "SolicitudDTO [id=" + id + ", solicitante=" + solicitante 
+                + ", evento=" + evento + ", asistentes=" + asistentes 
+                + ", serviceAddress=" + serviceAddress + "]";
     }
 }
