@@ -6,6 +6,9 @@ import com.eventos.ms_reservas.model.Solicitud;
 public class SolicitudMapper {
 
     public static SolicitudDTO toDTO(Solicitud solicitud) {
+         if (solicitud == null) {
+            return null;
+        }
         return new SolicitudDTO(
                 solicitud.getId(),
                 solicitud.getNombreRecurso(),
@@ -16,6 +19,10 @@ public class SolicitudMapper {
     }
 
     public static Solicitud toEntity(SolicitudDTO dto) {
+         if (dto == null) {
+            return null;
+        }
+        
         Solicitud solicitud = new Solicitud();
         solicitud.setId(dto.getId());
         solicitud.setNombreRecurso(dto.getNombreRecurso());

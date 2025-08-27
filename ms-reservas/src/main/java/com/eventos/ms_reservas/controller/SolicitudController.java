@@ -4,11 +4,8 @@ import java.time.LocalDateTime;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,12 +17,9 @@ import com.eventos.ms_reservas.model.Solicitud;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/v1/solicitud")
@@ -34,7 +28,7 @@ public class SolicitudController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SolicitudController.class);
 
-    // 📌 GET: Obtener solicitud por ID
+    // GET: Obtener solicitud por ID
     @Operation(summary = "Obtener una solicitud por ID", description = "Devuelve la información de una solicitud específica según su ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Solicitud encontrada"),
@@ -71,7 +65,9 @@ public class SolicitudController {
         return SolicitudMapper.toDTO(solicitud);
     }
 
-    // 📌 POST: Crear solicitud
+    /* 
+
+    // POST: Crear solicitud
     @Operation(summary = "Crear nueva solicitud", description = "Registra una nueva solicitud de reserva")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Solicitud creada correctamente"),
@@ -89,7 +85,7 @@ public class SolicitudController {
         LOGGER.info("Creando nueva solicitud: {}", body.getNombreRecurso());
 
         // Simulamos guardado en BD
-        body.setId("12345");
+        body.setId("1");
         body.setEstado("pendiente");
 
         LOGGER.debug("Solicitud creada con id: {}", body.getId());
@@ -97,7 +93,7 @@ public class SolicitudController {
         return body;
     }
 
-    // 📌 DELETE: Eliminar solicitud
+    // DELETE: Eliminar solicitud
     @Operation(summary = "Eliminar solicitud por ID", description = "Elimina una solicitud existente según su ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Solicitud eliminada"),
@@ -114,7 +110,7 @@ public class SolicitudController {
             throw new SolicitudNotFoundException("No se puede eliminar. No existe solicitud con id " + id);
         }
 
-        // 🚨 Aquí deberías llamar al servicio que realmente elimine en BD
+        // Aquí deberías llamar al servicio que realmente elimine en BD
         LOGGER.debug("Solicitud {} eliminada correctamente", id);
-    }
+    }*/
 }

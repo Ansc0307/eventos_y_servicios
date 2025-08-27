@@ -6,6 +6,9 @@ import com.eventos.ms_reservas.model.Disponible;
 public class DisponibleMapper {
 
     public static DisponibleDTO toDTO(Disponible disponible) {
+        if (disponible == null) {
+            return null;
+        }
         return new DisponibleDTO(
                 disponible.getId(),
                 disponible.getDescripcion(),
@@ -16,6 +19,9 @@ public class DisponibleMapper {
     }
 
     public static Disponible toEntity(DisponibleDTO dto) {
+        if (dto == null) {
+            return null;
+        }
         Disponible disponible = new Disponible();
         disponible.setId(dto.getId());
         disponible.setDescripcion(dto.getDescripcion());
