@@ -1,0 +1,45 @@
+springdoc:
+  # Rutas personalizadas para Swagger UI y los docs JSON
+  swagger-ui.path: /openapi/swagger-ui.html
+  api-docs.path: /openapi/v3/api-docs
+  packagesToScan: com.eventos.ms_usuarios.controller
+  pathsToMatch: /**
+
+api:
+  common:
+    version: 1.0.0
+    title: API Usuarios
+    description: Servicio de gestión de usuarios (creación, consulta y listado)
+    termsOfService: https://www.miempresa.com/terminos
+    license: Licencia MIT
+    licenseUrl: https://opensource.org/licenses/MIT
+    externalDocDesc: Documentación interna
+    externalDocUrl: https://www.miempresa.com/wiki/usuarios
+    contact:
+      name: Soporte Plataforma
+      url: https://www.miempresa.com/contacto
+      email: soporte@miempresa.com
+
+  responseCodes:
+    ok.description: Operación exitosa.
+    created.description: Recurso creado correctamente.
+    badRequest.description: Formato inválido de la solicitud. Ver mensaje de respuesta para más información.
+    notFound.description: El id de usuario especificado no existe.
+    unprocessableEntity.description: Los datos suministrados no pueden procesarse. Ver mensaje de respuesta para más información.
+    conflict.description: Conflicto, normalmente email duplicado.
+
+  usuario:
+    get-usuario:
+      description: Retorna la información del usuario por su id.
+      notes: |
+        # Respuesta exitosa
+        Si el id del usuario solicitado es encontrado se retornará la información del usuario.
+
+        # Respuestas con error
+        1. Si ningún usuario se encontró se devuelve **404 - Not Found**
+      parameters:
+        usuarioId: ID del usuario a buscar
+    listar-usuarios:
+      description: Lista todos los usuarios registrados.
+    crear-usuario:
+      description: Crea un nuevo usuario con email único.
