@@ -1,7 +1,7 @@
 package com.eventos.ofertas.mapper;
 
 import com.eventos.ofertas.dto.OfertaDTO;
-import com.eventos.ofertas.model.Oferta;
+import com.eventos.ofertas.entity.Oferta;
 
 public class OfertaMapper {
 

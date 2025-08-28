@@ -1,4 +1,4 @@
-package com.eventos.ofertas.model;
+package com.eventos.ofertas.entity;
 
 public class Oferta {
     private String id;
