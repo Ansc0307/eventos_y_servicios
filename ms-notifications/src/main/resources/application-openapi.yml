@@ -1,0 +1,41 @@
+springdoc:
+  swagger-ui:
+    path: /openapi/swagger-ui.html
+  api-docs:
+    path: /openapi/v3/api-docs
+  packagesToScan: com.eventos.ms_notifications.controller
+  pathsToMatch: /v1/**
+
+api:
+  common:
+    version: 1.0.0
+    title: API Notificaciones
+    description: Servicio de gestión de notificaciones de usuarios
+    termsOfService: https://www.miempresa.com/terminos
+    license: Licencia MIT
+    licenseUrl: https://opensource.org/licenses/MIT
+    externalDocDesc: Documentación en Wiki
+    externalDocUrl: https://www.miempresa.com/wiki
+    contact:
+      name: Soporte Eventos
+      url: https://www.miempresa.com/contacto
+      email: soporte@miempresa.com
+
+  responseCodes:
+    ok.description: OK
+    badRequest.description: Bad Request, el formato de la solicitud no es válido.
+    notFound.description: Not Found, la notificación no existe.
+    unprocessableEntity.description: Unprocessable Entity, no se puede procesar la solicitud.
+
+  notification:
+    get-by-id:
+      description: Retorna una notificación según el ID proporcionado.
+      notes: |
+        # Respuesta exitosa
+        Si el ID solicitado es válido, retornará la notificación.
+        
+        # Respuestas con error
+        1. Si el ID <= 0 se devuelve **400 - Bad Request**
+        2. Si el ID no existe (ej: 100) se devuelve **404 - Not Found**
+      parameters:
+        notificationId: ID de la notificación a buscar.
