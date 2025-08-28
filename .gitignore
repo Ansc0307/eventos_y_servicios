@@ -1,0 +1,53 @@
+# Compilación
+target/
+build/
+out/
+
+# Archivos de dependencias
+*.class
+*.jar
+*.war
+*.ear
+
+# Logs
+*.log
+
+# IDEs
+# IntelliJ
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Eclipse
+.project
+.classpath
+.settings/
+bin/
+
+# VS Code
+.vscode/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Archivos temporales
+*.tmp
+*.swp
+*.swo
+*~
+
+# Maven Wrapper
+.mvn/wrapper/maven-wrapper.jar
+.mvn/wrapper/maven-wrapper.properties
+
+# Gradle Wrapper
+.gradle/
+gradle-app.setting
+!gradle-wrapper.jar
+
+# Archivos de configuración sensibles
+application-*.yml
+application-*.yaml
+application-*.properties
