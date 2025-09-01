@@ -1,14 +1,22 @@
 package com.eventos.ms_usuarios.dto;
 
 import com.eventos.ms_usuarios.model.RolUsuario;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.Instant;
 
+@Schema(name = "Usuario", description = "Usuario expuesto en las respuestas")
 public class UsuarioDto {
+  @Schema(description = "Identificador único", example = "1")
   private Long id;
+  @Schema(description = "Nombre completo", example = "Juan Pérez")
   private String nombre;
+  @Schema(description = "Correo electrónico", example = "juan.perez@example.com")
   private String email;
+  @Schema(description = "Rol asignado", example = "ORGANIZADOR")
   private RolUsuario rol;
+  @Schema(description = "Fecha de creación", example = "2025-09-01T14:20:15Z")
   private Instant creadoEn;
+  @Schema(description = "Última fecha de actualización", example = "2025-09-01T14:25:10Z")
   private Instant actualizadoEn;
 
   public UsuarioDto() {
