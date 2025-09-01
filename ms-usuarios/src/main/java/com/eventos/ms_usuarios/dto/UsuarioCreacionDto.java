@@ -12,10 +12,10 @@ public class UsuarioCreacionDto {
   private String nombre;
   @NotBlank
   @Email
-  @Size(max = 150)
+  @Size(max = 80)
   private String email;
   @NotBlank
-  @Size(min = 6, max = 60)
+  @Size(min = 8, max = 60)
   private String password;
   @NotNull
   private RolUsuario rol;
