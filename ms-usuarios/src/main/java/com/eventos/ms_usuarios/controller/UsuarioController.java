@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 import jakarta.validation.Valid;
 
@@ -21,11 +22,8 @@ import jakarta.validation.Valid;
 @Tag(name = "Usuario", description = "REST API para usuarios")
 public class UsuarioController {
 
-  private final UsuarioService usuarioService;
-
-  public UsuarioController(UsuarioService usuarioService) {
-    this.usuarioService = usuarioService;
-  }
+  @Autowired
+  private UsuarioService usuarioService;
 
   @Operation(summary = "Crear usuario", description = "Crea un nuevo usuario")
   @ApiResponses(value = {

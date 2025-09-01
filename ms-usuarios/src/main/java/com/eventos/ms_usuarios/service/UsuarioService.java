@@ -6,6 +6,7 @@ import com.eventos.ms_usuarios.model.Usuario;
 import com.eventos.ms_usuarios.repository.UsuarioRepository;
 import com.eventos.ms_usuarios.exception.EmailDuplicadoException;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.List;
@@ -15,13 +16,10 @@ import com.eventos.ms_usuarios.exception.RecursoNoEncontradoException;
 @Service
 public class UsuarioService {
 
-  private final UsuarioRepository usuarioRepository;
-  private final PasswordEncoder passwordEncoder;
-
-  public UsuarioService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder) {
-    this.usuarioRepository = usuarioRepository;
-    this.passwordEncoder = passwordEncoder;
-  }
+  @Autowired
+  private UsuarioRepository usuarioRepository;
+  @Autowired
+  private PasswordEncoder passwordEncoder;
 
   @Transactional
   public UsuarioDto crearUsuario(UsuarioCreacionDto dto) {
