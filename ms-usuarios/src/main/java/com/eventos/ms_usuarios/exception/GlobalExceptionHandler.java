@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import org.springframework.lang.NonNull;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,8 +18,9 @@ import java.util.stream.Collectors;
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
   @Override
-  protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers,
-      HttpStatusCode status, WebRequest request) {
+  protected ResponseEntity<Object> handleMethodArgumentNotValid(@NonNull MethodArgumentNotValidException ex,
+      @NonNull HttpHeaders headers,
+      @NonNull HttpStatusCode status, @NonNull WebRequest request) {
     List<String> details = ex.getBindingResult().getFieldErrors().stream()
         .map(fe -> fe.getField() + ": " + fe.getDefaultMessage())
         .collect(Collectors.toList());
@@ -39,6 +41,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     ApiError apiError = new ApiError(HttpStatus.NOT_FOUND.value(), "Not Found", ex.getMessage(),
         request.getDescription(false), null);
     return new ResponseEntity<>(apiError, HttpStatus.NOT_FOUND);
+  }
+
+  @ExceptionHandler(PasswordDebilException.class)
+  public ResponseEntity<ApiError> handlePasswordDebil(PasswordDebilException ex, WebRequest request) {
+    ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST.value(), "Bad Request", ex.getMessage(),
+        request.getDescription(false), null);
+    return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
   }
 
   @ExceptionHandler(Exception.class)

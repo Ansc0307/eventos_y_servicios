@@ -12,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.List;
 import java.util.stream.Collectors;
 import com.eventos.ms_usuarios.exception.RecursoNoEncontradoException;
+import com.eventos.ms_usuarios.exception.PasswordDebilException;
 
 @Service
 public class UsuarioService {
@@ -26,6 +27,11 @@ public class UsuarioService {
     // Validación sencilla: email único
     if (usuarioRepository.existsByEmail(dto.getEmail())) {
       throw new EmailDuplicadoException(dto.getEmail());
+    }
+    // Validación simple de fuerza de contraseña (mínimo 8 caracteres, al menos una
+    // letra y un número)
+    if (!esPasswordFuerte(dto.getPassword())) {
+      throw new PasswordDebilException();
     }
     String hash = passwordEncoder.encode(dto.getPassword());
     Usuario usuario = new Usuario(dto.getNombre(), dto.getEmail(), hash, dto.getRol());
@@ -52,5 +58,13 @@ public class UsuarioService {
         .map(u -> new UsuarioDto(u.getId(), u.getNombre(), u.getEmail(), u.getRol(), u.getCreadoEn(),
             u.getActualizadoEn()))
         .collect(Collectors.toList());
+  }
+
+  private boolean esPasswordFuerte(String pwd) {
+    if (pwd == null || pwd.length() < 8)
+      return false;
+    boolean tieneLetra = pwd.chars().anyMatch(Character::isLetter);
+    boolean tieneDigito = pwd.chars().anyMatch(Character::isDigit);
+    return tieneLetra && tieneDigito;
   }
 }
