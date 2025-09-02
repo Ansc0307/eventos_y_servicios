@@ -2,13 +2,14 @@ package com.eventos.ms_reservas.dto;
 import java.time.LocalDateTime;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public class SolicitudDTO {
 
 
-      @Schema(description = "Identificador único de la solicitud", example = "1")
+    @Schema(description = "Identificador único de la solicitud", example = "1")
     private String id;
 
     @NotBlank(message = "El nombre del recurso es obligatorio")
@@ -16,10 +17,12 @@ public class SolicitudDTO {
     private String nombreRecurso;
 
     @NotNull(message = "La fecha de inicio no puede ser nula")
+    @Future(message = "La fecha de inicio debe estar en el futuro")
     @Schema(description = "Fecha y hora de inicio de la reserva", example = "2025-08-26T18:00:00")
     private LocalDateTime fechaInicio;
 
     @NotNull(message = "La fecha de fin no puede ser nula")
+    @Future(message = "La fecha de fin debe estar en el futuro")
     @Schema(description = "Fecha y hora de fin de la reserva", example = "2025-08-26T21:00:00")
     private LocalDateTime fechaFin;
 

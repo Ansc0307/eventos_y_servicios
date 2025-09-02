@@ -3,21 +3,24 @@ package com.eventos.ms_reservas.dto;
 import java.time.LocalDateTime;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
 
 public class DisponibleDTO {
 
-  @Schema(description = "Identificador único de la disponibilidad", example = "10")
+    @Schema(description = "Identificador único de la disponibilidad", example = "10")
     private String id;
 
     @Schema(description = "Descripción del evento o recurso", example = "Eventos disponibles entre X e Y")
     private String descripcion;
 
     @NotNull(message = "La fecha de inicio no puede ser nula")
+    @FutureOrPresent(message = "La fecha de inicio debe ser hoy o en el futuro")
     @Schema(description = "Fecha y hora de inicio de la disponibilidad", example = "2025-08-26T10:00:00")
     private LocalDateTime fechaInicio;
 
     @NotNull(message = "La fecha de fin no puede ser nula")
+    @FutureOrPresent(message = "La fecha de fin debe ser hoy o en el futuro")
     @Schema(description = "Fecha y hora de fin de la disponibilidad", example = "2025-08-26T11:00:00")
     private LocalDateTime fechaFin;
 
