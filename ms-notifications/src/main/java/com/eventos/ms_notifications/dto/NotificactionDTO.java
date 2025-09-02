@@ -1,14 +1,32 @@
 package com.eventos.ms_notifications.dto;
 import java.time.LocalDateTime;
+import io.swagger.v3.oas.annotations.media.Schema;
 
+@Schema(description = "DTO que representa una notificación dentro del sistema")
 public class NotificactionDTO {
+    
+    @Schema(description = "Identificador único de la notificación", example = "1")
     private Long id;
+
+    @Schema(description = "Identificador del usuario al que va dirigida la notificación", example = "1001")
     private Long userId;
+    
+    @Schema(description = "Asunto o título de la notificación", example = "Nueva reserva creada")
     private String asunto;
+
+    @Schema(description = "Mensaje detallado de la notificación", example = "Su reserva ha sido creada exitosamente.")
     private String mensaje;
+
+    @Schema(description = "Prioridad de la notificación", example = "alta")
     private String prioridad;
+
+    @Schema(description = "Fecha y hora de creación de la notificación", example = "2024-06-15T14:30:00")
     private LocalDateTime fechaCreacion;
+
+    @Schema(description = "Indica si la notificación ha sido leída", example = "false")
     private Boolean leido;
+
+    @Schema(description = "Tipo de notificación", example = "reserva, evento, general")
     private String tipoNotificacion;
 
     //Constructores

@@ -12,7 +12,7 @@ import io.swagger.v3.oas.models.info.License;
 
 @Configuration
 public class OpenApiConfig {
-
+    
     @Value("${api.common.version}")
     String apiVersion;
 
@@ -69,5 +69,5 @@ public class OpenApiConfig {
                 .externalDocs(new ExternalDocumentation()
                         .description(apiExternalDocDesc)
                         .url(apiExternalDocUrl));
-    }
+    }  
 }
