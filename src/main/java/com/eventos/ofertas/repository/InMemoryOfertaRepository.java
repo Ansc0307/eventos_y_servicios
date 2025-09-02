@@ -6,14 +6,18 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-
+import java.util.concurrent.atomic.AtomicLong;
 
 public class InMemoryOfertaRepository implements OfertaRepository {  
 
     private final Map<Long, Oferta> store = new ConcurrentHashMap<>();
+    private final AtomicLong idGenerator = new AtomicLong();
 
     @Override
     public Mono<Oferta> save(Oferta oferta) {
+        if (oferta.getId() == null) {
+            oferta.setId(idGenerator.incrementAndGet());
+        }
         store.put(oferta.getId(), oferta);
         return Mono.just(oferta);
     }

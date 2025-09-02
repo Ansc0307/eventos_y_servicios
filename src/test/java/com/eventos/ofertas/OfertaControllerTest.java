@@ -9,16 +9,19 @@ import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWeb
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
+
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Objects;
 
 @SpringBootTest
 @AutoConfigureWebTestClient
 public class OfertaControllerTest {
+
     @Autowired
-    WebTestClient webTestClient;
-    OfertaDTO base;
+    private WebTestClient webTestClient;
+
+    private OfertaDTO base;
+
     @BeforeEach
     void setUp() {
         base = new OfertaDTO();
@@ -29,25 +32,27 @@ public class OfertaControllerTest {
         base.setPrecioBase(new BigDecimal("4500.00"));
         base.setMediaUrls(List.of("https://example.com/foto1.jpg"));
     }
- @Test
+
+    @Test
     void crearYObtener() {
         // Crear
-        var created = webTestClient.post().uri("/ofertas")
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(base)
-            .exchange()
-            .expectStatus().isCreated()
-            .expectBody(OfertaDTO.class)
-            .returnResult().getResponseBody();
+        OfertaDTO created = webTestClient.post().uri("/ofertas")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(base)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody(OfertaDTO.class)
+                .returnResult()
+                .getResponseBody();
 
         // Verifica que created no sea null
-        created = Objects.requireNonNull(created, "La oferta creada es null");
+        assert created != null;
 
         // Obtener
         webTestClient.get().uri("/ofertas/" + created.getId())
-            .exchange()
-            .expectStatus().isOk()
-            .expectBody()
-            .jsonPath("$.titulo").isEqualTo("Salón Primavera");
-        }
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.titulo").isEqualTo("Salón Primavera");
+    }
 }
