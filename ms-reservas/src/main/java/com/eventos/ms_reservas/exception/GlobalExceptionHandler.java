@@ -97,5 +97,30 @@ public class GlobalExceptionHandler {
         LOG.error("Error inesperado: {}", ex.getMessage(), ex);
         return errorResponse("Error interno del servidor", HttpStatus.INTERNAL_SERVER_ERROR, "/");
     }
+
+    // ----------------- parametros -----------
+     @ExceptionHandler(SolicitudNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public Map<String, Object> handleSolicitudNotFound(SolicitudNotFoundException ex, HttpServletRequest request) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", Instant.now().toString());
+        body.put("status", 404);
+        body.put("error", "Not Found");
+        body.put("message", ex.getMessage());
+        body.put("path", request.getRequestURI());
+        return body;
+    }
+
+    @ExceptionHandler(SolicitudPendienteException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public Map<String, Object> handleSolicitudPendiente(SolicitudPendienteException ex, HttpServletRequest request) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", Instant.now().toString());
+        body.put("status", 409);
+        body.put("error", "Conflict");
+        body.put("message", ex.getMessage());
+        body.put("path", request.getRequestURI());
+        return body;
+    }
     
 }

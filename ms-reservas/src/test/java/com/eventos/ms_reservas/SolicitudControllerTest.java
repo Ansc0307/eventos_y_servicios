@@ -1,100 +1,128 @@
 package com.eventos.ms_reservas;
 
-import java.time.LocalDateTime;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
+import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
+import com.eventos.ms_reservas.controller.SolicitudController;
 import com.eventos.ms_reservas.dto.SolicitudDTO;
+import com.eventos.ms_reservas.exception.SolicitudNotFoundException;
+import com.eventos.ms_reservas.exception.SolicitudPendienteException;
+import com.eventos.ms_reservas.service.SolicitudService;
 
-@SpringBootTest(webEnvironment = RANDOM_PORT)
+import java.time.LocalDateTime;
+
+@WebFluxTest(SolicitudController.class)
 class SolicitudControllerTest {
 
     @Autowired
     private WebTestClient client;
 
-    @Test
-    void createSolicitud() {
-        SolicitudDTO solicitud = new SolicitudDTO(
-                "1",
-                "Reserva test",
-                LocalDateTime.now().plusHours(1),
-                LocalDateTime.now().plusHours(3),
-                "pendiente"
-        );
-
-        client.post()
-                .uri("/v1/solicitudes")
-                .contentType(APPLICATION_JSON)
-                .accept(APPLICATION_JSON)
-                .bodyValue(solicitud)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$.id").isEqualTo("1")
-                .jsonPath("$.nombreRecurso").isEqualTo("Reserva test")
-                .jsonPath("$.estado").isEqualTo("pendiente");
-    }
+    @MockBean
+    private SolicitudService solicitudService;
 
     @Test
-    void getSolicitudById() {
-        int id = 1;
+    void getSolicitudFound() {
+        SolicitudDTO dto = new SolicitudDTO();
+        dto.setId("1");
+        dto.setNombreRecurso("Reserva test");
+        dto.setEstado("aceptada");
+        dto.setFechaInicio(LocalDateTime.now().plusHours(1));
+        dto.setFechaFin(LocalDateTime.now().plusHours(2));
+
+        when(solicitudService.obtenerPorId(1)).thenReturn(dto);
 
         client.get()
-                .uri("/v1/solicitudes/" + id)
-                .accept(APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$.id").isEqualTo(String.valueOf(id));
-    }
-
-    @Test
-    void getSolicitudInvalidParameterString() {
-        client.get()
-                .uri("/v1/solicitudes/no-integer")
-                .accept(APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isEqualTo(BAD_REQUEST)
-                .expectHeader().contentType(APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$.path").isEqualTo("/v1/solicitudes/no-integer")
-                .jsonPath("$.error").isEqualTo("Bad Request");
+              .uri("/v1/solicitudes/1")
+              .exchange()
+              .expectStatus().isOk()
+              .expectBody()
+              .jsonPath("$.id").isEqualTo("1")
+              .jsonPath("$.nombreRecurso").isEqualTo("Reserva test")
+              .jsonPath("$.estado").isEqualTo("aceptada");
     }
 
     @Test
     void getSolicitudNotFound() {
-        int idNotFound = 999;
+        when(solicitudService.obtenerPorId(999))
+                .thenThrow(new SolicitudNotFoundException("No se encontró la solicitud"));
 
         client.get()
-                .uri("/v1/solicitudes/" + idNotFound)
-                .accept(APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isNotFound()
-                .expectHeader().contentType(APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$.path").isEqualTo("/v1/solicitudes/" + idNotFound);
+              .uri("/v1/solicitudes/999")
+              .exchange()
+              .expectStatus().isNotFound()
+              .expectBody()
+              .jsonPath("$.error").isEqualTo("No se encontró la solicitud")
+              .jsonPath("$.path").isEqualTo("/v1/solicitudes/999");
     }
 
     @Test
-    void getSolicitudInvalidParameterNegativeValue() {
-        int idInvalid = -1;
+    void getSolicitudPendiente() {
+        when(solicitudService.obtenerPorId(5))
+                .thenThrow(new SolicitudPendienteException("La solicitud aún está pendiente"));
 
         client.get()
-                .uri("/v1/solicitudes/" + idInvalid)
-                .accept(APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isEqualTo(UNPROCESSABLE_ENTITY)
-                .expectHeader().contentType(APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$.path").isEqualTo("/v1/solicitudes/" + idInvalid);
+              .uri("/v1/solicitudes/5")
+              .exchange()
+              .expectStatus().isEqualTo(409)
+              .expectBody()
+              .jsonPath("$.error").isEqualTo("La solicitud aún está pendiente")
+              .jsonPath("$.path").isEqualTo("/v1/solicitudes/5");
+    }
+
+    @Test
+    void createSolicitudValid() {
+        SolicitudDTO input = new SolicitudDTO();
+        input.setNombreRecurso("Reserva test");
+        input.setFechaInicio(LocalDateTime.now().plusHours(1));
+        input.setFechaFin(LocalDateTime.now().plusHours(2));
+
+        SolicitudDTO output = new SolicitudDTO();
+        output.setId("1");
+        output.setNombreRecurso("Reserva test");
+        output.setEstado("pendiente");
+        output.setFechaInicio(input.getFechaInicio());
+        output.setFechaFin(input.getFechaFin());
+
+        when(solicitudService.crearSolicitud(input)).thenReturn(output);
+
+        client.post()
+              .uri("/v1/solicitudes")
+              .bodyValue(input)
+              .exchange()
+              .expectStatus().isOk()
+              .expectBody()
+              .jsonPath("$.id").isEqualTo("1")
+              .jsonPath("$.estado").isEqualTo("pendiente");
+    }
+
+    @Test
+    void deleteSolicitudFound() {
+        doNothing().when(solicitudService).eliminarSolicitud(1);
+
+        client.delete()
+              .uri("/v1/solicitudes/1")
+              .exchange()
+              .expectStatus().isOk();
+    }
+
+    @Test
+    void deleteSolicitudNotFound() {
+        doThrow(new SolicitudNotFoundException("No se puede eliminar"))
+                .when(solicitudService).eliminarSolicitud(999);
+
+        client.delete()
+              .uri("/v1/solicitudes/999")
+              .exchange()
+              .expectStatus().isNotFound()
+              .expectBody()
+              .jsonPath("$.error").isEqualTo("No se puede eliminar")
+              .jsonPath("$.path").isEqualTo("/v1/solicitudes/999");
     }
 }
