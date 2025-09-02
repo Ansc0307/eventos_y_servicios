@@ -1,7 +1,7 @@
 package com.eventos.ms_reservas.exception;
 
 public class DisponibleNotFoundException extends RuntimeException {
-    private final Long id; // ID de la disponibilidad
+    private final Long id;
 
     public DisponibleNotFoundException(Long id, String message) {
         super(message);

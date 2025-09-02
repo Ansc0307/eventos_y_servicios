@@ -3,6 +3,7 @@ package com.eventos.ms_reservas;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.ArgumentMatchers.any;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ import com.eventos.ms_reservas.dto.SolicitudDTO;
 import com.eventos.ms_reservas.exception.SolicitudNotFoundException;
 import com.eventos.ms_reservas.exception.SolicitudPendienteException;
 import com.eventos.ms_reservas.service.SolicitudService;
+
 
 import java.time.LocalDateTime;
 
@@ -50,8 +52,9 @@ class SolicitudControllerTest {
 
     @Test
     void getSolicitudNotFound() {
+        // Cambiado para incluir el id como Long
         when(solicitudService.obtenerPorId(999))
-                .thenThrow(new SolicitudNotFoundException("No se encontró la solicitud"));
+                .thenThrow(new SolicitudNotFoundException(999L, "No se encontró la solicitud"));
 
         client.get()
               .uri("/v1/solicitudes/999")
@@ -64,8 +67,9 @@ class SolicitudControllerTest {
 
     @Test
     void getSolicitudPendiente() {
+        // Cambiado para incluir el id como Long
         when(solicitudService.obtenerPorId(5))
-                .thenThrow(new SolicitudPendienteException("La solicitud aún está pendiente"));
+                .thenThrow(new SolicitudPendienteException(5L, "La solicitud aún está pendiente"));
 
         client.get()
               .uri("/v1/solicitudes/5")
@@ -90,7 +94,7 @@ class SolicitudControllerTest {
         output.setFechaInicio(input.getFechaInicio());
         output.setFechaFin(input.getFechaFin());
 
-        when(solicitudService.crearSolicitud(input)).thenReturn(output);
+        when(solicitudService.crearSolicitud(any(SolicitudDTO.class))).thenReturn(output);
 
         client.post()
               .uri("/v1/solicitudes")
@@ -114,7 +118,8 @@ class SolicitudControllerTest {
 
     @Test
     void deleteSolicitudNotFound() {
-        doThrow(new SolicitudNotFoundException("No se puede eliminar"))
+        // Cambiado para incluir id como Long
+        doThrow(new SolicitudNotFoundException(999L, "No se puede eliminar"))
                 .when(solicitudService).eliminarSolicitud(999);
 
         client.delete()

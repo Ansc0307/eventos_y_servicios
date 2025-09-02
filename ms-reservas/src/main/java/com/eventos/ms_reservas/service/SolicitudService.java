@@ -22,11 +22,11 @@ public class SolicitudService {
         }
 
         if (id == 5) {
-            throw new SolicitudPendienteException("La solicitud " + id + " aún está pendiente");
+            throw new SolicitudPendienteException((long) id, "La solicitud " + id + " aún está pendiente");
         }
 
         if (id == 999) {
-            throw new SolicitudNotFoundException("No existe solicitud con id: " + id);
+            throw new SolicitudNotFoundException((long) id, "No existe solicitud con id: " + id);
         }
 
         // Si no existe, simulamos creación temporal
@@ -49,7 +49,7 @@ public class SolicitudService {
 
     public void eliminarSolicitud(int id) {
         if (!solicitudes.containsKey(String.valueOf(id)) || id == 999) {
-            throw new SolicitudNotFoundException("No existe solicitud con id: " + id);
+            throw new SolicitudNotFoundException((long) id, "No existe solicitud con id: " + id);
         }
         solicitudes.remove(String.valueOf(id));
     }
