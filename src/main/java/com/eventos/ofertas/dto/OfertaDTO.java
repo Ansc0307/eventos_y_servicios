@@ -1,74 +1,81 @@
 package com.eventos.ofertas.dto;
 
+import com.eventos.ofertas.entity.Categoria;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.*;
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.List;
 
-@Schema(description = "Datos de una oferta de espacio o servicio para eventos")
+@Schema(name = "OfertaDTO", description = "DTO para crear y exponer ofertas")
 public class OfertaDTO {
 
-    @Schema(description = "Identificador único de la oferta", example = "1")
-    private String id;
+    @Schema(description = "Identificador de la oferta", example = "1")
+    private Long id;
 
-    @Schema(description = "Título de la oferta", example = "Salón de Eventos Primavera")
+    @NotNull(message = "providerId es obligatorio")
+    @Schema(description = "ID del proveedor (usuario)", example = "2")
+    private Long providerId;
+
+    @NotBlank
+    @Size(min = 5, max = 150)
+    @Schema(example = "Salón de Eventos Primavera")
     private String titulo;
 
-    @Schema(description = "Descripción detallada de la oferta", example = "Espacio para 200 personas con catering incluido")
+
+    @NotBlank
+    @Size(min = 20, max = 2000)
+    @Schema(example = "Espacio para 200 personas con catering incluido y estacionamiento.")
     private String descripcion;
 
-    @Schema(description = "Precio de la oferta en dólares", example = "4500.00")
-    private double precio;
 
-    @Schema(description = "Categoría de la oferta (Espacio o Servicio)", example = "Espacio")
-    private String categoria;
+    @NotNull
+    @Schema(description = "Categoría de la oferta")
+    private Categoria categoria;
 
-    // Constructor vacío
-    public OfertaDTO() {}
-    // Constructor completo
-    public OfertaDTO(String id, String titulo, String descripcion, double precio, String categoria) {
-        this.id = id;
-        this.titulo = titulo;
-        this.descripcion = descripcion;
-        this.precio = precio;
-        this.categoria = categoria;
-    }
 
-    // Getters y Setters
-    public String getId() {
-        return id;
-    }
+    @NotNull
+    @DecimalMin(value = "0.0", inclusive = false, message = "precioBase debe ser mayor a 0")
+    @Digits(integer = 10, fraction = 2)
+    @Schema(example = "4500.00")
+    private BigDecimal precioBase;
 
-    public String getTitulo() {
-        return titulo;
-    }
 
-    public String getDescripcion() {
-        return descripcion;
-    }
+    @Schema(description = "URLs de fotos o videos")
+    private List<@Pattern(regexp = "^(https?)://.+$", message = "URL inválida") String> mediaUrls;
 
-    public double getPrecio() {
-        return precio;
-    }
 
-    public String getCategoria() {
-        return categoria;
-    }
+    @Schema(description = "Fecha de creación")
+    private Instant createdAt;
 
-    public void setId(String id) {
-        this.id = id;
-    }
 
-    public void setTitulo(String titulo) {
-        this.titulo = titulo;
-    }
+    @Schema(description = "Fecha de actualización")
+    private Instant updatedAt;
 
-    public void setDescripcion(String descripcion) {
-        this.descripcion = descripcion;
-    }
 
-    public void setPrecio(double precio) {
-        this.precio = precio;
-    }
+    @Schema(description = "Estado de publicación", example = "PUBLICADA")
+    private String estado; // DRAFT, PUBLICADA, ARCHIVADA
 
-    public void setCategoria(String categoria) {
-        this.categoria = categoria;
-    }
+
+    // getters y setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public Long getProviderId() { return providerId; }
+    public void setProviderId(Long providerId) { this.providerId = providerId; }
+    public String getTitulo() { return titulo; }
+    public void setTitulo(String titulo) { this.titulo = titulo; }
+    public String getDescripcion() { return descripcion; }
+    public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
+    public Categoria getCategoria() { return categoria; }
+    public void setCategoria(Categoria categoria) { this.categoria = categoria; }
+    public BigDecimal getPrecioBase() { return precioBase; }
+    public void setPrecioBase(BigDecimal precioBase) { this.precioBase = precioBase; }
+    public List<String> getMediaUrls() { return mediaUrls; }
+    public void setMediaUrls(List<String> mediaUrls) { this.mediaUrls = mediaUrls; }
+    public Instant getCreatedAt() { return createdAt; }
+    public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+    public Instant getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(Instant updatedAt) { this.updatedAt = updatedAt; }
+    public String getEstado() { return estado; }
+    public void setEstado(String estado) { this.estado = estado; }
 }
