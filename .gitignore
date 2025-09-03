@@ -48,6 +48,6 @@ gradle-app.setting
 !gradle-wrapper.jar
 
 # Archivos de configuración sensibles
-application-*.yml
-application-*.yaml
-application-*.properties
+#application-*.yml
+#application-*.yaml
+#application-*.properties
