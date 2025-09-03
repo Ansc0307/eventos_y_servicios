@@ -1,0 +1,38 @@
+springdoc:
+  swagger-ui.path: /openapi/swagger-ui.html
+  api-docs.path: /openapi/v3/api-docs
+  packagesToScan: com.eventos.ms_reservas.controller
+  pathsToMatch: /**
+
+api:
+  common:
+    version: 1.0.0
+    title: API Reservas
+    description: Servicio de gestión y consulta de reservas de eventos
+    termsOfService: https://www.miempresa.com/terminos
+    license: Licencia MIT
+    licenseUrl: https://opensource.org/licenses/MIT
+    externalDocDesc: Documentación en Wiki
+    externalDocUrl: https://www.miempresa.com/wiki
+    contact:
+      name: Soporte Reservas
+      url: https://www.miempresa.com/contacto
+      email: soporte@miempresa.com
+
+  responseCodes:
+    ok.description: OK
+    badRequest.description: Solicitud inválida. Verifica los parámetros enviados.
+    notFound.description: No encontrado. El recurso especificado no existe.
+    unprocessableEntity.description: No se pueden procesar los parámetros de entrada. Verifica la información enviada.
+
+  reserva:
+    get-reserva:
+      description: Retorna la información de la reserva en base al id proporcionado.
+      notes: |
+        # Respuesta exitosa
+        Si el id de la reserva es encontrado, el método retornará la información correspondiente.
+
+        # Respuestas con error
+        1. Si ninguna reserva se encontró se devuelve un error **404 - Not Found**
+      parameters:
+        reservaId: ID de la reserva a buscar
