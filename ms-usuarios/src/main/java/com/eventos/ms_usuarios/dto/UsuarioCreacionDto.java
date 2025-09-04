@@ -20,9 +20,9 @@ public class UsuarioCreacionDto {
   @Size(max = 150)
   private String email;
 
-  @Schema(description = "Contraseña en texto plano (será hasheada)", example = "Clave123", minLength = 6, maxLength = 60, required = true)
+  @Schema(description = "Contraseña en texto plano (será hasheada)", example = "Clave123", minLength = 8, maxLength = 60, required = true)
   @NotBlank
-  @Size(min = 6, max = 60)
+  @Size(min = 8, max = 60)
   private String password;
 
   @Schema(description = "Rol del usuario", example = "ORGANIZADOR", required = true)
