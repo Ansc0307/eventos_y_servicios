@@ -13,6 +13,7 @@ import com.eventos.ms_reservas.service.EventoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Tag(name = "Eventos", description = "Operaciones relacionadas con eventos")
@@ -27,12 +28,14 @@ public class EventoController {
 
     @Operation(
         summary = "Obtener un evento por ID",
-        description = "Devuelve la información de un evento según su ID",
-        responses = {
-            @ApiResponse(responseCode = "200", description = "Evento encontrado"),
-            @ApiResponse(responseCode = "404", description = "Evento no encontrado o ID inválido")
-        }
+        description = "Devuelve la información de un evento según su ID"
     )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Evento encontrado exitosamente"),
+        @ApiResponse(responseCode = "404", description = "Evento no encontrado"),
+        @ApiResponse(responseCode = "400", description = "Solicitud incorrecta - ID inválido"),
+        @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+    })
     @GetMapping("/{id}")
     public ResponseEntity<EventoDTO> obtenerEvento(
         @Parameter(description = "ID del evento", example = "1")
@@ -46,6 +49,12 @@ public class EventoController {
     }
 
     @Operation(summary = "Crear un nuevo evento", description = "Crea un evento y lo almacena en memoria")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "201", description = "Evento creado exitosamente"),
+        @ApiResponse(responseCode = "400", description = "Datos de entrada inválidos"),
+        @ApiResponse(responseCode = "409", description = "Conflicto - El evento ya existe"),
+        @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+    })
     @PostMapping
     public ResponseEntity<EventoDTO> crearEvento(@RequestBody EventoDTO eventoDTO) {
         Evento evento = EventoMapper.toEntity(eventoDTO);
@@ -54,6 +63,12 @@ public class EventoController {
     }
 
     @Operation(summary = "Actualizar un evento", description = "Actualiza un evento existente por ID")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Evento actualizado exitosamente"),
+        @ApiResponse(responseCode = "404", description = "Evento no encontrado"),
+        @ApiResponse(responseCode = "400", description = "Datos de entrada inválidos"),
+        @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+    })
     @PutMapping("/{id}")
     public ResponseEntity<EventoDTO> actualizarEvento(@PathVariable String id, @RequestBody EventoDTO eventoDTO) {
         Evento evento = EventoMapper.toEntity(eventoDTO);
@@ -65,6 +80,12 @@ public class EventoController {
     }
 
     @Operation(summary = "Eliminar un evento", description = "Elimina un evento por ID")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "204", description = "Evento eliminado exitosamente"),
+        @ApiResponse(responseCode = "404", description = "Evento no encontrado"),
+        @ApiResponse(responseCode = "400", description = "Solicitud incorrecta - ID inválido"),
+        @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+    })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminarEvento(@PathVariable String id) {
         boolean deleted = eventoService.delete(id);
