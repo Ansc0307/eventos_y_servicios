@@ -40,7 +40,7 @@ public class EventoController {
     ) {
         Evento evento = eventoService.getById(id);
         if (evento == null) {
-            throw new EventoNotFoundException("Evento no encontrado: " + id);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
         return ResponseEntity.ok(EventoMapper.toDTO(evento));
     }

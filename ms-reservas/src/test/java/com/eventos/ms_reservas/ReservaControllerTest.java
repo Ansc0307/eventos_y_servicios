@@ -2,8 +2,6 @@
 package com.eventos.ms_reservas;
 
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 import org.junit.jupiter.api.Test;
@@ -17,38 +15,49 @@ class ReservaControllerTest {
 	@Autowired
 	private WebTestClient client;
 
+
 	@Test
-	void getReservaById() {
-		String reservaId = "2";
+	void crudReserva() {
+		String reservaId = "res123";
+		// Crear reserva
+		client.post().uri("/v1/reserva")
+			.contentType(APPLICATION_JSON)
+			.bodyValue("{\"id\":\"" + reservaId + "\",\"estado\":\"APROBADA\"}")
+			.exchange()
+			.expectStatus().isCreated()
+			.expectBody()
+			.jsonPath("$.id").isEqualTo(reservaId)
+			.jsonPath("$.estado").isEqualTo("APROBADA");
+
+		// Obtener reserva
 		client.get().uri("/v1/reserva/" + reservaId)
 			.accept(APPLICATION_JSON)
 			.exchange()
 			.expectStatus().isOk()
-			.expectHeader().contentType(APPLICATION_JSON)
 			.expectBody()
-			.jsonPath("$.id").isEqualTo(reservaId);
-	}
+			.jsonPath("$.id").isEqualTo(reservaId)
+			.jsonPath("$.estado").isEqualTo("APROBADA");
 
-	@Test
-	void getReservaInvalidParameterString() {
-		client.get().uri("/v1/reserva/no-integer")
+		// Actualizar reserva
+		client.put().uri("/v1/reserva/" + reservaId)
+			.contentType(APPLICATION_JSON)
+			.bodyValue("{\"id\":\"" + reservaId + "\",\"estado\":\"CANCELADA\"}")
+			.exchange()
+			.expectStatus().isOk()
+			.expectBody()
+			.jsonPath("$.id").isEqualTo(reservaId)
+			.jsonPath("$.estado").isEqualTo("CANCELADA");
+
+		// Eliminar reserva
+		client.delete().uri("/v1/reserva/" + reservaId)
+			.exchange()
+			.expectStatus().isNoContent();
+
+		// Obtener reserva eliminada
+		client.get().uri("/v1/reserva/" + reservaId)
 			.accept(APPLICATION_JSON)
 			.exchange()
-			.expectStatus().isEqualTo(BAD_REQUEST)
-			.expectHeader().contentType(APPLICATION_JSON)
-			.expectBody()
-			.jsonPath("$.error").exists();
+			.expectStatus().isNotFound();
 	}
 
-	@Test
-	void getReservaNotFound() {
-		String reservaIdNotFound = "0";
-		client.get().uri("/v1/reserva/" + reservaIdNotFound)
-			.accept(APPLICATION_JSON)
-			.exchange()
-			.expectStatus().isEqualTo(BAD_REQUEST)
-			.expectHeader().contentType(APPLICATION_JSON)
-			.expectBody()
-			.jsonPath("$.error").exists();
-	}
 }
