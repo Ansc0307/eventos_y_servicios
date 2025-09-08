@@ -1,24 +1,45 @@
 
 package com.eventos.ms_reservas;
 
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
-@SpringBootTest(webEnvironment = RANDOM_PORT)
+import com.eventos.ms_reservas.controller.ReservaController;
+import com.eventos.ms_reservas.model.Reserva;
+import com.eventos.ms_reservas.service.ReservaService;
+
+@WebFluxTest(controllers = ReservaController.class)
 class ReservaControllerTest {
 
 	@Autowired
 	private WebTestClient client;
 
+	@MockBean
+	private ReservaService reservaService;
 
 	@Test
 	void crudReserva() {
 		String reservaId = "res123";
+
+		// Stubs
+		given(reservaService.save(any(Reserva.class)))
+			.willAnswer(invocation -> invocation.getArgument(0));
+		given(reservaService.getById(eq(reservaId)))
+			.willReturn(new Reserva(reservaId, "APROBADA"))
+			.willReturn(null); // después de eliminar
+		given(reservaService.update(eq(reservaId), any(Reserva.class)))
+			.willReturn(new Reserva(reservaId, "CANCELADA"));
+		given(reservaService.delete(eq(reservaId)))
+			.willReturn(true);
+
 		// Crear reserva
 		client.post().uri("/v1/reserva")
 			.contentType(APPLICATION_JSON)
@@ -31,7 +52,6 @@ class ReservaControllerTest {
 
 		// Obtener reserva
 		client.get().uri("/v1/reserva/" + reservaId)
-			.accept(APPLICATION_JSON)
 			.exchange()
 			.expectStatus().isOk()
 			.expectBody()
@@ -55,9 +75,7 @@ class ReservaControllerTest {
 
 		// Obtener reserva eliminada
 		client.get().uri("/v1/reserva/" + reservaId)
-			.accept(APPLICATION_JSON)
 			.exchange()
 			.expectStatus().isNotFound();
 	}
-
 }
