@@ -62,7 +62,7 @@ public class NotificationService {
             throw new ConflictException("El tipo de notificación genera un conflicto: " + newNotification.getTipoNotificacion());
         }
 
-        newNotification.setId(999L); // ID simulado
+        newNotification.setId(999L); // ID simulado, ya luego deberá sacar el último ID de la BD
         newNotification.setFechaCreacion(LocalDateTime.now());
         return newNotification;
     }

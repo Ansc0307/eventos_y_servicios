@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -102,8 +103,12 @@ public class NotificationController {
         @ApiResponse(responseCode = "404", description = "${api.responseCodes.notFound.description}")
     })
     @DeleteMapping("/{id}")
-    public void deleteNotification(@PathVariable Long id) {
+    public ResponseEntity<String> deleteNotification(@PathVariable Long id) {
         LOGGER.info("Eliminando notificación con ID: {}", id);
+
         notificationService.deleteNotification(id);
+
+        String mensaje = "Eliminando notificación con ID: " + id;
+        return ResponseEntity.ok(mensaje);
     }
 }
