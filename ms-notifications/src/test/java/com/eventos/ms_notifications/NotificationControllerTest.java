@@ -1,101 +1,162 @@
 package com.eventos.ms_notifications;
 
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
+import com.eventos.ms_notifications.dto.NotificationDTO;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
+import java.time.LocalDateTime;
+
 @SpringBootTest(webEnvironment = RANDOM_PORT)
-public class NotificationControllerTest {
+class NotificationControllerTest {
 
     @Autowired
     private WebTestClient client;
 
+    // GET por ID válido
     @Test
-    void getNotificationByIdOk() {
-        long id = 1L;
+    void getNotificationById_OK() {
+        Long id = 1L;
 
-        client.get()
-                .uri("/v1/notificaciones/" + id)
+        client.get().uri("/v1/notificaciones/" + id)
                 .accept(APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.id").isEqualTo((int) id)
-                .jsonPath("$.asunto").isEqualTo("Asunto de prueba")
-                .jsonPath("$.mensaje").isEqualTo("Este es un mensaje de prueba.");
+                .jsonPath("$.id").isEqualTo(id)
+                .jsonPath("$.userId").isEqualTo(1);
     }
 
+    // GET por ID no encontrado
     @Test
-    void getNotificationInvalidParameter() {
-        long id = -5L;
+    void getNotificationById_NotFound() {
+        Long id = 100L;
 
-        client.get()
-                .uri("/v1/notificaciones/" + id)
+        client.get().uri("/v1/notificaciones/" + id)
                 .accept(APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isEqualTo(BAD_REQUEST)
-                .expectHeader().contentType(APPLICATION_JSON)
+                .expectStatus().isNotFound()
                 .expectBody()
-                .jsonPath("$.message").isEqualTo("El ID de la notificación debe ser positivo: " + id);
-    }
-
-    @Test
-    void getNotificationNotFound() {
-        long id = 100L;
-
-        client.get()
-                .uri("/v1/notificaciones/" + id)
-                .accept(APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isEqualTo(NOT_FOUND)
-                .expectHeader().contentType(APPLICATION_JSON)
-                .expectBody()
+                .jsonPath("$.path").isEqualTo("/v1/notificaciones/" + id)
                 .jsonPath("$.message").isEqualTo("No se encontró la notificación con ID: " + id);
     }
 
+    // GET por ID inválido (<= 0)
     @Test
-    void createNotificationOk() {
-        String body = """
-            {
-              "userId": 1,
-              "asunto": "Nueva notificación",
-              "mensaje": "Mensaje creado desde test",
-              "prioridad": "ALTA",
-              "leido": false,
-              "tipoNotificacion": "INFORMATIVA"
-            }
-            """;
+    void getNotificationById_InvalidInput() {
+        Long id = -1L;
 
-        client.post()
-                .uri("/v1/notificaciones")
-                .contentType(APPLICATION_JSON)
-                .bodyValue(body)
+        client.get().uri("/v1/notificaciones/" + id)
+                .accept(APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(APPLICATION_JSON)
+                .expectStatus().isBadRequest()
                 .expectBody()
-                .jsonPath("$.id").exists()
-                .jsonPath("$.asunto").isEqualTo("Nueva notificación")
-                .jsonPath("$.mensaje").isEqualTo("Mensaje creado desde test");
+                .jsonPath("$.path").isEqualTo("/v1/notificaciones/" + id)
+                .jsonPath("$.message").isEqualTo("El ID de la notificación debe ser positivo: " + id);
     }
 
+    // GET ALL
     @Test
-    void getAllNotificationsOk() {
-        client.get()
-                .uri("/v1/notificaciones/")
+    void getAllNotifications_OK() {
+        client.get().uri("/v1/notificaciones/")
                 .accept(APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.length()").isEqualTo(5)
-                .jsonPath("$[0].id").isEqualTo(1);
+                .jsonPath("$.length()").isEqualTo(5);
+    }
+
+    // POST OK
+    @Test
+    void createNotification_OK() {
+        NotificationDTO dto = new NotificationDTO(
+                null,
+                200L,
+                "Asunto test",
+                "Mensaje test",
+                "ALTA",
+                LocalDateTime.now(),
+                false,
+                "INFORMATIVA"
+        );
+
+        client.post().uri("/v1/notificaciones")
+                .contentType(APPLICATION_JSON)
+                .bodyValue(dto)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.id").isEqualTo(999)
+                .jsonPath("$.asunto").isEqualTo("Asunto test");
+    }
+
+    // POST con validación inválida (sin asunto)
+    @Test
+    void createNotification_ValidationError() {
+        NotificationDTO dto = new NotificationDTO(
+                null,
+                200L,
+                "", // asunto vacío
+                "Mensaje test",
+                "MEDIA",
+                LocalDateTime.now(),
+                false,
+                "ALERTA"
+        );
+
+        client.post().uri("/v1/notificaciones")
+                .contentType(APPLICATION_JSON)
+                .bodyValue(dto)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.asunto").isEqualTo("El asunto es obligatorio");
+    }
+
+    // PUT OK
+    @Test
+    void updateNotification_OK() {
+        NotificationDTO dto = new NotificationDTO(
+                null,
+                200L,
+                "Asunto actualizado",
+                "Mensaje actualizado",
+                "BAJA",
+                LocalDateTime.now(),
+                true,
+                "ALERTA"
+        );
+
+        client.put().uri("/v1/notificaciones/10")
+                .contentType(APPLICATION_JSON)
+                .bodyValue(dto)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.id").isEqualTo(10)
+                .jsonPath("$.asunto").isEqualTo("Asunto actualizado");
+    }
+
+    // DELETE OK
+    @Test
+    void deleteNotification_OK() {
+        client.delete().uri("/v1/notificaciones/20")
+                .exchange()
+                .expectStatus().isOk();
+    }
+
+    // DELETE con error (id inválido)
+    @Test
+    void deleteNotification_InvalidId() {
+        client.delete().uri("/v1/notificaciones/-1")
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("El ID de la notificación debe ser positivo: -1");
     }
 }
