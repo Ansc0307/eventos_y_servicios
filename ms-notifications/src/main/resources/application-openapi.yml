@@ -35,26 +35,57 @@ api:
       description: Retorna una notificación según el ID proporcionado.
       notes: |
         # Respuesta exitosa
-        Si el ID solicitado es válido, retornará la notificación.
+        - ID válido, por ejemplo: 1 → 200 OK
         
         # Respuestas con error
-        1. Si el ID <= 0 se devuelve **400 - Bad Request**
-        2. Si el ID no existe (ej: 100) se devuelve **404 - Not Found**
+        - ID inválido (<= 0), por ejemplo: -1 → 400 Bad Request
+        - ID no encontrado, por ejemplo: 100 → 404 Not Found
+        - ID no autorizado, por ejemplo: 500 → 401 Unauthorized
       parameters:
         notificationId: ID de la notificación a buscar.
 
     get-all:
       summary: Listar todas las notificaciones
       description: Obtiene todas las notificaciones registradas.
+      notes: |
+        # Respuesta exitosa
+        - Siempre retorna 200 OK con la lista de notificaciones
+        - Lista vacía o con elementos
 
     create:
       summary: Crear una nueva notificación
       description: Crea una notificación a partir de los datos enviados.
+      notes: |
+        # Respuesta exitosa
+        - DTO válido, por ejemplo userId=200, asunto="Recordatorio", tipoNotificacion="ALERTA" → 200 OK
+        
+        # Respuestas con error
+        - Asunto vacío → 400 Bad Request
+        - Mensaje vacío → 400 Bad Request
+        - userId no encontrado, por ejemplo: 1111 → 404 Not Found
+        - Tipo de notificación conflictivo, por ejemplo: "SISTEMA" → 409 Conflict
 
     update:
       summary: Actualizar notificación existente
       description: Modifica los datos de una notificación según su ID.
+      notes: |
+        # Respuesta exitosa
+        - ID válido y DTO válido, por ejemplo: ID=10, userId=200, asunto="Actualizado" → 200 OK
+        
+        # Respuestas con error
+        - ID inválido (<=0), por ejemplo: -1 → 400 Bad Request
+        - ID no encontrado, por ejemplo: 100 → 404 Not Found
+        - ID no autorizado, por ejemplo: 500 → 401 Unauthorized
+        - DTO inválido (asunto vacío, mensaje vacío, prioridad incorrecta, etc.) → 400 Bad Request
 
     delete:
       summary: Eliminar notificación
       description: Elimina una notificación según su ID.
+      notes: |
+        # Respuesta exitosa
+        - ID válido, por ejemplo: 20 → 200 OK
+        
+        # Respuestas con error
+        - ID inválido (<=0), por ejemplo: -1 → 400 Bad Request
+        - ID no encontrado, por ejemplo: 100 → 404 Not Found
+        - ID no autorizado, por ejemplo: 500 → 401 Unauthorized
