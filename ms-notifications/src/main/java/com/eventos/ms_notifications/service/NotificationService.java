@@ -3,6 +3,8 @@ package com.eventos.ms_notifications.service;
 import com.eventos.ms_notifications.dto.NotificationDTO;
 import com.eventos.ms_notifications.exception.InvalidInputException;
 import com.eventos.ms_notifications.exception.NotFoundException;
+import com.eventos.ms_notifications.exception.UnauthorizedException;
+import com.eventos.ms_notifications.exception.ConflictException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -16,9 +18,11 @@ public class NotificationService {
         if (id <= 0) {
             throw new InvalidInputException("El ID de la notificación debe ser positivo: " + id);
         }
-
         if (id == 100) {
             throw new NotFoundException("No se encontró la notificación con ID: " + id);
+        }
+        if (id == 500) {
+            throw new UnauthorizedException("No tienes permisos para ver la notificación con ID: " + id);
         }
 
         return new NotificationDTO(
@@ -51,6 +55,14 @@ public class NotificationService {
     }
 
     public NotificationDTO createNotification(NotificationDTO newNotification) {
+        if (newNotification.getUserId() != null && newNotification.getUserId() == 1111) {
+            throw new NotFoundException("No se encontró el usuario con ID: " + newNotification.getUserId());
+        }
+        if ("SISTEMA".equalsIgnoreCase(newNotification.getTipoNotificacion())) {
+            throw new ConflictException("El tipo de notificación genera un conflicto: " + newNotification.getTipoNotificacion());
+        }
+
+        newNotification.setId(999L); // ID simulado
         newNotification.setFechaCreacion(LocalDateTime.now());
         return newNotification;
     }
@@ -62,6 +74,10 @@ public class NotificationService {
         if (id == 100) {
             throw new NotFoundException("No se encontró la notificación con ID: " + id);
         }
+        if (id == 500) {
+            throw new UnauthorizedException("No tienes permisos para modificar la notificación con ID: " + id);
+        }
+
         updatedNotification.setId(id);
         updatedNotification.setFechaCreacion(LocalDateTime.now());
         return updatedNotification;
@@ -74,7 +90,8 @@ public class NotificationService {
         if (id == 100) {
             throw new NotFoundException("No se encontró la notificación con ID: " + id);
         }
-        
+        if (id == 500) {
+            throw new UnauthorizedException("No tienes permisos para eliminar la notificación con ID: " + id);
+        }
     }
 }
-

@@ -25,10 +25,13 @@ api:
     ok.description: OK
     badRequest.description: Bad Request, el formato de la solicitud no es válido.
     notFound.description: Not Found, la notificación no existe.
+    unauthorized.description: Unauthorized, no tiene permisos para acceder al recurso.
+    conflict.description: Conflict, ya existe un recurso con esos datos.
     unprocessableEntity.description: Unprocessable Entity, no se puede procesar la solicitud.
 
   notification:
     get-by-id:
+      summary: Obtener notificación por ID
       description: Retorna una notificación según el ID proporcionado.
       notes: |
         # Respuesta exitosa
@@ -39,3 +42,19 @@ api:
         2. Si el ID no existe (ej: 100) se devuelve **404 - Not Found**
       parameters:
         notificationId: ID de la notificación a buscar.
+
+    get-all:
+      summary: Listar todas las notificaciones
+      description: Obtiene todas las notificaciones registradas.
+
+    create:
+      summary: Crear una nueva notificación
+      description: Crea una notificación a partir de los datos enviados.
+
+    update:
+      summary: Actualizar notificación existente
+      description: Modifica los datos de una notificación según su ID.
+
+    delete:
+      summary: Eliminar notificación
+      description: Elimina una notificación según su ID.

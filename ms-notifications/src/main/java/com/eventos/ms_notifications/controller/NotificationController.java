@@ -28,16 +28,17 @@ public class NotificationController {
         this.notificationService = notificationService;
     }
 
+    // GET por ID
     @Operation(
-        summary = "${api.notification.get-by-id.description}",
-        description = "${api.notification.get-by-id.notes}"
+        summary = "${api.notification.get-by-id.summary}",
+        description = "${api.notification.get-by-id.description}"
     )
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "${api.responseCodes.ok.description}"),
         @ApiResponse(responseCode = "400", description = "${api.responseCodes.badRequest.description}"),
         @ApiResponse(responseCode = "404", description = "${api.responseCodes.notFound.description}")
     })
-    @GetMapping(value = "/{id}", produces = "application/json")
+    @GetMapping("/{id}")
     public NotificationDTO getNotificacionById(
             @Parameter(description = "${api.notification.get-by-id.parameters.notificationId}", required = true)
             @PathVariable("id") Long id) {
@@ -45,28 +46,61 @@ public class NotificationController {
         return notificationService.getNotificacionById(id);
     }
 
-    @Operation(summary = "Listar todas las notificaciones")
+    // GET ALL
+    @Operation(
+        summary = "${api.notification.get-all.summary}",
+        description = "${api.notification.get-all.description}"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "${api.responseCodes.ok.description}")
+    })
     @GetMapping("/")
     public List<NotificationDTO> getAllNotifications() {
         LOGGER.info("Obteniendo todas las notificaciones");
         return notificationService.getAllNotifications();
     }
 
-    @Operation(summary = "Crear una nueva notificación")
+    // POST
+    @Operation(
+        summary = "${api.notification.create.summary}",
+        description = "${api.notification.create.description}"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "${api.responseCodes.ok.description}"),
+        @ApiResponse(responseCode = "400", description = "${api.responseCodes.badRequest.description}")
+    })
     @PostMapping
     public NotificationDTO createNotification(@Valid @RequestBody NotificationDTO newNotification) {
         LOGGER.info("Creando nueva notificación: {}", newNotification);
         return notificationService.createNotification(newNotification);
     }
 
-    @Operation(summary = "Actualizar una notificación existente")
+    // PUT
+    @Operation(
+        summary = "${api.notification.update.summary}",
+        description = "${api.notification.update.description}"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "${api.responseCodes.ok.description}"),
+        @ApiResponse(responseCode = "400", description = "${api.responseCodes.badRequest.description}"),
+        @ApiResponse(responseCode = "404", description = "${api.responseCodes.notFound.description}")
+    })
     @PutMapping("/{id}")
-    public NotificationDTO updateNotification(@PathVariable Long id,@Valid @RequestBody NotificationDTO updatedNotification) {
+    public NotificationDTO updateNotification(@PathVariable Long id, @Valid @RequestBody NotificationDTO updatedNotification) {
         LOGGER.info("Actualizando notificación con ID: {}", id);
         return notificationService.updateNotification(id, updatedNotification);
     }
 
-    @Operation(summary = "Eliminar una notificación por ID")
+    // DELETE
+    @Operation(
+        summary = "${api.notification.delete.summary}",
+        description = "${api.notification.delete.description}"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "${api.responseCodes.ok.description}"),
+        @ApiResponse(responseCode = "400", description = "${api.responseCodes.badRequest.description}"),
+        @ApiResponse(responseCode = "404", description = "${api.responseCodes.notFound.description}")
+    })
     @DeleteMapping("/{id}")
     public void deleteNotification(@PathVariable Long id) {
         LOGGER.info("Eliminando notificación con ID: {}", id);
