@@ -1,8 +1,6 @@
 package com.eventos.ofertas.exception;
 
-import com.eventos.ofertas.dto.ApiError;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -29,21 +27,11 @@ public class GlobalExceptionHandler {
         ApiError api = new ApiError(409, "Conflict", ex.getMessage(), exchange.getRequest().getPath().value());
         return Mono.just(api);
     }
-    // Validación para WebFlux
+    //webfux
     @ExceptionHandler(WebExchangeBindException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Mono<ApiError> handleWebFluxValidation(WebExchangeBindException ex, ServerWebExchange exchange) {
         var fieldErrors = ex.getFieldErrors().stream()
-            .collect(Collectors.toMap(fe -> fe.getField(), fe -> fe.getDefaultMessage(), (a,b)->a, LinkedHashMap::new));
-        ApiError api = new ApiError(400, "Bad Request", "Errores de validación", exchange.getRequest().getPath().value());
-        api.setFieldErrors(fieldErrors);
-        return Mono.just(api);
-    }
-    // Por compatibilidad si alguna vez queda un @Valid en MVC
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Mono<ApiError> handleMvcValidation(MethodArgumentNotValidException ex, ServerWebExchange exchange) {
-        var fieldErrors = ex.getBindingResult().getFieldErrors().stream()
             .collect(Collectors.toMap(fe -> fe.getField(), fe -> fe.getDefaultMessage(), (a,b)->a, LinkedHashMap::new));
         ApiError api = new ApiError(400, "Bad Request", "Errores de validación", exchange.getRequest().getPath().value());
         api.setFieldErrors(fieldErrors);

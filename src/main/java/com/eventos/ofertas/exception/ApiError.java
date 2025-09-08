@@ -1,9 +1,7 @@
-package com.eventos.ofertas.dto;
-
+package com.eventos.ofertas.exception;
 
 import java.time.Instant;
 import java.util.Map;
-
 
 public class ApiError {
     private Instant timestamp = Instant.now();
@@ -11,14 +9,12 @@ public class ApiError {
     private String error;
     private String message;
     private String path;
-    private Map<String, String> fieldErrors; // opcional para validaciones
-
+    private Map<String, String> fieldErrors; 
 
     public ApiError() {}
     public ApiError(int status, String error, String message, String path) {
     this.status = status; this.error = error; this.message = message; this.path = path;
     }
-    // getters y setters
     public Instant getTimestamp() { return timestamp; }
     public void setTimestamp(Instant timestamp) { this.timestamp = timestamp; }
     public int getStatus() { return status; }

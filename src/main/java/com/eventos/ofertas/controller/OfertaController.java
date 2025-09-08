@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -19,6 +20,7 @@ import reactor.core.publisher.Mono;
 @RestController
 @RequestMapping(path = "/ofertas", produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "Ofertas", description = "Endpoints para gestionar ofertas")
+@Validated
 public class OfertaController {
 
     private final OfertaService service;

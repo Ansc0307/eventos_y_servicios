@@ -8,7 +8,9 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class InMemoryOfertaRepository implements OfertaRepository {  
+/*import org.springframework.stereotype.Repository;
+@Repository*/
+public class InMemoryOfertaRepository implements OfertaRepository {
 
     private final Map<Long, Oferta> store = new ConcurrentHashMap<>();
     private final AtomicLong idGenerator = new AtomicLong();

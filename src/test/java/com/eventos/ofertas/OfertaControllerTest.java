@@ -35,7 +35,6 @@ public class OfertaControllerTest {
 
     @Test
     void crearYObtener() {
-        // Crear
         OfertaDTO created = webTestClient.post().uri("/ofertas")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(base)
@@ -45,10 +44,10 @@ public class OfertaControllerTest {
                 .returnResult()
                 .getResponseBody();
 
-        // Verifica que created no sea null
-        assert created != null;
-
-        // Obtener
+        if (created == null) {
+            throw new AssertionError("La oferta creada es null");
+        }
+        
         webTestClient.get().uri("/ofertas/" + created.getId())
                 .exchange()
                 .expectStatus().isOk()
