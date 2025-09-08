@@ -1,4 +1,4 @@
-package com.eventos.ms_notifications.http;
+package com.eventos.ms_notifications.exception;
 
 import java.time.ZonedDateTime;
 import org.springframework.http.HttpStatus;
