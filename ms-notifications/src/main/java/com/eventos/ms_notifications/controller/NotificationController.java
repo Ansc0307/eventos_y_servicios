@@ -111,4 +111,10 @@ public class NotificationController {
 
         return newNotification;
     }
+
+    @Operation(summary = "Eliminar una notificación por ID")
+    @DeleteMapping("/{id}")
+    public void deleteNotification(@PathVariable Long id) {
+        LOGGER.info("Eliminando notificación con ID: {}", id);
+    }
 }
