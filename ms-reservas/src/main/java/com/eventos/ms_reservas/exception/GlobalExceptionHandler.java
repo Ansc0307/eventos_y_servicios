@@ -2,6 +2,7 @@ package com.eventos.ms_reservas.exception;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.support.WebExchangeBindException;
 import reactor.core.publisher.Mono;
 
 /**
@@ -32,6 +34,24 @@ public class GlobalExceptionHandler {
         LOG.error("Error en evento: {}", ex.getMessage());
         Map<String, String> error = new HashMap<>();
         error.put("error", ex.getMessage());
+        return Mono.just(new ResponseEntity<>(error, HttpStatus.BAD_REQUEST));
+    }
+
+    @ExceptionHandler(WebExchangeBindException.class)
+    public Mono<ResponseEntity<Map<String, Object>>> handleValidationErrors(WebExchangeBindException ex) {
+        LOG.error("Error de validación: {}", ex.getMessage());
+        
+        Map<String, Object> error = new HashMap<>();
+        error.put("error", "Datos de entrada inválidos");
+        error.put("validationErrors", ex.getBindingResult()
+            .getFieldErrors()
+            .stream()
+            .collect(Collectors.toMap(
+                fieldError -> fieldError.getField(),
+                fieldError -> fieldError.getDefaultMessage(),
+                (existing, replacement) -> existing + "; " + replacement
+            )));
+        
         return Mono.just(new ResponseEntity<>(error, HttpStatus.BAD_REQUEST));
     }
 

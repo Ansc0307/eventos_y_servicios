@@ -3,6 +3,7 @@ package com.eventos.ms_reservas.controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
+import jakarta.validation.Valid;
 
 import com.eventos.ms_reservas.dto.ReservaDTO;
 import com.eventos.ms_reservas.exception.ReservaNotFoundException;
@@ -56,7 +57,7 @@ public class ReservaController {
         @ApiResponse(responseCode = "500", description = "Error interno del servidor")
     })
     @PostMapping
-    public ResponseEntity<ReservaDTO> crearReserva(@RequestBody ReservaDTO reservaDTO) {
+    public ResponseEntity<ReservaDTO> crearReserva(@Valid @RequestBody ReservaDTO reservaDTO) {
         Reserva reserva = ReservaMapper.toEntity(reservaDTO);
         reservaService.save(reserva);
         return new ResponseEntity<>(ReservaMapper.toDTO(reserva), HttpStatus.CREATED);
@@ -71,7 +72,7 @@ public class ReservaController {
         @ApiResponse(responseCode = "500", description = "Error interno del servidor")
     })
     @PutMapping("/{id}")
-    public ResponseEntity<ReservaDTO> actualizarReserva(@PathVariable String id, @RequestBody ReservaDTO reservaDTO) {
+    public ResponseEntity<ReservaDTO> actualizarReserva(@PathVariable String id, @Valid @RequestBody ReservaDTO reservaDTO) {
         Reserva reserva = ReservaMapper.toEntity(reservaDTO);
         Reserva updated = reservaService.update(id, reserva);
         if (updated == null) {

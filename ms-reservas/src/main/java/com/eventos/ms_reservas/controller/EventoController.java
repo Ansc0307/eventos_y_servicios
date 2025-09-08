@@ -3,6 +3,7 @@ package com.eventos.ms_reservas.controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
+import jakarta.validation.Valid;
 
 import com.eventos.ms_reservas.dto.EventoDTO;
 import com.eventos.ms_reservas.exception.EventoNotFoundException;
@@ -56,7 +57,7 @@ public class EventoController {
         @ApiResponse(responseCode = "500", description = "Error interno del servidor")
     })
     @PostMapping
-    public ResponseEntity<EventoDTO> crearEvento(@RequestBody EventoDTO eventoDTO) {
+    public ResponseEntity<EventoDTO> crearEvento(@Valid @RequestBody EventoDTO eventoDTO) {
         Evento evento = EventoMapper.toEntity(eventoDTO);
         eventoService.save(evento);
         return new ResponseEntity<>(EventoMapper.toDTO(evento), HttpStatus.CREATED);
@@ -70,7 +71,7 @@ public class EventoController {
         @ApiResponse(responseCode = "500", description = "Error interno del servidor")
     })
     @PutMapping("/{id}")
-    public ResponseEntity<EventoDTO> actualizarEvento(@PathVariable String id, @RequestBody EventoDTO eventoDTO) {
+    public ResponseEntity<EventoDTO> actualizarEvento(@PathVariable String id, @Valid @RequestBody EventoDTO eventoDTO) {
         Evento evento = EventoMapper.toEntity(eventoDTO);
         Evento updated = eventoService.update(id, evento);
         if (updated == null) {
