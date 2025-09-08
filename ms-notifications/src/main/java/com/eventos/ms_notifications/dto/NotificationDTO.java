@@ -20,23 +20,30 @@ public class NotificationDTO {
 
     @NotBlank(message = "El asunto es obligatorio")
     @Size(max = 100, message = "El asunto no puede superar 100 caracteres")
+    @Schema(description = "Asunto o título de la notificación", example = "Recordatorio de evento")
     private String asunto;
 
     @NotBlank(message = "El mensaje es obligatorio")
     @Size(max = 500, message = "El mensaje no puede superar 500 caracteres")
+    @Schema(description = "Contenido del mensaje de la notificación", example = "No olvides asistir al evento mañana a las 10 AM.")
     private String mensaje;
 
     @NotBlank(message = "La prioridad es obligatoria")
     @Pattern(regexp = "BAJA|MEDIA|ALTA", message = "La prioridad debe ser BAJA, MEDIA o ALTA")
+    @Schema(description = "Nivel de prioridad de la notificación", example = "ALTA")
     private String prioridad;
 
+    //@NotNull(message = "La fecha de creación no puede ser nula")
+    @Schema(description = "Fecha y hora en que se creó la notificación", example = "2025-09-09T14:48:00")
     private LocalDateTime fechaCreacion;
 
     @NotNull(message = "El campo leido no puede ser nulo")
+    @Schema(description = "Indica si la notificación ha sido leída", example = "false")
     private Boolean leido;
 
     @NotBlank(message = "El tipo de notificación es obligatorio")
     @Pattern(regexp = "INFORMATIVA|ALERTA|RECORDATORIO|PROMOCION|SISTEMA", message = "El tipo de notificación debe ser INFORMATIVA, ALERTA, RECORDATORIO, PROMOCION o SISTEMA")
+    @Schema(description = "Tipo de notificación", example = "INFORMATIVA")
     private String tipoNotificacion;
 
     //Constructores
