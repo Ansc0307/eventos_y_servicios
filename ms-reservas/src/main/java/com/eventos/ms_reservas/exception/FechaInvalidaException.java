@@ -1,8 +1,14 @@
 package com.eventos.ms_reservas.exception;
 
-// Fechas inválidas (ej. fechaInicio después de fechaFin)
 public class FechaInvalidaException extends RuntimeException {
-    public FechaInvalidaException(String message) {
+    private final Long id;
+
+    public FechaInvalidaException(Long id, String message) {
         super(message);
+        this.id = id;
+    }
+
+    public Long getId() {
+        return id;
     }
 }

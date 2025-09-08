@@ -1,8 +1,14 @@
 package com.eventos.ms_reservas.exception;
 
-// Ya está ocupado (no se puede reservar)
 public class DisponibleOcupadoException extends RuntimeException {
-    public DisponibleOcupadoException(String message) {
+    private final Long id;
+
+    public DisponibleOcupadoException(Long id, String message) {
         super(message);
+        this.id = id;
+    }
+
+    public Long getId() {
+        return id;
     }
 }
