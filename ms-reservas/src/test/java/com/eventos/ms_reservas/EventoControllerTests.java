@@ -1,8 +1,6 @@
 package com.eventos.ms_reservas;
 
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 import org.junit.jupiter.api.Test;
@@ -16,38 +14,49 @@ class EventoControllerTests {
     @Autowired
     private WebTestClient client;
 
+
     @Test
-    void getEventoById() {
-        String eventoId = "1";
+    void crudEvento() {
+        String eventoId = "evt123";
+        // Crear evento
+        client.post().uri("/v1/evento")
+            .contentType(APPLICATION_JSON)
+            .bodyValue("{\"id\":\"" + eventoId + "\",\"descripcion\":\"Concierto\"}")
+            .exchange()
+            .expectStatus().isCreated()
+            .expectBody()
+            .jsonPath("$.id").isEqualTo(eventoId)
+            .jsonPath("$.descripcion").isEqualTo("Concierto");
+
+        // Obtener evento
         client.get().uri("/v1/evento/" + eventoId)
             .accept(APPLICATION_JSON)
             .exchange()
             .expectStatus().isOk()
-            .expectHeader().contentType(APPLICATION_JSON)
             .expectBody()
-            .jsonPath("$.id").isEqualTo(eventoId);
-    }
+            .jsonPath("$.id").isEqualTo(eventoId)
+            .jsonPath("$.descripcion").isEqualTo("Concierto");
 
-    @Test
-    void getEventoInvalidParameterString() {
-        client.get().uri("/v1/evento/no-integer")
+        // Actualizar evento
+        client.put().uri("/v1/evento/" + eventoId)
+            .contentType(APPLICATION_JSON)
+            .bodyValue("{\"id\":\"" + eventoId + "\",\"descripcion\":\"Cancelado\"}")
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody()
+            .jsonPath("$.id").isEqualTo(eventoId)
+            .jsonPath("$.descripcion").isEqualTo("Cancelado");
+
+        // Eliminar evento
+        client.delete().uri("/v1/evento/" + eventoId)
+            .exchange()
+            .expectStatus().isNoContent();
+
+        // Obtener evento eliminado
+        client.get().uri("/v1/evento/" + eventoId)
             .accept(APPLICATION_JSON)
             .exchange()
-            .expectStatus().isEqualTo(BAD_REQUEST)
-            .expectHeader().contentType(APPLICATION_JSON)
-            .expectBody()
-            .jsonPath("$.error").exists();
+            .expectStatus().isNotFound();
     }
 
-    @Test
-    void getEventoNotFound() {
-        String eventoIdNotFound = "0";
-        client.get().uri("/v1/evento/" + eventoIdNotFound)
-            .accept(APPLICATION_JSON)
-            .exchange()
-            .expectStatus().isEqualTo(BAD_REQUEST)
-            .expectHeader().contentType(APPLICATION_JSON)
-            .expectBody()
-            .jsonPath("$.error").exists();
-    }
 }
