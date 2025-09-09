@@ -25,7 +25,8 @@ public class OfertaDTO {
 
     @NotBlank
     @Size(min = 20, max = 2000)
-    @Schema(example = "Espacio para 200 personas con catering incluido y estacionamiento.")
+    @Schema(example = "Espacio para 200 personas con catering incluido y estacionamiento.", 
+            description = "Descripción detallada de la oferta")
     private String descripcion;
 
 

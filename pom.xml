@@ -14,6 +14,7 @@
     <groupId>com.eventos</groupId>
     <artifactId>ms-oferta</artifactId>
     <version>0.0.1-SNAPSHOT</version>
+    
     <name>ms-oferta</name>
     <description>Microservicio de Gestión de Ofertas para plataforma de eventos</description>
 

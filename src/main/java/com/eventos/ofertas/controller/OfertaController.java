@@ -46,7 +46,7 @@ public class OfertaController {
     }
 
 
-    @Operation(summary = "Listar ofertas (filtrar por categoría opcional)")
+    @Operation(summary = "Listar todas las ofertas por categoría")
     @GetMapping
     public Flux<OfertaDTO> listar(@RequestParam(required = false) Categoria categoria) {
         return service.listar(categoria);
