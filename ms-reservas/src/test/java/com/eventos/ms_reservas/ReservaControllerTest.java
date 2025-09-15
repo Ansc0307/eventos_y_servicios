@@ -73,9 +73,48 @@ class ReservaControllerTest {
 			.exchange()
 			.expectStatus().isNoContent();
 
-		// Obtener reserva eliminada
+		// Obtener reserva eliminada - verificar formato de error JSON
 		client.get().uri("/v1/reserva/" + reservaId)
 			.exchange()
-			.expectStatus().isNotFound();
+			.expectStatus().isNotFound()
+			.expectBody()
+			.jsonPath("$.error").exists()
+			.jsonPath("$.path").isEqualTo("/v1/reservas/" + reservaId);
+	}
+
+	@Test
+	void testErrorResponseFormatOnUpdate() {
+		String nonExistentId = "999";
+		
+		// Mock service to return null for non-existent reserva
+		given(reservaService.update(eq(nonExistentId), any(Reserva.class)))
+			.willReturn(null);
+
+		// Test update of non-existent reserva
+		client.put().uri("/v1/reserva/" + nonExistentId)
+			.contentType(APPLICATION_JSON)
+			.bodyValue("{\"id\":\"" + nonExistentId + "\",\"estado\":\"APROBADA\"}")
+			.exchange()
+			.expectStatus().isNotFound()
+			.expectBody()
+			.jsonPath("$.error").exists()
+			.jsonPath("$.path").isEqualTo("/v1/reservas/" + nonExistentId);
+	}
+
+	@Test
+	void testErrorResponseFormatOnDelete() {
+		String nonExistentId = "888";
+		
+		// Mock service to return false for non-existent reserva
+		given(reservaService.delete(eq(nonExistentId)))
+			.willReturn(false);
+
+		// Test delete of non-existent reserva
+		client.delete().uri("/v1/reserva/" + nonExistentId)
+			.exchange()
+			.expectStatus().isNotFound()
+			.expectBody()
+			.jsonPath("$.error").exists()
+			.jsonPath("$.path").isEqualTo("/v1/reservas/" + nonExistentId);
 	}
 }

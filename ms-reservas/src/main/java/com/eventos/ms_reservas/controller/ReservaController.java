@@ -44,7 +44,7 @@ public class ReservaController {
     ) {
         Reserva reserva = reservaService.getById(id);
         if (reserva == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            throw new ReservaNotFoundException(id, "Reserva no encontrada: " + id);
         }
         return ResponseEntity.ok(ReservaMapper.toDTO(reserva));
     }
@@ -76,7 +76,7 @@ public class ReservaController {
         Reserva reserva = ReservaMapper.toEntity(reservaDTO);
         Reserva updated = reservaService.update(id, reserva);
         if (updated == null) {
-            throw new ReservaNotFoundException("Reserva no encontrada: " + id);
+            throw new ReservaNotFoundException(id, "Reserva no encontrada: " + id);
         }
         return ResponseEntity.ok(ReservaMapper.toDTO(updated));
     }
@@ -92,7 +92,7 @@ public class ReservaController {
     public ResponseEntity<Void> eliminarReserva(@PathVariable String id) {
         boolean deleted = reservaService.delete(id);
         if (!deleted) {
-            throw new ReservaNotFoundException("Reserva no encontrada: " + id);
+            throw new ReservaNotFoundException(id, "Reserva no encontrada: " + id);
         }
         return ResponseEntity.noContent().build();
     }

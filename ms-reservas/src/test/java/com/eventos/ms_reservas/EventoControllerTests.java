@@ -72,10 +72,48 @@ class EventoControllerTests {
             .exchange()
             .expectStatus().isNoContent();
 
-        // Obtener evento eliminado
+        // Obtener evento eliminado - verificar formato de error JSON
         client.get().uri("/v1/evento/" + eventoId)
             .exchange()
-            .expectStatus().isNotFound();
+            .expectStatus().isNotFound()
+            .expectBody()
+            .jsonPath("$.error").exists()
+            .jsonPath("$.path").isEqualTo("/v1/eventos/" + eventoId);
     }
 
+    @Test
+    void testErrorResponseFormatOnUpdate() {
+        String nonExistentId = "999";
+        
+        // Mock service to return null for non-existent evento
+        given(eventoService.update(eq(nonExistentId), any(Evento.class)))
+            .willReturn(null);
+
+        // Test update of non-existent evento
+        client.put().uri("/v1/evento/" + nonExistentId)
+            .contentType(APPLICATION_JSON)
+            .bodyValue("{\"id\":\"" + nonExistentId + "\",\"descripcion\":\"Test\"}")
+            .exchange()
+            .expectStatus().isNotFound()
+            .expectBody()
+            .jsonPath("$.error").exists()
+            .jsonPath("$.path").isEqualTo("/v1/eventos/" + nonExistentId);
+    }
+
+    @Test
+    void testErrorResponseFormatOnDelete() {
+        String nonExistentId = "888";
+        
+        // Mock service to return false for non-existent evento
+        given(eventoService.delete(eq(nonExistentId)))
+            .willReturn(false);
+
+        // Test delete of non-existent evento
+        client.delete().uri("/v1/evento/" + nonExistentId)
+            .exchange()
+            .expectStatus().isNotFound()
+            .expectBody()
+            .jsonPath("$.error").exists()
+            .jsonPath("$.path").isEqualTo("/v1/eventos/" + nonExistentId);
+    }
 }

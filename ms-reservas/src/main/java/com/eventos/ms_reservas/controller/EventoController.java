@@ -44,7 +44,7 @@ public class EventoController {
     ) {
         Evento evento = eventoService.getById(id);
         if (evento == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            throw new EventoNotFoundException(id, "Evento no encontrado: " + id);
         }
         return ResponseEntity.ok(EventoMapper.toDTO(evento));
     }
@@ -75,7 +75,7 @@ public class EventoController {
         Evento evento = EventoMapper.toEntity(eventoDTO);
         Evento updated = eventoService.update(id, evento);
         if (updated == null) {
-            throw new EventoNotFoundException("Evento no encontrado: " + id);
+            throw new EventoNotFoundException(id, "Evento no encontrado: " + id);
         }
         return ResponseEntity.ok(EventoMapper.toDTO(updated));
     }
@@ -91,7 +91,7 @@ public class EventoController {
     public ResponseEntity<Void> eliminarEvento(@PathVariable String id) {
         boolean deleted = eventoService.delete(id);
         if (!deleted) {
-            throw new EventoNotFoundException("Evento no encontrado: " + id);
+            throw new EventoNotFoundException(id, "Evento no encontrado: " + id);
         }
         return ResponseEntity.noContent().build();
     }

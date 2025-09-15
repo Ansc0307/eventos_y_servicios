@@ -22,19 +22,23 @@ public class GlobalExceptionHandler {
     private static final Logger LOG = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(ReservaNotFoundException.class)
-    public Mono<ResponseEntity<Map<String, String>>> handleReservaNotFound(ReservaNotFoundException ex) {
+    public Mono<ResponseEntity<Map<String, Object>>> handleReservaNotFound(ReservaNotFoundException ex) {
         LOG.error("Error en reserva: {}", ex.getMessage());
-        Map<String, String> error = new HashMap<>();
+        Map<String, Object> error = new HashMap<>();
         error.put("error", ex.getMessage());
-        return Mono.just(new ResponseEntity<>(error, HttpStatus.BAD_REQUEST));
+        String path = ex.getId() != null ? "/v1/reservas/" + ex.getId() : "/v1/reservas";
+        error.put("path", path);
+        return Mono.just(ResponseEntity.status(HttpStatus.NOT_FOUND).body(error));
     }
 
     @ExceptionHandler(EventoNotFoundException.class)
-    public Mono<ResponseEntity<Map<String, String>>> handleEventoNotFound(EventoNotFoundException ex) {
+    public Mono<ResponseEntity<Map<String, Object>>> handleEventoNotFound(EventoNotFoundException ex) {
         LOG.error("Error en evento: {}", ex.getMessage());
-        Map<String, String> error = new HashMap<>();
+        Map<String, Object> error = new HashMap<>();
         error.put("error", ex.getMessage());
-        return Mono.just(new ResponseEntity<>(error, HttpStatus.BAD_REQUEST));
+        String path = ex.getId() != null ? "/v1/eventos/" + ex.getId() : "/v1/eventos";
+        error.put("path", path);
+        return Mono.just(ResponseEntity.status(HttpStatus.NOT_FOUND).body(error));
     }
 
     @ExceptionHandler(WebExchangeBindException.class)
