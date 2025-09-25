@@ -1,97 +1,90 @@
 package com.eventos.ms_notifications.service;
 
 import com.eventos.ms_notifications.dto.NotificationDTO;
-import com.eventos.ms_notifications.exception.InvalidInputException;
 import com.eventos.ms_notifications.exception.NotFoundException;
-import com.eventos.ms_notifications.exception.UnauthorizedException;
-import com.eventos.ms_notifications.exception.ConflictException;
+import com.eventos.ms_notifications.model.Notification;
+import com.eventos.ms_notifications.repository.NotificationRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class NotificationService {
 
-    public NotificationDTO getNotificacionById(Long id) {
-        if (id <= 0) {
-            throw new InvalidInputException("El ID de la notificación debe ser positivo: " + id);
-        }
-        if (id == 100) {
-            throw new NotFoundException("No se encontró la notificación con ID: " + id);
-        }
-        if (id == 500) {
-            throw new UnauthorizedException("No tienes permisos para ver la notificación con ID: " + id);
-        }
+    private final NotificationRepository repo;
 
-        return new NotificationDTO(
-                id,
-                1L,
-                "Asunto de prueba",
-                "Este es un mensaje de prueba.",
-                "ALTA",
-                LocalDateTime.now(),
-                false,
-                "INFORMATIVA"
-        );
+    public NotificationService(NotificationRepository repo) {
+        this.repo = repo;
+    }
+
+    public NotificationDTO getNotificacionById(Long id) {
+        Notification entity = repo.findById(id)
+                .orElseThrow(() -> new NotFoundException("No se encontró la notificación con ID: " + id));
+        return mapToDTO(entity);
     }
 
     public List<NotificationDTO> getAllNotifications() {
-        List<NotificationDTO> lista = new ArrayList<>();
-        for (long i = 1; i <= 5; i++) {
-            lista.add(new NotificationDTO(
-                    i,
-                    i * 10,
-                    "Asunto de prueba " + i,
-                    "Mensaje de prueba " + i,
-                    i % 2 == 0 ? "ALTA" : "BAJA",
-                    LocalDateTime.now(),
-                    false,
-                    "INFORMATIVA"
-            ));
-        }
-        return lista;
+        return repo.findAll()
+                   .stream()
+                   .map(this::mapToDTO)
+                   .collect(Collectors.toList());
     }
 
-    public NotificationDTO createNotification(NotificationDTO newNotification) {
-        if (newNotification.getUserId() != null && newNotification.getUserId() == 1111) {
-            throw new NotFoundException("No se encontró el usuario con ID: " + newNotification.getUserId());
-        }
-        if ("SISTEMA".equalsIgnoreCase(newNotification.getTipoNotificacion())) {
-            throw new ConflictException("El tipo de notificación genera un conflicto: " + newNotification.getTipoNotificacion());
-        }
-
-        newNotification.setId(999L); // ID simulado, ya luego deberá sacar el último ID de la BD
-        newNotification.setFechaCreacion(LocalDateTime.now());
-        return newNotification;
+    public NotificationDTO createNotification(NotificationDTO dto) {
+        Notification entity = mapToEntity(dto);
+        entity.setFechaCreacion(LocalDateTime.now());
+        Notification saved = repo.save(entity);
+        return mapToDTO(saved);
     }
 
-    public NotificationDTO updateNotification(Long id, NotificationDTO updatedNotification) {
-        if (id <= 0) {
-            throw new InvalidInputException("El ID de la notificación debe ser positivo: " + id);
-        }
-        if (id == 100) {
-            throw new NotFoundException("No se encontró la notificación con ID: " + id);
-        }
-        if (id == 500) {
-            throw new UnauthorizedException("No tienes permisos para modificar la notificación con ID: " + id);
-        }
+    public NotificationDTO updateNotification(Long id, NotificationDTO dto) {
+        Notification existing = repo.findById(id)
+                .orElseThrow(() -> new NotFoundException("No se encontró la notificación con ID: " + id));
 
-        updatedNotification.setId(id);
-        updatedNotification.setFechaCreacion(LocalDateTime.now());
-        return updatedNotification;
+        // actualizar campos
+        existing.setAsunto(dto.getAsunto());
+        existing.setMensaje(dto.getMensaje());
+        existing.setPrioridad(com.eventos.ms_notifications.model.Prioridad.valueOf(dto.getPrioridad()));
+        existing.setLeido(dto.getLeido());
+        existing.setTipoNotificacion(com.eventos.ms_notifications.model.TipoNotificacion.valueOf(dto.getTipoNotificacion()));
+
+        Notification updated = repo.save(existing);
+        return mapToDTO(updated);
     }
 
     public void deleteNotification(Long id) {
-        if (id <= 0) {
-            throw new InvalidInputException("El ID de la notificación debe ser positivo: " + id);
-        }
-        if (id == 100) {
+        if (!repo.existsById(id)) {
             throw new NotFoundException("No se encontró la notificación con ID: " + id);
         }
-        if (id == 500) {
-            throw new UnauthorizedException("No tienes permisos para eliminar la notificación con ID: " + id);
-        }
+        repo.deleteById(id);
+    }
+
+    // 🔹 Helpers de mapeo
+    private NotificationDTO mapToDTO(Notification n) {
+        return new NotificationDTO(
+                n.getId(),
+                n.getUserId(),
+                n.getAsunto(),
+                n.getMensaje(),
+                n.getPrioridad().name(),
+                n.getFechaCreacion(),
+                n.getLeido(),
+                n.getTipoNotificacion().name()
+        );
+    }
+
+    private Notification mapToEntity(NotificationDTO dto) {
+        Notification n = new Notification();
+        n.setId(dto.getId());
+        n.setUserId(dto.getUserId());
+        n.setAsunto(dto.getAsunto());
+        n.setMensaje(dto.getMensaje());
+        n.setPrioridad(com.eventos.ms_notifications.model.Prioridad.valueOf(dto.getPrioridad()));
+        n.setFechaCreacion(dto.getFechaCreacion() != null ? dto.getFechaCreacion() : LocalDateTime.now());
+        n.setLeido(dto.getLeido());
+        n.setTipoNotificacion(com.eventos.ms_notifications.model.TipoNotificacion.valueOf(dto.getTipoNotificacion()));
+        return n;
     }
 }
