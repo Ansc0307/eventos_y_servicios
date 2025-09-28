@@ -17,6 +17,12 @@ public class TipoNotificacion {
     @Column(length = 200)
     private String descripcion;
 
+    @Column(name = "requiere_ack", nullable = false) 
+    private Boolean requiereAck = false; // si necesita confirmación de lectura
+
+    @Column(length = 50) 
+    private String icono; // ej: fa-bell, fa-warning
+
     @Column(nullable = false)
     private Boolean activo = true;
 
@@ -42,6 +48,20 @@ public class TipoNotificacion {
         this.descripcion = descripcion;
     }
 
+    public Boolean getRequiereAck() {
+        return requiereAck;
+    }
+    public void setRequiereAck(Boolean requiereAck) {
+        this.requiereAck = requiereAck;
+    }
+
+    public String getIcono() {
+        return icono;
+    }
+    public void setIcono(String icono) {
+        this.icono = icono;
+    }
+
     public Boolean getActivo() {
         return activo;
     }
@@ -52,11 +72,11 @@ public class TipoNotificacion {
     //Constructores
     public TipoNotificacion() {}
     
-    public TipoNotificacion(String nombre, String descripcion, Boolean activo) {
+    public TipoNotificacion(String nombre, String descripcion, Boolean requiereAck, String icono, Boolean activo) {
         this.nombre = nombre;
         this.descripcion = descripcion;
+        this.requiereAck = requiereAck;
+        this.icono = icono;
         this.activo = activo;
     }
-
-
 }
