@@ -4,8 +4,8 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "notification")
-public class Notification {
+@Table(name = "notificacion")
+public class Notificacion {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -14,25 +14,25 @@ public class Notification {
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
+    @ManyToOne
+    @JoinColumn(name = "prioridad_id", nullable = false)
+    private Prioridad prioridad;
+
+    @ManyToOne
+    @JoinColumn(name = "tipo_id", nullable = false)
+    private TipoNotificacion tipoNotificacion;
+
     @Column(nullable = false, length = 100)
     private String asunto;
 
     @Column(nullable = false, length = 500)
     private String mensaje;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 10)
-    private Prioridad prioridad;
-
     @Column(name = "fecha_creacion", nullable = false)
-    private LocalDateTime fechaCreacion;
+    private LocalDateTime fechaCreacion = LocalDateTime.now();
 
     @Column(nullable = false)
-    private Boolean leido;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "tipo_notificacion", nullable = false, length = 20)
-    private TipoNotificacion tipoNotificacion;
+    private Boolean leido = false;
 
     // Getters y Setters
     public Long getId() {
@@ -49,6 +49,20 @@ public class Notification {
         this.userId = userId;
     }
 
+    public Prioridad getPrioridad() {
+        return prioridad;
+    }
+    public void setPrioridad(Prioridad prioridad) {
+        this.prioridad = prioridad;
+    }
+
+    public TipoNotificacion getTipoNotificacion() {
+        return tipoNotificacion;
+    }
+    public void setTipoNotificacion(TipoNotificacion tipoNotificacion) {
+        this.tipoNotificacion = tipoNotificacion;
+    }
+
     public String getAsunto() {
         return asunto;
     }
@@ -61,13 +75,6 @@ public class Notification {
     }
     public void setMensaje(String mensaje) {
         this.mensaje = mensaje;
-    }
-
-    public Prioridad getPrioridad() {
-        return prioridad;
-    }
-    public void setPrioridad(Prioridad prioridad) {
-        this.prioridad = prioridad;
     }
 
     public LocalDateTime getFechaCreacion() {
@@ -84,11 +91,18 @@ public class Notification {
         this.leido = leido;
     }
 
-    public TipoNotificacion getTipoNotificacion() {
-        return tipoNotificacion;
+    // constructores
+    public Notificacion() {
     }
-    public void setTipoNotificacion(TipoNotificacion tipoNotificacion) {
+
+    public Notificacion(Long userId, Prioridad prioridad, TipoNotificacion tipoNotificacion,
+                       String asunto, String mensaje, LocalDateTime fechaCreacion, Boolean leido) {
+        this.userId = userId;
+        this.asunto = asunto;
+        this.mensaje = mensaje;
+        this.prioridad = prioridad;
         this.tipoNotificacion = tipoNotificacion;
+        this.fechaCreacion = fechaCreacion;
+        this.leido = leido;
     }
 }
-

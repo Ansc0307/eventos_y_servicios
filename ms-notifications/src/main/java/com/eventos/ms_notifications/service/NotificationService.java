@@ -2,7 +2,7 @@ package com.eventos.ms_notifications.service;
 
 import com.eventos.ms_notifications.dto.NotificationDTO;
 import com.eventos.ms_notifications.exception.NotFoundException;
-import com.eventos.ms_notifications.model.Notification;
+import com.eventos.ms_notifications.model.Notificacion;
 import com.eventos.ms_notifications.repository.NotificationRepository;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +20,7 @@ public class NotificationService {
     }
 
     public NotificationDTO getNotificacionById(Long id) {
-        Notification entity = repo.findById(id)
+        Notificacion entity = repo.findById(id)
                 .orElseThrow(() -> new NotFoundException("No se encontró la notificación con ID: " + id));
         return mapToDTO(entity);
     }
@@ -33,14 +33,14 @@ public class NotificationService {
     }
 
     public NotificationDTO createNotification(NotificationDTO dto) {
-        Notification entity = mapToEntity(dto);
+        Notificacion entity = mapToEntity(dto);
         entity.setFechaCreacion(LocalDateTime.now());
-        Notification saved = repo.save(entity);
+        Notificacion saved = repo.save(entity);
         return mapToDTO(saved);
     }
 
     public NotificationDTO updateNotification(Long id, NotificationDTO dto) {
-        Notification existing = repo.findById(id)
+        Notificacion existing = repo.findById(id)
                 .orElseThrow(() -> new NotFoundException("No se encontró la notificación con ID: " + id));
 
         // actualizar campos
@@ -50,7 +50,7 @@ public class NotificationService {
         existing.setLeido(dto.getLeido());
         existing.setTipoNotificacion(com.eventos.ms_notifications.model.TipoNotificacion.valueOf(dto.getTipoNotificacion()));
 
-        Notification updated = repo.save(existing);
+        Notificacion updated = repo.save(existing);
         return mapToDTO(updated);
     }
 
