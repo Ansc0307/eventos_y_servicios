@@ -7,6 +7,11 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface NotificationRepository extends JpaRepository<Notificacion, Long> {
+public interface NotificacionRepository extends JpaRepository<Notificacion, Long> {
+    
+    // Ejemplo: Listar notificaciones por usuario
     List<Notificacion> findByUserId(Long userId);
+
+    // Ejemplo: Listar notificaciones no leídas por usuario
+    List<Notificacion> findByUserIdAndLeidoFalse(Long userId);
 }
