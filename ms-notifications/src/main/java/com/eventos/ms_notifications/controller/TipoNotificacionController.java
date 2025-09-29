@@ -24,12 +24,12 @@ public class TipoNotificacionController {
     @Operation(summary = "Crear nuevo tipo de notificación")
     @PostMapping
     public ResponseEntity<TipoNotificacionDTO> crearTipo(@Valid @RequestBody TipoNotificacionDTO dto) {
-        return ResponseEntity.ok(tipoNotificacionService.crearTipo(dto));
+        return ResponseEntity.ok(tipoNotificacionService.crearTipoNotificacion(dto));
     }
 
     @Operation(summary = "Listar tipos de notificación")
     @GetMapping
     public ResponseEntity<List<TipoNotificacionDTO>> listarTipos() {
-        return ResponseEntity.ok(tipoNotificacionService.listarTipos());
+        return ResponseEntity.ok(tipoNotificacionService.listarTiposNotificacion());
     }
 }
