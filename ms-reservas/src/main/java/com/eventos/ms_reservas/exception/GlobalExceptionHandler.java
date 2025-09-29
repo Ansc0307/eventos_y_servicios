@@ -31,15 +31,6 @@ public class GlobalExceptionHandler {
         return Mono.just(ResponseEntity.status(HttpStatus.NOT_FOUND).body(error));
     }
 
-    @ExceptionHandler(EventoNotFoundException.class)
-    public Mono<ResponseEntity<Map<String, Object>>> handleEventoNotFound(EventoNotFoundException ex) {
-        LOG.error("Error en evento: {}", ex.getMessage());
-        Map<String, Object> error = new HashMap<>();
-        error.put("error", ex.getMessage());
-        String path = ex.getId() != null ? "/v1/eventos/" + ex.getId() : "/v1/eventos";
-        error.put("path", path);
-        return Mono.just(ResponseEntity.status(HttpStatus.NOT_FOUND).body(error));
-    }
 
     @ExceptionHandler(WebExchangeBindException.class)
     public Mono<ResponseEntity<Map<String, Object>>> handleValidationErrors(WebExchangeBindException ex) {
