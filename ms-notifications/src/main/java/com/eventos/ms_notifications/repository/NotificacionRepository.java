@@ -9,9 +9,9 @@ import java.util.List;
 @Repository
 public interface NotificacionRepository extends JpaRepository<Notificacion, Long> {
     
-    // Ejemplo: Listar notificaciones por usuario
+    //Listar notificaciones por usuario
     List<Notificacion> findByUserId(Long userId);
 
-    // Ejemplo: Listar notificaciones no leídas por usuario
+    //Listar notificaciones no leídas por usuario
     List<Notificacion> findByUserIdAndLeidoFalse(Long userId);
 }

@@ -9,6 +9,6 @@ import java.util.Optional;
 @Repository
 public interface PrioridadRepository extends JpaRepository<Prioridad, Long> {
 
-    // Buscar por nombre (por si quieres validar duplicados)
+    // Buscar por nombre (para validar duplicados)
     Optional<Prioridad> findByNombre(String nombre);
 }

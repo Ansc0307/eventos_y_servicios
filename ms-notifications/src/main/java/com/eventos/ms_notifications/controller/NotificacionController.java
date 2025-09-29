@@ -29,9 +29,10 @@ public class NotificacionController {
         return ResponseEntity.ok(notificacionService.crearNotificacion(dto));
     }
 
-    @Operation(summary = "Listar notificaciones por usuario")
-    @GetMapping("/usuario/{userId}")
-    public ResponseEntity<List<NotificacionResponseDTO>> listarPorUsuario(@PathVariable Long userId) {
-        return ResponseEntity.ok(notificacionService.listarPorUsuario(userId));
+    @Operation(summary = "Listar todas las notificaciones")
+    @GetMapping
+    public ResponseEntity<List<NotificacionResponseDTO>> listarTodas() {
+        return ResponseEntity.ok(notificacionService.listarTodas());
     }
+    
 }

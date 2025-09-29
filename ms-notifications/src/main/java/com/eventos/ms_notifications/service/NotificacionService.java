@@ -42,11 +42,13 @@ public class NotificacionService {
         return NotificacionMapper.toResponseDTO(saved);
     }
 
-    // Listar notificaciones por usuario
-    public List<NotificacionResponseDTO> listarPorUsuario(Long userId) {
-        return notificacionRepository.findByUserId(userId)
+    // Obtener todas las notificaciones 
+    public List<NotificacionResponseDTO> listarTodas() {
+        return notificacionRepository.findAll()
                 .stream()
                 .map(NotificacionMapper::toResponseDTO)
                 .collect(Collectors.toList());
     }
+
+
 }
