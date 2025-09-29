@@ -4,7 +4,7 @@
 -- tables
 -- Table: no_disponibilidad
 CREATE TABLE no_disponibilidad (
-    id_no_disponiblilidad serial  ,
+    id_no_disponiblilidad SERIAL  ,
     id_oferta int  ,
     motivo varchar(100)  ,
     fecha_inicio timestamp  ,
@@ -15,7 +15,7 @@ CREATE TABLE no_disponibilidad (
 
 -- Table: reservas
 CREATE TABLE reservas (
-    id_reserva serial  ,
+    id_reserva SERIAL  ,
     id_solicitud int  ,
     fecha_reserva_inicio timestamp  ,
     fecha_reserva_fin timestamp  ,
@@ -27,14 +27,12 @@ CREATE TABLE reservas (
 
 -- Table: solicitudes
 CREATE TABLE solicitudes (
-    id_solicitud serial  ,
+    id_solicitud SERIAL  ,
     fecha_solicitud timestamp  ,
     estado_solicitud varchar(100)  ,
     id_organizador int  ,
     id_proovedor int  ,
     id_oferta int  ,
-    id_proovedor_nombre varchar(100)  ,
-    id_organizador_nombre varchar(100)  ,
     CONSTRAINT solicitudes_pk PRIMARY KEY (id_solicitud)
 );
 
