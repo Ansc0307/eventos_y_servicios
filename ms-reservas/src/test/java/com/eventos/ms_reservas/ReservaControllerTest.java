@@ -6,6 +6,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
+import java.time.LocalDateTime;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
@@ -27,27 +29,38 @@ class ReservaControllerTest {
 
 	@Test
 	void crudReserva() {
-		String reservaId = "res123";
+		Long reservaId = 1L;
+		LocalDateTime now = LocalDateTime.now();
+		LocalDateTime inicio = now.plusDays(1);
+		LocalDateTime fin = now.plusDays(2);
+
+		// Crear reserva de prueba
+		Reserva reservaAprobada = new Reserva(reservaId, 123, inicio, fin, "APROBADA", now, now);
+		Reserva reservaCancelada = new Reserva(reservaId, 123, inicio, fin, "CANCELADA", now, now);
 
 		// Stubs
 		given(reservaService.save(any(Reserva.class)))
-			.willAnswer(invocation -> invocation.getArgument(0));
+			.willAnswer(invocation -> {
+				Reserva r = invocation.getArgument(0);
+				r.setIdReserva(reservaId);
+				return r;
+			});
 		given(reservaService.getById(eq(reservaId)))
-			.willReturn(new Reserva(reservaId, "APROBADA"))
+			.willReturn(reservaAprobada)
 			.willReturn(null); // después de eliminar
 		given(reservaService.update(eq(reservaId), any(Reserva.class)))
-			.willReturn(new Reserva(reservaId, "CANCELADA"));
+			.willReturn(reservaCancelada);
 		given(reservaService.delete(eq(reservaId)))
 			.willReturn(true);
 
 		// Crear reserva
 		client.post().uri("/v1/reserva")
 			.contentType(APPLICATION_JSON)
-			.bodyValue("{\"id\":\"" + reservaId + "\",\"estado\":\"APROBADA\"}")
+			.bodyValue("{\"idSolicitud\":123,\"fechaReservaInicio\":\"" + inicio + "\",\"fechaReservaFin\":\"" + fin + "\",\"estado\":\"APROBADA\"}")
 			.exchange()
 			.expectStatus().isCreated()
 			.expectBody()
-			.jsonPath("$.id").isEqualTo(reservaId)
+			.jsonPath("$.idReserva").isEqualTo(reservaId)
 			.jsonPath("$.estado").isEqualTo("APROBADA");
 
 		// Obtener reserva
@@ -55,17 +68,17 @@ class ReservaControllerTest {
 			.exchange()
 			.expectStatus().isOk()
 			.expectBody()
-			.jsonPath("$.id").isEqualTo(reservaId)
+			.jsonPath("$.idReserva").isEqualTo(reservaId)
 			.jsonPath("$.estado").isEqualTo("APROBADA");
 
 		// Actualizar reserva
 		client.put().uri("/v1/reserva/" + reservaId)
 			.contentType(APPLICATION_JSON)
-			.bodyValue("{\"id\":\"" + reservaId + "\",\"estado\":\"CANCELADA\"}")
+			.bodyValue("{\"idSolicitud\":123,\"fechaReservaInicio\":\"" + inicio + "\",\"fechaReservaFin\":\"" + fin + "\",\"estado\":\"CANCELADA\"}")
 			.exchange()
 			.expectStatus().isOk()
 			.expectBody()
-			.jsonPath("$.id").isEqualTo(reservaId)
+			.jsonPath("$.idReserva").isEqualTo(reservaId)
 			.jsonPath("$.estado").isEqualTo("CANCELADA");
 
 		// Eliminar reserva
@@ -84,7 +97,10 @@ class ReservaControllerTest {
 
 	@Test
 	void testErrorResponseFormatOnUpdate() {
-		String nonExistentId = "999";
+		Long nonExistentId = 999L;
+		LocalDateTime now = LocalDateTime.now();
+		LocalDateTime inicio = now.plusDays(1);
+		LocalDateTime fin = now.plusDays(2);
 		
 		// Mock service to return null for non-existent reserva
 		given(reservaService.update(eq(nonExistentId), any(Reserva.class)))
@@ -93,7 +109,7 @@ class ReservaControllerTest {
 		// Test update of non-existent reserva
 		client.put().uri("/v1/reserva/" + nonExistentId)
 			.contentType(APPLICATION_JSON)
-			.bodyValue("{\"id\":\"" + nonExistentId + "\",\"estado\":\"APROBADA\"}")
+			.bodyValue("{\"idSolicitud\":123,\"fechaReservaInicio\":\"" + inicio + "\",\"fechaReservaFin\":\"" + fin + "\",\"estado\":\"APROBADA\"}")
 			.exchange()
 			.expectStatus().isNotFound()
 			.expectBody()
@@ -103,7 +119,7 @@ class ReservaControllerTest {
 
 	@Test
 	void testErrorResponseFormatOnDelete() {
-		String nonExistentId = "888";
+		Long nonExistentId = 888L;
 		
 		// Mock service to return false for non-existent reserva
 		given(reservaService.delete(eq(nonExistentId)))

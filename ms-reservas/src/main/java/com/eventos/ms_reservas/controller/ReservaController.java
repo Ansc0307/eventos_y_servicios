@@ -40,11 +40,11 @@ public class ReservaController {
     @GetMapping("/{id}")
     public ResponseEntity<ReservaDTO> obtenerReserva(
         @Parameter(description = "ID de la reserva", example = "1")
-        @PathVariable String id
+        @PathVariable Long id
     ) {
         Reserva reserva = reservaService.getById(id);
         if (reserva == null) {
-            throw new ReservaNotFoundException(id, "Reserva no encontrada: " + id);
+            throw new ReservaNotFoundException(String.valueOf(id), "Reserva no encontrada: " + id);
         }
         return ResponseEntity.ok(ReservaMapper.toDTO(reserva));
     }
@@ -72,11 +72,11 @@ public class ReservaController {
         @ApiResponse(responseCode = "500", description = "Error interno del servidor")
     })
     @PutMapping("/{id}")
-    public ResponseEntity<ReservaDTO> actualizarReserva(@PathVariable String id, @Valid @RequestBody ReservaDTO reservaDTO) {
+    public ResponseEntity<ReservaDTO> actualizarReserva(@PathVariable Long id, @Valid @RequestBody ReservaDTO reservaDTO) {
         Reserva reserva = ReservaMapper.toEntity(reservaDTO);
         Reserva updated = reservaService.update(id, reserva);
         if (updated == null) {
-            throw new ReservaNotFoundException(id, "Reserva no encontrada: " + id);
+            throw new ReservaNotFoundException(String.valueOf(id), "Reserva no encontrada: " + id);
         }
         return ResponseEntity.ok(ReservaMapper.toDTO(updated));
     }
@@ -89,10 +89,10 @@ public class ReservaController {
         @ApiResponse(responseCode = "500", description = "Error interno del servidor")
     })
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminarReserva(@PathVariable String id) {
+    public ResponseEntity<Void> eliminarReserva(@PathVariable Long id) {
         boolean deleted = reservaService.delete(id);
         if (!deleted) {
-            throw new ReservaNotFoundException(id, "Reserva no encontrada: " + id);
+            throw new ReservaNotFoundException(String.valueOf(id), "Reserva no encontrada: " + id);
         }
         return ResponseEntity.noContent().build();
     }
