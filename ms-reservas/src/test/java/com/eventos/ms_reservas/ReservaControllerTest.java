@@ -29,7 +29,7 @@ class ReservaControllerTest {
 
 	@Test
 	void crudReserva() {
-		Long reservaId = 1L;
+		Integer reservaId = 1;
 		LocalDateTime now = LocalDateTime.now();
 		LocalDateTime inicio = now.plusDays(1);
 		LocalDateTime fin = now.plusDays(2);
@@ -97,7 +97,7 @@ class ReservaControllerTest {
 
 	@Test
 	void testErrorResponseFormatOnUpdate() {
-		Long nonExistentId = 999L;
+		Integer nonExistentId = 999;
 		LocalDateTime now = LocalDateTime.now();
 		LocalDateTime inicio = now.plusDays(1);
 		LocalDateTime fin = now.plusDays(2);
@@ -119,7 +119,7 @@ class ReservaControllerTest {
 
 	@Test
 	void testErrorResponseFormatOnDelete() {
-		Long nonExistentId = 888L;
+		Integer nonExistentId = 888;
 		
 		// Mock service to return false for non-existent reserva
 		given(reservaService.delete(eq(nonExistentId)))

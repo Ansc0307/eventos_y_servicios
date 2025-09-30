@@ -20,22 +20,28 @@ public class ReservaMapper {
 
     public static Reserva toEntity(ReservaDTO dto) {
         Reserva reserva = new Reserva();
-        reserva.setIdReserva(dto.getIdReserva());
+        // NO establecer el ID para nuevas entidades - Hibernate lo generará automáticamente
+        // reserva.setIdReserva(dto.getIdReserva());
         reserva.setIdSolicitud(dto.getIdSolicitud());
         reserva.setFechaReservaInicio(dto.getFechaReservaInicio());
         reserva.setFechaReservaFin(dto.getFechaReservaFin());
         reserva.setEstado(dto.getEstado());
-        reserva.setFechaCreacion(dto.getFechaCreacion());
-        reserva.setFechaActualizacion(dto.getFechaActualizacion());
         
-        // Si no se proporciona fecha de creación, usar la actual
-        if (reserva.getFechaCreacion() == null) {
-            reserva.setFechaCreacion(LocalDateTime.now());
+        // Las fechas de auditoría se manejan automáticamente con @PrePersist y @PreUpdate
+        // Solo establecer si vienen en el DTO (para casos especiales)
+        if (dto.getFechaCreacion() != null) {
+            reserva.setFechaCreacion(dto.getFechaCreacion());
+        }
+        if (dto.getFechaActualizacion() != null) {
+            reserva.setFechaActualizacion(dto.getFechaActualizacion());
         }
         
-        // Siempre actualizar la fecha de actualización
-        reserva.setFechaActualizacion(LocalDateTime.now());
-        
+        return reserva;
+    }
+
+    public static Reserva toEntityWithId(ReservaDTO dto) {
+        Reserva reserva = toEntity(dto);
+        reserva.setIdReserva(dto.getIdReserva());
         return reserva;
     }
 }

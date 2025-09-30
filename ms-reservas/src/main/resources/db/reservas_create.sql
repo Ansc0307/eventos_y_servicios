@@ -15,7 +15,7 @@ CREATE TABLE no_disponibilidad (
 
 -- Table: reservas
 CREATE TABLE reservas (
-    id_reserva SERIAL  ,
+    id_reserva BIGSERIAL  ,
     id_solicitud int  ,
     fecha_reserva_inicio timestamp  ,
     fecha_reserva_fin timestamp  ,

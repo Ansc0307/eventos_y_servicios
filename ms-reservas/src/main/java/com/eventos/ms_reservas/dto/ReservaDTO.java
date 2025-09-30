@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 public class ReservaDTO {
 
     @Schema(description = "Identificador único de la reserva", example = "1", required = false)
-    private Long idReserva;
+    private Integer idReserva;
 
     @Schema(description = "Identificador de la solicitud", example = "123", required = true)
     @NotNull(message = "El id de solicitud no puede estar vacío")
@@ -37,7 +37,7 @@ public class ReservaDTO {
 
     public ReservaDTO() {}
 
-    public ReservaDTO(Long idReserva, Integer idSolicitud, LocalDateTime fechaReservaInicio, 
+    public ReservaDTO(Integer idReserva, Integer idSolicitud, LocalDateTime fechaReservaInicio, 
                       LocalDateTime fechaReservaFin, String estado, LocalDateTime fechaCreacion, 
                       LocalDateTime fechaActualizacion) {
         this.idReserva = idReserva;
@@ -50,7 +50,7 @@ public class ReservaDTO {
     }
 
     // Getters
-    public Long getIdReserva() {
+    public Integer getIdReserva() {
         return idReserva;
     }
 
@@ -79,7 +79,7 @@ public class ReservaDTO {
     }
 
     // Setters
-    public void setIdReserva(Long idReserva) {
+    public void setIdReserva(Integer idReserva) {
         this.idReserva = idReserva;
     }
 

@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: reservas-postgres
+    environment:
+      POSTGRES_DB: reservas_db
+      POSTGRES_USER: reservas_user
+      POSTGRES_PASSWORD: reservas_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./src/main/resources/db/reservas_create.sql:/docker-entrypoint-initdb.d/01-init.sql
+    networks:
+      - reservas-network
+
+  app:
+    build: .
+    container_name: reservas-app
+    depends_on:
+      - postgres
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/reservas_db
+      SPRING_DATASOURCE_USERNAME: reservas_user
+      SPRING_DATASOURCE_PASSWORD: reservas_password
+    ports:
+      - "8082:8082"
+    networks:
+      - reservas-network
+
+volumes:
+  postgres_data:
+
+networks:
+  reservas-network:
+    driver: bridge

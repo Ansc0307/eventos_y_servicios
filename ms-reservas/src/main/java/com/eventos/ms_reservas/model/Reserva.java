@@ -1,19 +1,37 @@
 package com.eventos.ms_reservas.model;
 
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+@Entity
+@Table(name = "reservas")
 public class Reserva {
-    private Long idReserva;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_reserva")
+    private Integer idReserva;
+
+    @Column(name = "id_solicitud", nullable = false)
     private Integer idSolicitud;
+
+    @Column(name = "fecha_reserva_inicio", nullable = false)
     private LocalDateTime fechaReservaInicio;
+
+    @Column(name = "fecha_reserva_fin", nullable = false)
     private LocalDateTime fechaReservaFin;
+
+    @Column(name = "estado", length = 100, nullable = false)
     private String estado;
+
+    @Column(name = "fecha_creacion", nullable = false)
     private LocalDateTime fechaCreacion;
+
+    @Column(name = "fecha_actualizacion", nullable = false)
     private LocalDateTime fechaActualizacion;
 
     public Reserva() {}
 
-    public Reserva(Long idReserva, Integer idSolicitud, LocalDateTime fechaReservaInicio, 
+    public Reserva(Integer idReserva, Integer idSolicitud, LocalDateTime fechaReservaInicio, 
                    LocalDateTime fechaReservaFin, String estado, LocalDateTime fechaCreacion, 
                    LocalDateTime fechaActualizacion) {
         this.idReserva = idReserva;
@@ -26,7 +44,7 @@ public class Reserva {
     }
 
     // Getters
-    public Long getIdReserva() {
+    public Integer getIdReserva() {
         return idReserva;
     }
 
@@ -55,7 +73,7 @@ public class Reserva {
     }
 
     // Setters
-    public void setIdReserva(Long idReserva) {
+    public void setIdReserva(Integer idReserva) {
         this.idReserva = idReserva;
     }
 
@@ -81,5 +99,16 @@ public class Reserva {
 
     public void setFechaActualizacion(LocalDateTime fechaActualizacion) {
         this.fechaActualizacion = fechaActualizacion;
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        fechaCreacion = LocalDateTime.now();
+        fechaActualizacion = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        fechaActualizacion = LocalDateTime.now();
     }
 }
