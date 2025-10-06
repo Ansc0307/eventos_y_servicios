@@ -1,17 +1,38 @@
 server:
-  port: 8083
+  port: 8087
 
 spring:
+  application:
+    name: ms-notifications
   profiles:
     active: openapi
-
   datasource:
     url: jdbc:postgresql://localhost:5432/notifications_db
     username: postgres
     password: admin
     driver-class-name: org.postgresql.Driver
-
   jpa:
     hibernate:
-      ddl-auto: none   # nonoe en producción, o si no quieres perder datos
-    show-sql: true       # muestra las queries en consola
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  sql:
+    init:
+      mode: always
+
+logging:
+  level:
+    com.eventos.ms_notifications: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+  file:
+    name: logs/ms-notifications.log
+  pattern:
+    file: "%d{yyyy-MM-dd HH:mm:ss} - %logger{36} - %level - %msg%n"
+
+app:
+  config:
+    max-page-size: 50

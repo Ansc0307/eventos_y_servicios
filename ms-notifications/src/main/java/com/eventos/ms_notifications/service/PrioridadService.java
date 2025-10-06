@@ -1,66 +1,128 @@
 package com.eventos.ms_notifications.service;
 
 import com.eventos.ms_notifications.dto.PrioridadDTO;
+import com.eventos.ms_notifications.exception.ConflictException;
+import com.eventos.ms_notifications.exception.NotFoundException;
 import com.eventos.ms_notifications.mapper.PrioridadMapper;
 import com.eventos.ms_notifications.model.Prioridad;
 import com.eventos.ms_notifications.repository.PrioridadRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class PrioridadService {
 
     private final PrioridadRepository prioridadRepository;
+    private final PrioridadMapper prioridadMapper;
 
-    public PrioridadService(PrioridadRepository prioridadRepository) {
+    public PrioridadService(PrioridadRepository prioridadRepository, PrioridadMapper prioridadMapper) {
         this.prioridadRepository = prioridadRepository;
+        this.prioridadMapper = prioridadMapper;
     }
 
-    // Crear prioridad
+    // ============ MÉTODOS CRUD BÁSICOS ============
+    
     public PrioridadDTO crearPrioridad(PrioridadDTO dto) {
-        Prioridad prioridad = PrioridadMapper.toEntity(dto);
+        if (prioridadRepository.findByNombre(dto.getNombre()).isPresent()) {
+            throw new ConflictException("Prioridad", "nombre", dto.getNombre());
+        }
+        
+        Prioridad prioridad = prioridadMapper.toEntity(dto);
         Prioridad saved = prioridadRepository.save(prioridad);
-        return PrioridadMapper.toDTO(saved);
+        return prioridadMapper.toDTO(saved);
     }
 
-    // Listar todas las prioridades
+    @Transactional(readOnly = true)
     public List<PrioridadDTO> listarPrioridades() {
-        return prioridadRepository.findAll()
+        return prioridadRepository.findAllByOrderByNivelAsc()
                 .stream()
-                .map(PrioridadMapper::toDTO)
+                .map(prioridadMapper::toDTO)
                 .collect(Collectors.toList());
     }
 
-    // Obtener prioridad por ID
+    @Transactional(readOnly = true)
     public PrioridadDTO obtenerPorId(Long id) {
         Prioridad prioridad = prioridadRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Prioridad no encontrada"));
-        return PrioridadMapper.toDTO(prioridad);
+                .orElseThrow(() -> new NotFoundException("Prioridad", id));
+        return prioridadMapper.toDTO(prioridad);
     }
 
-    // Actualizar prioridad
     public PrioridadDTO actualizarPrioridad(Long id, PrioridadDTO dto) {
-        Prioridad prioridad = prioridadRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Prioridad no encontrada"));
-
-        // Actualizamos los campos
-        prioridad.setNombre(dto.getNombre());
-        prioridad.setDescripcion(dto.getDescripcion());
-        prioridad.setNivel(dto.getNivel());
-        prioridad.setColorHex(dto.getColorHex());
-        prioridad.setActivo(dto.getActivo());
-
-        Prioridad updated = prioridadRepository.save(prioridad);
-        return PrioridadMapper.toDTO(updated);
+        Prioridad existingPrioridad = prioridadRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Prioridad", id));
+        
+        prioridadRepository.findByNombre(dto.getNombre())
+                .ifPresent(prioridadConMismoNombre -> {
+                    if (!prioridadConMismoNombre.getId().equals(id)) {
+                        throw new ConflictException("Prioridad", "nombre", dto.getNombre());
+                    }
+                });
+        
+        prioridadMapper.updateEntityFromDTO(dto, existingPrioridad);
+        Prioridad updated = prioridadRepository.save(existingPrioridad);
+        return prioridadMapper.toDTO(updated);
     }
 
-    // Eliminar prioridad
     public void eliminarPrioridad(Long id) {
         if (!prioridadRepository.existsById(id)) {
-            throw new RuntimeException("Prioridad no encontrada");
+            throw new NotFoundException("Prioridad", id);
         }
         prioridadRepository.deleteById(id);
+    }
+
+    // ============ MÉTODOS ADICIONALES ============
+    
+    @Transactional(readOnly = true)
+    public List<PrioridadDTO> listarPrioridadesActivas() {
+        return prioridadRepository.findByActivoTrue()
+                .stream()
+                .map(prioridadMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public boolean existePorNombre(String nombre) {
+        return prioridadRepository.findByNombre(nombre).isPresent();
+    }
+
+    @Transactional(readOnly = true)
+    public List<PrioridadDTO> buscarPorNivel(Integer nivel) {
+        List<Prioridad> prioridades = prioridadRepository.findByNivel(nivel);
+        if (prioridades.isEmpty()) {
+            throw new NotFoundException("No se encontraron prioridades con nivel: " + nivel);
+        }
+        return prioridades.stream()
+                .map(prioridadMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    public PrioridadDTO desactivarPrioridad(Long id) {
+        Prioridad prioridad = prioridadRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Prioridad", id));
+        
+        prioridad.setActivo(false);
+        Prioridad updated = prioridadRepository.save(prioridad);
+        return prioridadMapper.toDTO(updated);
+    }
+
+    public PrioridadDTO activarPrioridad(Long id) {
+        Prioridad prioridad = prioridadRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Prioridad", id));
+        
+        prioridad.setActivo(true);
+        Prioridad updated = prioridadRepository.save(prioridad);
+        return prioridadMapper.toDTO(updated);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PrioridadDTO> buscarPorNombreContaining(String nombre) {
+        return prioridadRepository.findByNombreContainingIgnoreCase(nombre)
+                .stream()
+                .map(prioridadMapper::toDTO)
+                .collect(Collectors.toList());
     }
 }

@@ -1,8 +1,15 @@
 package com.eventos.ms_notifications.exception;
 
 public class NotFoundException extends RuntimeException {
-    public NotFoundException() {}
-    public NotFoundException(String message) { super(message); }
-    public NotFoundException(String message, Throwable cause) { super(message, cause); }
-    public NotFoundException(Throwable cause) { super(cause); }
+    public NotFoundException(String message) {
+        super(message);
+    }
+    
+    public NotFoundException(String resource, Long id) {
+        super(resource + " no encontrado con ID: " + id);
+    }
+    
+    public NotFoundException(String resource, String identifier) {
+        super(resource + " no encontrado: " + identifier);
+    }
 }

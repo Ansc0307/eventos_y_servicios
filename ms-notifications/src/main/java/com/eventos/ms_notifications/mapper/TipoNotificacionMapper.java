@@ -2,12 +2,18 @@ package com.eventos.ms_notifications.mapper;
 
 import com.eventos.ms_notifications.dto.TipoNotificacionDTO;
 import com.eventos.ms_notifications.model.TipoNotificacion;
+import org.springframework.stereotype.Component;
 
+@Component
 public class TipoNotificacionMapper {
 
-    // De Entidad -> DTO
-    public static TipoNotificacionDTO toDTO(TipoNotificacion entidad) {
-        if(entidad == null) return null;
+    /**
+     * Convierte una entidad TipoNotificacion a un DTO TipoNotificacionDTO
+     */
+    public TipoNotificacionDTO toDTO(TipoNotificacion entidad) {
+        if (entidad == null) {
+            return null;
+        }
 
         TipoNotificacionDTO dto = new TipoNotificacionDTO();
         dto.setId(entidad.getId());
@@ -19,17 +25,45 @@ public class TipoNotificacionMapper {
         return dto;
     }
 
-    // De DTO -> Entidad
-    public static TipoNotificacion toEntity(TipoNotificacionDTO dto) {
-        if(dto == null) return null;
+    /**
+     * Convierte un DTO TipoNotificacionDTO a una entidad TipoNotificacion
+     * Para creación (sin ID)
+     */
+    public TipoNotificacion toEntity(TipoNotificacionDTO dto) {
+        if (dto == null) {
+            return null;
+        }
 
         TipoNotificacion entidad = new TipoNotificacion();
-        entidad.setId(dto.getId()); // opcional, solo si vas a actualizar
+        // No seteamos el ID para creación
         entidad.setNombre(dto.getNombre());
         entidad.setDescripcion(dto.getDescripcion());
-        entidad.setRequiereAck(dto.getRequiereAck());
+        entidad.setRequiereAck(dto.getRequiereAck() != null ? dto.getRequiereAck() : false);
         entidad.setIcono(dto.getIcono());
-        entidad.setActivo(dto.getActivo());
+        entidad.setActivo(dto.getActivo() != null ? dto.getActivo() : true);
         return entidad;
+    }
+
+    /**
+     * Actualiza una entidad existente con datos del DTO
+     * Para actualizaciones (con ID)
+     */
+    public void updateEntityFromDTO(TipoNotificacionDTO dto, TipoNotificacion entidad) {
+        if (dto == null || entidad == null) {
+            return;
+        }
+
+        entidad.setNombre(dto.getNombre());
+        entidad.setDescripcion(dto.getDescripcion());
+        
+        if (dto.getRequiereAck() != null) {
+            entidad.setRequiereAck(dto.getRequiereAck());
+        }
+        
+        entidad.setIcono(dto.getIcono());
+        
+        if (dto.getActivo() != null) {
+            entidad.setActivo(dto.getActivo());
+        }
     }
 }
