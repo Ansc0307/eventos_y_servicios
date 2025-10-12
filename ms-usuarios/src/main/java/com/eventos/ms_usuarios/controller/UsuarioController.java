@@ -9,12 +9,15 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springdoc.core.annotations.ParameterObject;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import jakarta.validation.Valid;
 
 @RestController
@@ -56,5 +59,20 @@ public class UsuarioController {
   @GetMapping
   public ResponseEntity<List<UsuarioDto>> listar() {
     return ResponseEntity.ok(usuarioService.listar());
+  }
+
+  @Operation(summary = "Listar usuarios (paginado)", description = "Lista usuarios con paginación y orden")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Operación exitosa")
+  })
+  @GetMapping("/page")
+  public ResponseEntity<Page<UsuarioDto>> listarPage(
+      @ParameterObject Pageable pageable,
+      @Parameter(description = "Nombre contiene (ignore-case)", example = "ana") @RequestParam(required = false) String nombre,
+      @Parameter(description = "Email contiene (ignore-case)", example = "@gmail.com") @RequestParam(required = false) String email,
+      @Parameter(description = "Teléfono contiene (ignore-case)", example = "999") @RequestParam(required = false) String telefono,
+      @Parameter(description = "Rol del usuario", example = "ORGANIZADOR") @RequestParam(required = false) String rol,
+      @Parameter(description = "Solo activos/inactivos", example = "true") @RequestParam(required = false) Boolean activo) {
+    return ResponseEntity.ok(usuarioService.listar(pageable, nombre, email, telefono, rol, activo));
   }
 }

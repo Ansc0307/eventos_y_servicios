@@ -11,6 +11,12 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.util.StringUtils;
+import com.eventos.ms_usuarios.model.RolUsuario;
 import com.eventos.ms_usuarios.exception.RecursoNoEncontradoException;
 import com.eventos.ms_usuarios.exception.PasswordDebilException;
 
@@ -35,29 +41,122 @@ public class UsuarioService {
     }
     String hash = passwordEncoder.encode(dto.getPassword());
     Usuario usuario = new Usuario(dto.getNombre(), dto.getEmail(), hash, dto.getRol());
+    if (dto.getTelefono() != null) {
+      usuario.setTelefono(dto.getTelefono());
+    }
+    if (dto.getActivo() != null) {
+      usuario.setActivo(dto.getActivo());
+    }
     Usuario guardado = usuarioRepository.save(usuario);
-    return new UsuarioDto(
-        guardado.getId(),
-        guardado.getNombre(),
-        guardado.getEmail(),
-        guardado.getRol(),
-        guardado.getCreadoEn(),
-        guardado.getActualizadoEn());
+    UsuarioDto res = new UsuarioDto();
+    res.setId(guardado.getId());
+    res.setNombre(guardado.getNombre());
+    res.setEmail(guardado.getEmail());
+    res.setTelefono(guardado.getTelefono());
+    res.setRol(guardado.getRol());
+    res.setActivo(guardado.isActivo());
+    res.setCreadoEn(guardado.getCreadoEn());
+    res.setActualizadoEn(guardado.getActualizadoEn());
+    return res;
   }
 
   @Transactional(readOnly = true)
   public UsuarioDto obtenerPorId(Long id) {
     Usuario u = usuarioRepository.findById(id)
         .orElseThrow(() -> new RecursoNoEncontradoException("Usuario", id));
-    return new UsuarioDto(u.getId(), u.getNombre(), u.getEmail(), u.getRol(), u.getCreadoEn(), u.getActualizadoEn());
+    UsuarioDto res = new UsuarioDto();
+    res.setId(u.getId());
+    res.setNombre(u.getNombre());
+    res.setEmail(u.getEmail());
+    res.setTelefono(u.getTelefono());
+    res.setRol(u.getRol());
+    res.setActivo(u.isActivo());
+    res.setCreadoEn(u.getCreadoEn());
+    res.setActualizadoEn(u.getActualizadoEn());
+    return res;
   }
 
   @Transactional(readOnly = true)
   public List<UsuarioDto> listar() {
     return usuarioRepository.findAll().stream()
-        .map(u -> new UsuarioDto(u.getId(), u.getNombre(), u.getEmail(), u.getRol(), u.getCreadoEn(),
-            u.getActualizadoEn()))
+        .map(u -> {
+          UsuarioDto d = new UsuarioDto();
+          d.setId(u.getId());
+          d.setNombre(u.getNombre());
+          d.setEmail(u.getEmail());
+          d.setTelefono(u.getTelefono());
+          d.setRol(u.getRol());
+          d.setActivo(u.isActivo());
+          d.setCreadoEn(u.getCreadoEn());
+          d.setActualizadoEn(u.getActualizadoEn());
+          return d;
+        })
         .collect(Collectors.toList());
+  }
+
+  @Transactional(readOnly = true)
+  public Page<UsuarioDto> listar(Pageable pageable) {
+    return usuarioRepository.findAll(pageable)
+        .map(u -> {
+          UsuarioDto d = new UsuarioDto();
+          d.setId(u.getId());
+          d.setNombre(u.getNombre());
+          d.setEmail(u.getEmail());
+          d.setTelefono(u.getTelefono());
+          d.setRol(u.getRol());
+          d.setActivo(u.isActivo());
+          d.setCreadoEn(u.getCreadoEn());
+          d.setActualizadoEn(u.getActualizadoEn());
+          return d;
+        });
+  }
+
+  @Transactional(readOnly = true)
+  public Page<UsuarioDto> listar(Pageable pageable,
+      String nombre,
+      String email,
+      String telefono,
+      String rol,
+      Boolean activo) {
+    Usuario probe = new Usuario();
+    if (StringUtils.hasText(nombre)) {
+      probe.setNombre(nombre);
+    }
+    if (StringUtils.hasText(email)) {
+      probe.setEmail(email);
+    }
+    if (StringUtils.hasText(telefono)) {
+      probe.setTelefono(telefono);
+    }
+    if (activo != null) {
+      probe.setActivo(activo);
+    }
+    if (StringUtils.hasText(rol)) {
+      try {
+        probe.setRol(RolUsuario.valueOf(rol.trim().toUpperCase()));
+      } catch (IllegalArgumentException ex) {
+        // rol inválido: ignorar filtro
+      }
+    }
+
+    ExampleMatcher matcher = ExampleMatcher.matchingAll()
+        .withIgnoreNullValues()
+        .withIgnoreCase()
+        .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING);
+
+    return usuarioRepository.findAll(Example.of(probe, matcher), pageable)
+        .map(u -> {
+          UsuarioDto d = new UsuarioDto();
+          d.setId(u.getId());
+          d.setNombre(u.getNombre());
+          d.setEmail(u.getEmail());
+          d.setTelefono(u.getTelefono());
+          d.setRol(u.getRol());
+          d.setActivo(u.isActivo());
+          d.setCreadoEn(u.getCreadoEn());
+          d.setActualizadoEn(u.getActualizadoEn());
+          return d;
+        });
   }
 
   private boolean esPasswordFuerte(String pwd) {

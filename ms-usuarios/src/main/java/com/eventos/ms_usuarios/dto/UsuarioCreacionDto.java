@@ -29,6 +29,12 @@ public class UsuarioCreacionDto {
   @NotNull
   private RolUsuario rol;
 
+  @Schema(description = "Número de teléfono", example = "+591 69705051")
+  private String telefono;
+
+  @Schema(description = "Indica si la cuenta inicia activa (por defecto true)")
+  private Boolean activo;
+
   public UsuarioCreacionDto() {
   }
 
@@ -69,5 +75,21 @@ public class UsuarioCreacionDto {
 
   public void setRol(RolUsuario rol) {
     this.rol = rol;
+  }
+
+  public String getTelefono() {
+    return telefono;
+  }
+
+  public void setTelefono(String telefono) {
+    this.telefono = telefono;
+  }
+
+  public Boolean getActivo() {
+    return activo;
+  }
+
+  public void setActivo(Boolean activo) {
+    this.activo = activo;
   }
 }
