@@ -1,8 +1,6 @@
 package com.eventos.ms_notifications.service;
 
 import com.eventos.ms_notifications.dto.TipoNotificacionDTO;
-import com.eventos.ms_notifications.exception.ConflictException;
-import com.eventos.ms_notifications.exception.NotFoundException;
 import com.eventos.ms_notifications.mapper.TipoNotificacionMapper;
 import com.eventos.ms_notifications.model.TipoNotificacion;
 import com.eventos.ms_notifications.repository.TipoNotificacionRepository;
@@ -19,133 +17,47 @@ public class TipoNotificacionService {
     private final TipoNotificacionRepository tipoNotificacionRepository;
     private final TipoNotificacionMapper tipoNotificacionMapper;
 
-    public TipoNotificacionService(TipoNotificacionRepository tipoNotificacionRepository, 
-                                  TipoNotificacionMapper tipoNotificacionMapper) {
+    public TipoNotificacionService(TipoNotificacionRepository tipoNotificacionRepository,
+                                   TipoNotificacionMapper tipoNotificacionMapper) {
         this.tipoNotificacionRepository = tipoNotificacionRepository;
         this.tipoNotificacionMapper = tipoNotificacionMapper;
     }
 
-    // ============ MÉTODOS CRUD BÁSICOS ============
-    
-    @Transactional
-    public TipoNotificacionDTO crearTipoNotificacion(TipoNotificacionDTO dto) {
-        // Validar que no exista un tipo con el mismo nombre
-        if (tipoNotificacionRepository.findByNombre(dto.getNombre()).isPresent()) {
-            throw new ConflictException("Tipo de notificación", "nombre", dto.getNombre());
-        }
-        
-        TipoNotificacion tipoNotificacion = tipoNotificacionMapper.toEntity(dto);
-        TipoNotificacion saved = tipoNotificacionRepository.save(tipoNotificacion);
-        return tipoNotificacionMapper.toDTO(saved);
-    }
-
-    @Transactional(readOnly = true)
-    public List<TipoNotificacionDTO> listarTiposNotificacion() {
-        return tipoNotificacionRepository.findAllByOrderByNombreAsc()
+    public List<TipoNotificacionDTO> obtenerTodas() {
+        return tipoNotificacionRepository.findAll()
                 .stream()
-                .map(tipoNotificacionMapper::toDTO)
+                .map(tipoNotificacionMapper::toDto)
                 .collect(Collectors.toList());
     }
 
-    @Transactional(readOnly = true)
     public TipoNotificacionDTO obtenerPorId(Long id) {
-        TipoNotificacion tipoNotificacion = tipoNotificacionRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Tipo de notificación", id));
-        return tipoNotificacionMapper.toDTO(tipoNotificacion);
+        TipoNotificacion tipo = tipoNotificacionRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Tipo de notificación no encontrada con ID: " + id));
+        return tipoNotificacionMapper.toDto(tipo);
     }
 
-    @Transactional
-    public TipoNotificacionDTO actualizarTipoNotificacion(Long id, TipoNotificacionDTO dto) {
-        TipoNotificacion existingTipo = tipoNotificacionRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Tipo de notificación", id));
-        
-        // Verificar que el nombre no esté en uso por otro tipo
-        tipoNotificacionRepository.findByNombre(dto.getNombre())
-                .ifPresent(tipoConMismoNombre -> {
-                    if (!tipoConMismoNombre.getId().equals(id)) {
-                        throw new ConflictException("Tipo de notificación", "nombre", dto.getNombre());
-                    }
-                });
-        
-        tipoNotificacionMapper.updateEntityFromDTO(dto, existingTipo);
-        TipoNotificacion updated = tipoNotificacionRepository.save(existingTipo);
-        return tipoNotificacionMapper.toDTO(updated);
+    public TipoNotificacionDTO crear(TipoNotificacionDTO tipoDTO) {
+        if (tipoNotificacionRepository.existsByNombreIgnoreCase(tipoDTO.getNombre())) {
+            throw new RuntimeException("Ya existe un tipo de notificación con ese nombre");
+        }
+        TipoNotificacion tipo = tipoNotificacionMapper.toEntity(tipoDTO);
+        return tipoNotificacionMapper.toDto(tipoNotificacionRepository.save(tipo));
     }
 
-    @Transactional
-    public void eliminarTipoNotificacion(Long id) {
+    public TipoNotificacionDTO actualizar(Long id, TipoNotificacionDTO tipoDTO) {
+        TipoNotificacion existente = tipoNotificacionRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Tipo de notificación no encontrada con ID: " + id));
+
+        existente.setNombre(tipoDTO.getNombre());
+        existente.setDescripcion(tipoDTO.getDescripcion());
+
+        return tipoNotificacionMapper.toDto(tipoNotificacionRepository.save(existente));
+    }
+
+    public void eliminar(Long id) {
         if (!tipoNotificacionRepository.existsById(id)) {
-            throw new NotFoundException("Tipo de notificación", id);
+            throw new RuntimeException("Tipo de notificación no encontrada con ID: " + id);
         }
         tipoNotificacionRepository.deleteById(id);
-    }
-
-    // ============ MÉTODOS ADICIONALES ============
-    
-    @Transactional(readOnly = true)
-    public List<TipoNotificacionDTO> listarTiposActivos() {
-        return tipoNotificacionRepository.findByActivoTrue()
-                .stream()
-                .map(tipoNotificacionMapper::toDTO)
-                .collect(Collectors.toList());
-    }
-
-    @Transactional(readOnly = true)
-    public List<TipoNotificacionDTO> listarTiposQueRequierenAck() {
-        return tipoNotificacionRepository.findByRequiereAckTrue()
-                .stream()
-                .map(tipoNotificacionMapper::toDTO)
-                .collect(Collectors.toList());
-    }
-
-    @Transactional(readOnly = true)
-    public List<TipoNotificacionDTO> listarTiposActivosQueRequierenAck() {
-        return tipoNotificacionRepository.findByActivoTrueAndRequiereAckTrue()
-                .stream()
-                .map(tipoNotificacionMapper::toDTO)
-                .collect(Collectors.toList());
-    }
-
-    @Transactional(readOnly = true)
-    public boolean existePorNombre(String nombre) {
-        return tipoNotificacionRepository.findByNombre(nombre).isPresent();
-    }
-
-    @Transactional(readOnly = true)
-    public List<TipoNotificacionDTO> buscarPorNombreContaining(String nombre) {
-        return tipoNotificacionRepository.findByNombreContainingIgnoreCase(nombre)
-                .stream()
-                .map(tipoNotificacionMapper::toDTO)
-                .collect(Collectors.toList());
-    }
-
-    @Transactional
-    public TipoNotificacionDTO desactivarTipoNotificacion(Long id) {
-        TipoNotificacion tipoNotificacion = tipoNotificacionRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Tipo de notificación", id));
-        
-        tipoNotificacion.setActivo(false);
-        TipoNotificacion updated = tipoNotificacionRepository.save(tipoNotificacion);
-        return tipoNotificacionMapper.toDTO(updated);
-    }
-
-    @Transactional
-    public TipoNotificacionDTO activarTipoNotificacion(Long id) {
-        TipoNotificacion tipoNotificacion = tipoNotificacionRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Tipo de notificación", id));
-        
-        tipoNotificacion.setActivo(true);
-        TipoNotificacion updated = tipoNotificacionRepository.save(tipoNotificacion);
-        return tipoNotificacionMapper.toDTO(updated);
-    }
-
-    @Transactional
-    public TipoNotificacionDTO cambiarEstadoAck(Long id, Boolean requiereAck) {
-        TipoNotificacion tipoNotificacion = tipoNotificacionRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Tipo de notificación", id));
-        
-        tipoNotificacion.setRequiereAck(requiereAck);
-        TipoNotificacion updated = tipoNotificacionRepository.save(tipoNotificacion);
-        return tipoNotificacionMapper.toDTO(updated);
     }
 }

@@ -2,64 +2,58 @@ package com.eventos.ms_notifications.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 @Entity
 @Table(name = "prioridad")
-@Schema(description = "Entidad que representa una prioridad en el sistema")
+@Schema(description = "Entidad que representa los niveles de prioridad de las notificaciones")
 public class Prioridad {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Schema(description = "ID único de la prioridad", example = "1")
+    @Schema(description = "ID de la prioridad", example = "4", required = true)
     private Long id;
 
-    @Column(name = "nombre", nullable = false, unique = true, length = 20)
-    @Schema(description = "Nombre único de la prioridad", example = "ALTA", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotBlank(message = "El nombre es obligatorio")
+    @Size(max = 50, message = "El nombre no puede superar 50 caracteres")
+    @Schema(description = "Nombre de la prioridad (ej. ALTA, MEDIA, BAJA)", example = "URGENTE")
+    @Column(unique = true, nullable = false, length = 50)
     private String nombre;
 
-    @Column(name = "descripcion", length = 200)
-    @Schema(description = "Descripción detallada de la prioridad", example = "Atención inmediata requerida")
+    @Size(max = 255, message = "La descripción no puede superar 255 caracteres")
+    @Schema(description = "Descripción opcional de la prioridad", example = "Atención inmediata")
     private String descripcion;
 
-    @Column(name = "nivel", nullable = false)
-    @Schema(description = "Nivel jerárquico (1=alta, 2=media, 3=baja)", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
-    private Integer nivel;
-
-    @Column(name = "color_hex", length = 7)
-    @Schema(description = "Color en formato HEX", example = "#FF0000")
-    private String colorHex;
-
-    @Column(name = "activo", nullable = false)
-    @Schema(description = "Estado de la prioridad", example = "true")
-    private Boolean activo = true;
-
-    // Constructores, Getters y Setters
+    // Constructores
     public Prioridad() {}
 
-    public Prioridad(String nombre, String descripcion, Integer nivel, String colorHex, Boolean activo) {
+    public Prioridad(Long id, String nombre, String descripcion) {
+        this.id = id;
         this.nombre = nombre;
         this.descripcion = descripcion;
-        this.nivel = nivel;
-        this.colorHex = colorHex;
-        this.activo = activo;
     }
 
     // Getters y Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getId() {
+        return id;
+    }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public String getNombre() { return nombre; }
-    public void setNombre(String nombre) { this.nombre = nombre; }
+    public String getNombre() {
+        return nombre;
+    }
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
 
-    public String getDescripcion() { return descripcion; }
-    public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
-
-    public Integer getNivel() { return nivel; }
-    public void setNivel(Integer nivel) { this.nivel = nivel; }
-
-    public String getColorHex() { return colorHex; }
-    public void setColorHex(String colorHex) { this.colorHex = colorHex; }
-
-    public Boolean getActivo() { return activo; }
-    public void setActivo(Boolean activo) { this.activo = activo; }
+    public String getDescripcion() {
+        return descripcion;
+    }
+    public void setDescripcion(String descripcion) {
+        this.descripcion = descripcion;
+    }
 }
+

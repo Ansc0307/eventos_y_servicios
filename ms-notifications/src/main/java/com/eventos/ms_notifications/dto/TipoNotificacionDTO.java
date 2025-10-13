@@ -4,47 +4,56 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-@Schema(description = "DTO que representa un tipo de notificación")
+@Schema(description = "DTO que representa un tipo de notificación dentro del sistema")
 public class TipoNotificacionDTO {
 
     @Schema(description = "ID del tipo de notificación", example = "1")
     private Long id;
 
     @NotBlank(message = "El nombre es obligatorio")
-    @Size(max = 30, message = "El nombre no puede exceder los 30 caracteres")
-    @Schema(description = "Nombre único del tipo de notificación", example = "ALERTA", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Size(max = 50, message = "El nombre no puede superar 50 caracteres")
+    @Schema(
+        description = "Nombre del tipo de notificación (ej. INFORMATIVA, ALERTA, RECORDATORIO, PROMOCION o SISTEMA)",
+        example = "ALERTA",
+        required = true
+    )
     private String nombre;
 
-    @Size(max = 200, message = "La descripción no puede exceder los 200 caracteres")
-    @Schema(description = "Descripción del tipo de notificación", example = "Notificación que alerta al usuario de un evento importante")
+    @Size(max = 255, message = "La descripción no puede superar 255 caracteres")
+    @Schema(
+        description = "Descripción opcional del tipo de notificación",
+        example = "Notificación para alertar al usuario sobre un evento importante"
+    )
     private String descripcion;
 
-    @Schema(description = "Si requiere confirmación de lectura", example = "true")
-    private Boolean requiereAck = false;
+    // Constructores
+    public TipoNotificacionDTO() {}
 
-    @Size(max = 50, message = "El ícono no puede exceder los 50 caracteres")
-    @Schema(description = "Ícono representativo", example = "fa-warning")
-    private String icono;
-
-    @Schema(description = "Si el tipo está activo", example = "true")
-    private Boolean activo = true;
+    public TipoNotificacionDTO(Long id, String nombre, String descripcion) {
+        this.id = id;
+        this.nombre = nombre;
+        this.descripcion = descripcion;
+    }
 
     // Getters y Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getId() {
+        return id;
+    }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public String getNombre() { return nombre; }
-    public void setNombre(String nombre) { this.nombre = nombre; }
+    public String getNombre() {
+        return nombre;
+    }
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
 
-    public String getDescripcion() { return descripcion; }
-    public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
-
-    public Boolean getRequiereAck() { return requiereAck; }
-    public void setRequiereAck(Boolean requiereAck) { this.requiereAck = requiereAck; }
-
-    public String getIcono() { return icono; }
-    public void setIcono(String icono) { this.icono = icono; }
-
-    public Boolean getActivo() { return activo; }
-    public void setActivo(Boolean activo) { this.activo = activo; }
+    public String getDescripcion() {
+        return descripcion;
+    }
+    public void setDescripcion(String descripcion) {
+        this.descripcion = descripcion;
+    }
 }

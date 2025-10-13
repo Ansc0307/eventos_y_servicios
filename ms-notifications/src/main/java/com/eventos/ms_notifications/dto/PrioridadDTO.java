@@ -1,27 +1,32 @@
 package com.eventos.ms_notifications.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
-@Schema(description = "DTO que representa una prioridad")
+@Schema(description = "DTO que representa una prioridad dentro del sistema")
 public class PrioridadDTO {
 
     @Schema(description = "ID de la prioridad", example = "1")
     private Long id;
 
-    @Schema(description = "Nombre de la prioridad", example = "ALTA")
+    @NotBlank(message = "El nombre es obligatorio")
+    @Size(max = 50, message = "El nombre no puede superar 50 caracteres")
+    @Schema(description = "Nombre de la prioridad (ej. ALTA, MEDIA, BAJA)", example = "ALTA", required = true)
     private String nombre;
 
-    @Schema(description = "Descripción de la prioridad", example = "Atención inmediata")
+    @Size(max = 255, message = "La descripción no puede superar 255 caracteres")
+    @Schema(description = "Descripción opcional de la prioridad", example = "Atención inmediata")
     private String descripcion;
 
-    @Schema(description = "Nivel jerárquico (1=alta, 2=media, 3=baja)", example = "1")
-    private Integer nivel;
+    // Constructores
+    public PrioridadDTO() {}
 
-    @Schema(description = "Color en formato HEX", example = "#FF0000")
-    private String colorHex;
-
-    @Schema(description = "Si está activa la prioridad", example = "true")
-    private Boolean activo;
+    public PrioridadDTO(Long id, String nombre, String descripcion) {
+        this.id = id;
+        this.nombre = nombre;
+        this.descripcion = descripcion;
+    }
 
     // Getters y Setters
     public Long getId() {
@@ -43,26 +48,5 @@ public class PrioridadDTO {
     }
     public void setDescripcion(String descripcion) {
         this.descripcion = descripcion;
-    }
-
-    public Integer getNivel() {
-        return nivel;
-    }
-    public void setNivel(Integer nivel) {
-        this.nivel = nivel;
-    }
-
-    public String getColorHex() {
-        return colorHex;
-    }
-    public void setColorHex(String colorHex) {
-        this.colorHex = colorHex;
-    }
-
-    public Boolean getActivo() {
-        return activo;
-    }
-    public void setActivo(Boolean activo) {
-        this.activo = activo;
     }
 }
