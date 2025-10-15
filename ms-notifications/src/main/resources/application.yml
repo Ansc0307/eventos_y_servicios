@@ -13,7 +13,7 @@ spring:
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: update   #Usar create solo la primera vez, luego con update
+      ddl-auto: create  #Usar create solo la primera vez, luego con update
     show-sql: true
     properties:
       '[hibernate.format_sql]': true

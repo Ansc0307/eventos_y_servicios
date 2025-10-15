@@ -1,29 +1,42 @@
 package com.eventos.ms_notifications.exception;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import org.springframework.http.HttpStatus;
 
-import java.time.LocalDateTime;
-
 public class HttpErrorInfo {
-    
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    private final LocalDateTime timestamp;
-    private final String path;
-    private final HttpStatus httpStatus;
-    private final String message;
 
-    public HttpErrorInfo(HttpStatus httpStatus, String path, String message) {
-        this.timestamp = LocalDateTime.now();
-        this.httpStatus = httpStatus;
+    private final String timestamp;
+    private final String path;
+    private final String message;
+    private final int status;
+    private final String error;
+
+    public HttpErrorInfo(HttpStatus status, String path, String message) {
+        this.timestamp = ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
         this.path = path;
+        this.status = status.value();
+        this.error = status.getReasonPhrase();
         this.message = message;
     }
 
-    // Getters
-    public LocalDateTime getTimestamp() { return timestamp; }
-    public String getPath() { return path; }
-    public int getStatus() { return httpStatus.value(); }
-    public String getError() { return httpStatus.getReasonPhrase(); }
-    public String getMessage() { return message; }
+    public String getTimestamp() {
+        return timestamp;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public String getError() {
+        return error;
+    }
+
+    public String getMessage() {
+        return message;
+    }
 }

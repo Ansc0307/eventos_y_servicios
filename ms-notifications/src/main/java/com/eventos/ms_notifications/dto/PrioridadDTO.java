@@ -7,12 +7,12 @@ import jakarta.validation.constraints.Size;
 @Schema(description = "DTO que representa una prioridad dentro del sistema")
 public class PrioridadDTO {
 
-    @Schema(description = "ID de la prioridad", example = "1")
+    @Schema(description = "ID de la prioridad", example = "4")
     private Long id;
 
     @NotBlank(message = "El nombre es obligatorio")
     @Size(max = 50, message = "El nombre no puede superar 50 caracteres")
-    @Schema(description = "Nombre de la prioridad (ej. ALTA, MEDIA, BAJA)", example = "ALTA", required = true)
+    @Schema(description = "Nombre de la prioridad (ej. ALTA, MEDIA, BAJA, etc.)", example = "URGENTE", required = true)
     private String nombre;
 
     @Size(max = 255, message = "La descripción no puede superar 255 caracteres")

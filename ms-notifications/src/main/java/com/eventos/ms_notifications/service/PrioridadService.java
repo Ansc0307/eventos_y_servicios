@@ -1,6 +1,9 @@
 package com.eventos.ms_notifications.service;
 
 import com.eventos.ms_notifications.dto.PrioridadDTO;
+import com.eventos.ms_notifications.exception.ConflictException;
+import com.eventos.ms_notifications.exception.InvalidInputException;
+import com.eventos.ms_notifications.exception.NotFoundException;
 import com.eventos.ms_notifications.mapper.PrioridadMapper;
 import com.eventos.ms_notifications.model.Prioridad;
 import com.eventos.ms_notifications.repository.PrioridadRepository;
@@ -31,21 +34,30 @@ public class PrioridadService {
 
     public PrioridadDTO obtenerPorId(Long id) {
         Prioridad prioridad = prioridadRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Prioridad no encontrada con ID: " + id));
+                .orElseThrow(() -> new NotFoundException("Prioridad no encontrada con ID: " + id));
         return prioridadMapper.toDto(prioridad);
     }
 
     public PrioridadDTO crear(PrioridadDTO prioridadDTO) {
-        if (prioridadRepository.existsByNombreIgnoreCase(prioridadDTO.getNombre())) {
-            throw new RuntimeException("Ya existe una prioridad con ese nombre");
+        if (prioridadDTO.getNombre() == null || prioridadDTO.getNombre().isBlank()) {
+            throw new InvalidInputException("El nombre de la prioridad no puede estar vacío.");
         }
+
+        if (prioridadRepository.existsByNombreIgnoreCase(prioridadDTO.getNombre())) {
+            throw new ConflictException("Ya existe una prioridad con el nombre '" + prioridadDTO.getNombre() + "'.");
+        }
+
         Prioridad prioridad = prioridadMapper.toEntity(prioridadDTO);
         return prioridadMapper.toDto(prioridadRepository.save(prioridad));
     }
 
     public PrioridadDTO actualizar(Long id, PrioridadDTO prioridadDTO) {
         Prioridad existente = prioridadRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Prioridad no encontrada con ID: " + id));
+                .orElseThrow(() -> new NotFoundException("No se encontró la prioridad con ID: " + id));
+
+        if (prioridadDTO.getNombre() == null || prioridadDTO.getNombre().isBlank()) {
+            throw new InvalidInputException("El nombre no puede estar vacío.");
+        }
 
         existente.setNombre(prioridadDTO.getNombre());
         existente.setDescripcion(prioridadDTO.getDescripcion());
@@ -55,7 +67,7 @@ public class PrioridadService {
 
     public void eliminar(Long id) {
         if (!prioridadRepository.existsById(id)) {
-            throw new RuntimeException("No existe la prioridad con ID: " + id);
+            throw new NotFoundException("No existe la prioridad con ID: " + id);
         }
         prioridadRepository.deleteById(id);
     }
