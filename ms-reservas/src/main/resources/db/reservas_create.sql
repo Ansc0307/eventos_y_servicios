@@ -4,7 +4,7 @@
 -- tables
 -- Table: no_disponibilidad
 CREATE TABLE no_disponibilidad (
-    id_no_disponiblilidad SERIAL  ,
+    id_no_disponiblilidad BIGSERIAL  ,
     id_oferta int  ,
     motivo varchar(100)  ,
     fecha_inicio timestamp  ,
@@ -27,7 +27,7 @@ CREATE TABLE reservas (
 
 -- Table: solicitudes
 CREATE TABLE solicitudes (
-    id_solicitud SERIAL  ,
+    id_solicitud BIGSERIAL  ,
     fecha_solicitud timestamp  ,
     estado_solicitud varchar(100)  ,
     id_organizador int  ,
