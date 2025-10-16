@@ -18,6 +18,6 @@ public class CategoriaDTO {
     
     @NotBlank(message = "El detalle no puede estar vacío")
     @Size(max = 50, message = "El detalle no puede exceder 50 caracteres")
-    @Schema(description = "Nombre o descripción de la categoría", example = "Electrónica", required = true)
+    @Schema(description = "Nombre o descripción de la categoría", example = "Salón de eventos", required = true)
     private String detalle;
 }

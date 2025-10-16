@@ -29,7 +29,7 @@ public class OfertaRequestDTO {
     private Long idCategoria;
     
     @Size(max = 400, message = "La descripción no puede exceder 400 caracteres")
-    @Schema(description = "Descripción detallada de la oferta", example = "Laptop HP con procesador Intel i5, 8GB RAM, 256GB SSD")
+    @Schema(description = "Descripción detallada de la oferta", example = "Salón de eventos grande para 500 persons")
     private String descripcion;
     
     @NotNull(message = "El precio base es obligatorio")
@@ -37,8 +37,8 @@ public class OfertaRequestDTO {
     @Schema(description = "Precio base del producto", example = "899.99", required = true)
     private BigDecimal precioBase;
     
-    @Pattern(regexp = "borrador|publicado|archivado", message = "Estado inválido")
-    @Schema(description = "Estado de la oferta", example = "publicado", allowableValues = {"borrador", "publicado", "archivado"})
+    @Pattern(regexp = "publicado|archivado", message = "Estado inválido")
+    @Schema(description = "Estado de la oferta", example = "publicado", allowableValues = {"publicado", "archivado"})
     private String estado;
     
     @Schema(description = "Indica si la oferta está activa", example = "true")

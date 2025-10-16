@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:13
+    container_name: eventos_postgres
+    restart: always
+    environment:
+      POSTGRES_DB: ms-ofertas
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      # Si quieres ejecutar un script SQL inicial, descomenta la línea siguiente:
+      # - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - eventos-net
+
+  ofertas-service:
+    build: .
+    container_name: ofertas_service
+    restart: always
+    ports:
+      - "8083:8083"
+    depends_on:
+      - postgres
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ms-ofertas
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: admin
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      #SPRING_JPA_HIBERNATE_DDL_AUTO: none
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
+    networks:
+      - eventos-net
+
+networks:
+  eventos-net:
+    driver: bridge
+
+volumes:
+  postgres_data:
