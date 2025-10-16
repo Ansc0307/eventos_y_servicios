@@ -5,30 +5,31 @@ import com.eventos.ms_reservas.model.Solicitud;
 
 public class SolicitudMapper {
 
-    public static SolicitudDTO toDTO(Solicitud solicitud) {
-         if (solicitud == null) {
-            return null;
-        }
-        return new SolicitudDTO(
-                solicitud.getId(),
-                solicitud.getNombreRecurso(),
-                solicitud.getFechaInicio(),
-                solicitud.getFechaFin(),
-                solicitud.getEstado()
-        );
+    public static SolicitudDTO toDTO(Solicitud entidad) {
+        if (entidad == null) return null;
+
+        SolicitudDTO dto = new SolicitudDTO();
+        dto.setIdSolicitud(entidad.getIdSolicitud());
+        dto.setFechaSolicitud(entidad.getFechaSolicitud());
+        dto.setEstadoSolicitud(entidad.getEstadoSolicitud());
+        dto.setIdOrganizador(entidad.getIdOrganizador());
+        dto.setIdProovedor(entidad.getIdProovedor());
+        dto.setIdOferta(entidad.getIdOferta());
+
+        return dto;
     }
 
     public static Solicitud toEntity(SolicitudDTO dto) {
-         if (dto == null) {
-            return null;
-        }
-        
-        Solicitud solicitud = new Solicitud();
-        solicitud.setId(dto.getId());
-        solicitud.setNombreRecurso(dto.getNombreRecurso());
-        solicitud.setFechaInicio(dto.getFechaInicio());
-        solicitud.setFechaFin(dto.getFechaFin());
-        solicitud.setEstado(dto.getEstado());
-        return solicitud;
+        if (dto == null) return null;
+
+        Solicitud entidad = new Solicitud();
+        entidad.setIdSolicitud(dto.getIdSolicitud());
+        entidad.setFechaSolicitud(dto.getFechaSolicitud());
+        entidad.setEstadoSolicitud(dto.getEstadoSolicitud());
+        entidad.setIdOrganizador(dto.getIdOrganizador());
+        entidad.setIdProovedor(dto.getIdProovedor());
+        entidad.setIdOferta(dto.getIdOferta());
+
+        return entidad;
     }
 }

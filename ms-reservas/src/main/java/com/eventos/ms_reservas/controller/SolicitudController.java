@@ -2,7 +2,6 @@ package com.eventos.ms_reservas.controller;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,8 +11,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import jakarta.validation.Valid;
-
 import com.eventos.ms_reservas.dto.SolicitudDTO;
 import com.eventos.ms_reservas.service.SolicitudService;
 
@@ -22,7 +19,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/v1/solicitudes")
@@ -41,14 +38,14 @@ public class SolicitudController {
     @Operation(summary = "Obtener solicitud por ID", description = "Devuelve la información de una solicitud por su ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Solicitud encontrada"),
-            @ApiResponse(responseCode = "404", description = "Solicitud no encontrada"),
-            @ApiResponse(responseCode = "409", description = "Solicitud aún pendiente")
+            @ApiResponse(responseCode = "404", description = "Solicitud no encontrada")
     })
     public SolicitudDTO getSolicitud(
             @Parameter(description = "ID de la solicitud", required = true, example = "1")
-            @PathVariable int id) {
+            @PathVariable Long id) {
         LOGGER.info("Obteniendo solicitud con id: {}", id);
-        return solicitudService.obtenerPorId(id);
+        return solicitudService.obtenerPorId(id)
+                .orElseThrow(() -> new RuntimeException("Solicitud no encontrada con ID: " + id));
     }
 
     @PostMapping
@@ -68,7 +65,7 @@ public class SolicitudController {
             @ApiResponse(responseCode = "200", description = "Solicitud eliminada correctamente"),
             @ApiResponse(responseCode = "404", description = "Solicitud no encontrada")
     })
-    public void deleteSolicitud(@PathVariable int id) {
+    public void deleteSolicitud(@PathVariable Long id) {
         LOGGER.debug("Eliminando solicitud con id: {}", id);
         solicitudService.eliminarSolicitud(id);
     }

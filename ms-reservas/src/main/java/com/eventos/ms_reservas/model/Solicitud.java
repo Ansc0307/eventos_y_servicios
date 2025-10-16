@@ -2,63 +2,83 @@ package com.eventos.ms_reservas.model;
 
 import java.time.LocalDateTime;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "solicitudes")
 public class Solicitud {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_solicitud")
+    private Long idSolicitud;
 
+    @Column(name = "fecha_solicitud", nullable = false)
+    private LocalDateTime fechaSolicitud;
 
-    private String id;
-    private String nombreRecurso;    // antes descripcion
-    private LocalDateTime fechaInicio;
-    private LocalDateTime fechaFin;
-    private String estado;           // "pendiente", "aprobada", "rechazada"
+    @Column(name = "estado_solicitud", length = 100, nullable = false)
+    private String estadoSolicitud;
 
-    public Solicitud() {}
+    @Column(name = "id_organizador", nullable = false)
+    private Integer idOrganizador;
 
-    public Solicitud(String id, String nombreRecurso, LocalDateTime fechaInicio, LocalDateTime fechaFin, String estado) {
-        this.id = id;
-        this.nombreRecurso = nombreRecurso;
-        this.fechaInicio = fechaInicio;
-        this.fechaFin = fechaFin;
-        this.estado = estado;
+    @Column(name = "id_proovedor", nullable = false)
+    private Integer idProovedor;
+
+    @Column(name = "id_oferta", nullable = false)
+    private Integer idOferta;
+
+    // Getters y Setters
+    public Long getIdSolicitud() {
+        return idSolicitud;
     }
 
-    public String getId() {
-        return id;
+    public void setIdSolicitud(Long idSolicitud) {
+        this.idSolicitud = idSolicitud;
     }
 
-    public String getNombreRecurso() {
-        return nombreRecurso;
+    public LocalDateTime getFechaSolicitud() {
+        return fechaSolicitud;
     }
 
-    public LocalDateTime getFechaInicio() {
-        return fechaInicio;
+    public void setFechaSolicitud(LocalDateTime fechaSolicitud) {
+        this.fechaSolicitud = fechaSolicitud;
     }
 
-    public LocalDateTime getFechaFin() {
-        return fechaFin;
+    public String getEstadoSolicitud() {
+        return estadoSolicitud;
     }
 
-    public String getEstado() {
-        return estado;
+    public void setEstadoSolicitud(String estadoSolicitud) {
+        this.estadoSolicitud = estadoSolicitud;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public Integer getIdOrganizador() {
+        return idOrganizador;
     }
 
-    public void setNombreRecurso(String nombreRecurso) {
-        this.nombreRecurso = nombreRecurso;
+    public void setIdOrganizador(Integer idOrganizador) {
+        this.idOrganizador = idOrganizador;
     }
 
-    public void setFechaInicio(LocalDateTime fechaInicio) {
-        this.fechaInicio = fechaInicio;
+    public Integer getIdProovedor() {
+        return idProovedor;
     }
 
-    public void setFechaFin(LocalDateTime fechaFin) {
-        this.fechaFin = fechaFin;
+    public void setIdProovedor(Integer idProovedor) {
+        this.idProovedor = idProovedor;
     }
 
-    public void setEstado(String estado) {
-        this.estado = estado;
+    public Integer getIdOferta() {
+        return idOferta;
+    }
+
+    public void setIdOferta(Integer idOferta) {
+        this.idOferta = idOferta;
     }
 }

@@ -1,5 +1,6 @@
 package com.eventos.ms_reservas.exception;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -8,9 +9,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.support.WebExchangeBindException;
+
 import reactor.core.publisher.Mono;
 
 /**
@@ -58,38 +60,57 @@ public class GlobalExceptionHandler {
         return Mono.just(new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR));
     }
 
-    // ---------- Disponibles ----------
-    @ExceptionHandler(DisponibleNotFoundException.class)
-    public Mono<ResponseEntity<Map<String, Object>>> handleDisponibleNotFound(DisponibleNotFoundException ex) {
-        LOG.error("Error en disponibilidad: {}", ex.getMessage());
+    @ExceptionHandler(NoDisponibleNotFoundException.class)
+    public Mono<ResponseEntity<Map<String, Object>>> handleNoDisponibleNotFound(NoDisponibleNotFoundException ex) {
+        LOG.error("NoDisponible no encontrado: {}", ex.getMessage());
         Map<String, Object> error = new HashMap<>();
         error.put("error", ex.getMessage());
-        error.put("path", "/v1/disponibles/" + ex.getId());
+        error.put("path", "/v1/no-disponibles/" + ex.getId());
         return Mono.just(ResponseEntity.status(HttpStatus.NOT_FOUND).body(error));
     }
 
-    @ExceptionHandler(FechaInvalidaException.class)
-    public Mono<ResponseEntity<Map<String, Object>>> handleFechaInvalida(FechaInvalidaException ex) {
-        LOG.error("Error en fechas: {}", ex.getMessage());
+    @ExceptionHandler(NoDisponibleOcupadoException.class)
+    public Mono<ResponseEntity<Map<String, Object>>> handleNoDisponibleOcupado(NoDisponibleOcupadoException ex) {
+        LOG.error("NoDisponible ocupado: {}", ex.getMessage());
         Map<String, Object> error = new HashMap<>();
         error.put("error", ex.getMessage());
-        error.put("path", "/v1/disponibles/" + ex.getId());
+        error.put("path", "/v1/no-disponibles/" + ex.getId());
         return Mono.just(ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(error));
     }
 
-    @ExceptionHandler(DisponibleOcupadoException.class)
-    public Mono<ResponseEntity<Map<String, Object>>> handleDisponibleOcupado(DisponibleOcupadoException ex) {
-        LOG.error("Error en estado de disponibilidad: {}", ex.getMessage());
-        Map<String, Object> error = new HashMap<>();
-        error.put("error", ex.getMessage());
-        error.put("path", "/v1/disponibles/" + ex.getId());
-        return Mono.just(ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(error));
+  
+
+    @ExceptionHandler(NoDisponibleNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleNotFound(NoDisponibleNotFoundException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.NOT_FOUND.value());
+        body.put("error", ex.getMessage());
+        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(FechaInvalidaException.class)
+    public ResponseEntity<Map<String, Object>> handleFechaInvalida(FechaInvalidaException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.UNPROCESSABLE_ENTITY.value());
+        body.put("error", ex.getMessage());
+        return new ResponseEntity<>(body, HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Map<String, Object>> handleGeneric(Exception ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+        body.put("error", ex.getMessage());
+        return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     // ---------- Solicitudes ----------
     @ExceptionHandler(SolicitudNotFoundException.class)
     public Mono<ResponseEntity<Map<String, Object>>> handleSolicitudNotFound(SolicitudNotFoundException ex) {
-        LOG.error("Error en solicitud: {}", ex.getMessage());
+        LOG.error("Solicitud no encontrada: {}", ex.getMessage());
         Map<String, Object> error = new HashMap<>();
         error.put("error", ex.getMessage());
         error.put("path", "/v1/solicitudes/" + ex.getId());
