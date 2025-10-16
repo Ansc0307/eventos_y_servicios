@@ -71,8 +71,8 @@ public class PrioridadController {
         @ApiResponse(responseCode = "204", description = "Prioridad eliminada correctamente"),
         @ApiResponse(responseCode = "404", description = "Prioridad no encontrada")
     })
-    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
+    public ResponseEntity<String> eliminar(@PathVariable Long id) {
         prioridadService.eliminar(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok("Prioridad con ID " + id + " eliminada correctamente");
     }
 }

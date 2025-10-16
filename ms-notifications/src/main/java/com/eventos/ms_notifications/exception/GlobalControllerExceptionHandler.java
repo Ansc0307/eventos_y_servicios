@@ -10,6 +10,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.bind.support.WebExchangeBindException;
+
+import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalControllerExceptionHandler {
@@ -40,6 +43,16 @@ public class GlobalControllerExceptionHandler {
         return createHttpErrorInfo(BAD_REQUEST, request, ex);
     }
 
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(WebExchangeBindException.class)
+    public @ResponseBody HttpErrorInfo handleValidationException(ServerHttpRequest request, WebExchangeBindException ex) {
+        String errores = ex.getFieldErrors().stream()
+                .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                .collect(Collectors.joining("; "));
+
+        return new HttpErrorInfo(HttpStatus.BAD_REQUEST, request.getPath().pathWithinApplication().value(), errores);
+    }
+
     @ResponseStatus(INTERNAL_SERVER_ERROR)
     @ExceptionHandler(Exception.class)
     public @ResponseBody HttpErrorInfo handleGenericException(ServerHttpRequest request, Exception ex) {
@@ -49,7 +62,7 @@ public class GlobalControllerExceptionHandler {
     private HttpErrorInfo createHttpErrorInfo(HttpStatus status, ServerHttpRequest request, Exception ex) {
         final String path = request.getPath().pathWithinApplication().value();
         final String message = ex.getMessage() != null ? ex.getMessage() : "Error interno del servidor";
-        LOGGER.error("❌ Error HTTP {} en {}: {}", status, path, message);
+        LOGGER.error("[{}] Error HTTP {} en {}: {}", ex.getClass().getSimpleName(), status, path, message);
         return new HttpErrorInfo(status, path, message);
     }
 }

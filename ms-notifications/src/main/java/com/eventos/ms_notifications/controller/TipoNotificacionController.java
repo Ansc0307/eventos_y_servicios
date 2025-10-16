@@ -73,8 +73,8 @@ public class TipoNotificacionController {
         @ApiResponse(responseCode = "204", description = "Tipo de notificación eliminado correctamente"),
         @ApiResponse(responseCode = "404", description = "Tipo de notificación no encontrado")
     })
-    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
+    public ResponseEntity<String> eliminar(@PathVariable Long id) {
         tipoNotificacionService.eliminar(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok("Tipo de notificación con ID " + id + " eliminada correctamente");
     }
 }
