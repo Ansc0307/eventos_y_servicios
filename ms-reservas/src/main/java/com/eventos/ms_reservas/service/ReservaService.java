@@ -82,6 +82,16 @@ public class ReservaService {
         return reservaRepository.findByFechaReservaInicioBetween(inicio, fin);
     }
 
+    @Transactional(readOnly = true)
+    public List<Reserva> getReservasConflictivas(LocalDateTime inicio, LocalDateTime fin) {
+        return reservaRepository.findReservasConflictivas(inicio, fin);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Reserva> getReservasConflictivasNative(LocalDateTime inicio, LocalDateTime fin) {
+        return reservaRepository.findReservasConflictivasNative(inicio, fin);
+    }
+
     private void validateNoConflicts(LocalDateTime inicio, LocalDateTime fin) {
         List<Reserva> conflictivas = reservaRepository.findReservasConflictivas(inicio, fin);
         if (!conflictivas.isEmpty()) {
