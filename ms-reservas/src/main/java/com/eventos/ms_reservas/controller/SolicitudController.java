@@ -42,7 +42,7 @@ public class SolicitudController {
     })
     public SolicitudDTO getSolicitud(
             @Parameter(description = "ID de la solicitud", required = true, example = "1")
-            @PathVariable Long id) {
+            @PathVariable Integer id) {
         LOGGER.info("Obteniendo solicitud con id: {}", id);
         return solicitudService.obtenerPorId(id)
                 .orElseThrow(() -> new RuntimeException("Solicitud no encontrada con ID: " + id));
@@ -65,7 +65,7 @@ public class SolicitudController {
             @ApiResponse(responseCode = "200", description = "Solicitud eliminada correctamente"),
             @ApiResponse(responseCode = "404", description = "Solicitud no encontrada")
     })
-    public void deleteSolicitud(@PathVariable Long id) {
+    public void deleteSolicitud(@PathVariable Integer id) {
         LOGGER.debug("Eliminando solicitud con id: {}", id);
         solicitudService.eliminarSolicitud(id);
     }

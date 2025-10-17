@@ -16,7 +16,7 @@ public class Solicitud {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_solicitud")
-    private Long idSolicitud;
+    private Integer idSolicitud;
 
     @Column(name = "fecha_solicitud", nullable = false)
     private LocalDateTime fechaSolicitud;
@@ -34,11 +34,11 @@ public class Solicitud {
     private Integer idOferta;
 
     // Getters y Setters
-    public Long getIdSolicitud() {
+    public Integer getIdSolicitud() {
         return idSolicitud;
     }
 
-    public void setIdSolicitud(Long idSolicitud) {
+    public void setIdSolicitud(Integer idSolicitud) {
         this.idSolicitud = idSolicitud;
     }
 

@@ -29,7 +29,7 @@ class SolicitudControllerTest {
 
     @Test
     void crudSolicitud() {
-        Long solicitudId = 1L;
+        Integer solicitudId = 1;
         LocalDateTime now = LocalDateTime.now();
 
         // Crear DTOs de prueba
@@ -88,7 +88,7 @@ class SolicitudControllerTest {
 
     @Test
     void testErrorResponseOnUpdateNonExistent() {
-        Long nonExistentId = 999L;
+        Integer nonExistentId = 999;
         LocalDateTime now = LocalDateTime.now();
 
         // Mock service para devolver vacío
@@ -104,7 +104,7 @@ class SolicitudControllerTest {
 
     @Test
     void testErrorResponseOnDeleteNonExistent() {
-        Long nonExistentId = 888L;
+        Integer nonExistentId = 888;
 
         // Mock service para devolver false
         given(solicitudService.eliminarSolicitud(eq(nonExistentId)))

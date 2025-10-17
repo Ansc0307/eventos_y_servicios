@@ -37,13 +37,13 @@ public class SolicitudService {
     }
 
     // Obtener por ID
-    public Optional<SolicitudDTO> obtenerPorId(Long id) {
+    public Optional<SolicitudDTO> obtenerPorId(Integer id) {
         return solicitudRepository.findById(id.intValue()) // conversión necesaria
                 .map(SolicitudMapper::toDTO);
     }
 
     // Actualizar
-    public Optional<SolicitudDTO> actualizarSolicitud(Long id, SolicitudDTO solicitudDTO) {
+    public Optional<SolicitudDTO> actualizarSolicitud(Integer id, SolicitudDTO solicitudDTO) {
         return solicitudRepository.findById(id.intValue())
                 .map(solicitudExistente -> {
                     Solicitud solicitud = SolicitudMapper.toEntity(solicitudDTO);
@@ -54,7 +54,7 @@ public class SolicitudService {
     }
 
     // Eliminar
-    public boolean eliminarSolicitud(Long id) {
+    public boolean eliminarSolicitud(Integer id) {
         if (solicitudRepository.existsById(id.intValue())) {
             solicitudRepository.deleteById(id.intValue());
             return true;
@@ -71,7 +71,7 @@ public class SolicitudService {
                 .collect(Collectors.toList());
     }
 
-    public Optional<SolicitudDTO> obtenerPorIdOferta(Long idOferta) {
+    public Optional<SolicitudDTO> obtenerPorIdOferta(Integer idOferta) {
         return solicitudRepository.findByIdOferta(idOferta.intValue())
                 .map(SolicitudMapper::toDTO);
     }

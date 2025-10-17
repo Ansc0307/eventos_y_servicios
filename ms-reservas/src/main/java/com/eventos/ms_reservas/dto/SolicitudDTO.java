@@ -11,7 +11,7 @@ import jakarta.validation.constraints.Positive;
 public class SolicitudDTO {
 
     @Schema(description = "Identificador único de la solicitud", example = "1")
-    private Long idSolicitud;
+    private Integer idSolicitud;
 
     @NotNull(message = "La fecha de la solicitud no puede ser nula")
     @PastOrPresent(message = "La fecha de la solicitud no puede estar en el futuro")
@@ -41,7 +41,7 @@ public class SolicitudDTO {
     public SolicitudDTO() {}
 
     // Constructor con campos
-    public SolicitudDTO(Long idSolicitud, LocalDateTime fechaSolicitud, String estadoSolicitud, Integer idOrganizador, Integer idProovedor, Integer idOferta) {
+    public SolicitudDTO(Integer idSolicitud, LocalDateTime fechaSolicitud, String estadoSolicitud, Integer idOrganizador, Integer idProovedor, Integer idOferta) {
         this.idSolicitud = idSolicitud;
         this.fechaSolicitud = fechaSolicitud;
         this.estadoSolicitud = estadoSolicitud;
@@ -51,8 +51,8 @@ public class SolicitudDTO {
     }
 
     // Getters y Setters
-    public Long getIdSolicitud() { return idSolicitud; }
-    public void setIdSolicitud(Long idSolicitud) { this.idSolicitud = idSolicitud; }
+    public Integer getIdSolicitud() { return idSolicitud; }
+    public void setIdSolicitud(Integer idSolicitud) { this.idSolicitud = idSolicitud; }
 
     public LocalDateTime getFechaSolicitud() { return fechaSolicitud; }
     public void setFechaSolicitud(LocalDateTime fechaSolicitud) { this.fechaSolicitud = fechaSolicitud; }

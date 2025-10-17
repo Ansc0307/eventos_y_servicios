@@ -5,14 +5,14 @@ package com.eventos.ms_reservas.exception;
  */
 public class SolicitudPendienteException extends RuntimeException {
 
-    private final Long id;
+    private final Integer id;
 
-    public SolicitudPendienteException(Long id, String message) {
+    public SolicitudPendienteException(Integer id, String message) {
         super(message);
         this.id = id;
     }
 
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 }
