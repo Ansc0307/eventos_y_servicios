@@ -13,10 +13,15 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      # Si quieres ejecutar un script SQL inicial, descomenta la línea siguiente:
+      # Si quieres ejecutar un script SQL inicial
       # - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - eventos-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   ofertas-service:
     build: .
@@ -27,6 +32,7 @@ services:
     depends_on:
       - postgres
     environment:
+    #apunta al contenedor de postgres, no al localhost
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ms-ofertas
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: admin
@@ -34,8 +40,13 @@ services:
       #SPRING_JPA_HIBERNATE_DDL_AUTO: none
       SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
     networks:
+    #Red compartida
       - eventos-net
-
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8083/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 networks:
   eventos-net:
     driver: bridge

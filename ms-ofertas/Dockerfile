@@ -17,7 +17,7 @@ WORKDIR /app
 # Copiar el JAR desde la etapa anterior
 COPY --from=build /app/target/*.jar app.jar
 
-# Puerto expuesto (mismo que uses en application.properties)
+# Puerto expuesto
 EXPOSE 8083
 
 # Comando para ejecutar
