@@ -4,10 +4,13 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,10 +19,6 @@ import com.eventos.ms_reservas.dto.NoDisponibilidadDTO;
 import com.eventos.ms_reservas.exception.NoDisponibleNotFoundException;
 import com.eventos.ms_reservas.service.NoDisponibilidadService;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
@@ -35,50 +34,54 @@ public class NoDisponibilidadController {
         this.service = service;
     }
 
+    // ✅ GET todos los registros
+    @GetMapping
+    public ResponseEntity<List<NoDisponibilidadDTO>> getAll() {
+        LOGGER.info("Listando todas las no disponibilidades");
+        return ResponseEntity.ok(service.obtenerTodas());
+    }
+
+    // ✅ GET por ID
     @GetMapping("/{id}")
-    @Operation(summary = "Obtener registro de no disponibilidad por ID")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Registro encontrado"),
-            @ApiResponse(responseCode = "404", description = "No disponibilidad no encontrada")
-    })
-    public NoDisponibilidadDTO getNoDisponibilidad(
-            @Parameter(description = "ID del registro de no disponibilidad", example = "1")
-            @PathVariable Long id) {
+    public ResponseEntity<NoDisponibilidadDTO> getNoDisponibilidad(@PathVariable Long id) {
         LOGGER.info("Buscando no disponibilidad con id: {}", id);
         return service.obtenerPorId(id)
+                .map(ResponseEntity::ok)
                 .orElseThrow(() -> new NoDisponibleNotFoundException(id,
                         "No se encontró la no disponibilidad con ID: " + id));
     }
 
+    // ✅ GET por ID de oferta
     @GetMapping("/oferta/{idOferta}")
-    @Operation(summary = "Listar registros de no disponibilidad por ID de oferta")
-    public List<NoDisponibilidadDTO> getByIdOferta(
-            @Parameter(description = "ID de la oferta", example = "303")
-            @PathVariable Integer idOferta) {
+    public ResponseEntity<List<NoDisponibilidadDTO>> getByIdOferta(@PathVariable Integer idOferta) {
         LOGGER.info("Listando no disponibilidades de la oferta: {}", idOferta);
-        return service.obtenerPorIdOferta(idOferta);
+        return ResponseEntity.ok(service.obtenerPorIdOferta(idOferta));
     }
 
+    // ✅ POST
     @PostMapping
-    @Operation(summary = "Registrar nueva no disponibilidad")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "No disponibilidad registrada correctamente"),
-            @ApiResponse(responseCode = "400", description = "Datos inválidos"),
-            @ApiResponse(responseCode = "422", description = "Fecha de inicio posterior a fecha fin")
-    })
-    public NoDisponibilidadDTO createNoDisponibilidad(@Valid @RequestBody NoDisponibilidadDTO dto) {
+    public ResponseEntity<NoDisponibilidadDTO> createNoDisponibilidad(@Valid @RequestBody NoDisponibilidadDTO dto) {
         LOGGER.debug("Creando registro de no disponibilidad: {}", dto);
-        return service.crearNoDisponible(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.crearNoDisponible(dto));
     }
 
+    // ✅ PUT
+    @PutMapping("/{id}")
+    public ResponseEntity<NoDisponibilidadDTO> updateNoDisponibilidad(@PathVariable Long id,
+                                                                     @Valid @RequestBody NoDisponibilidadDTO dto) {
+        LOGGER.debug("Actualizando no disponibilidad con id {}: {}", id, dto);
+        NoDisponibilidadDTO actualizado = service.actualizar(id, dto);
+        if (actualizado == null) {
+            throw new NoDisponibleNotFoundException(id, "No se encontró la no disponibilidad con ID: " + id);
+        }
+        return ResponseEntity.ok(actualizado);
+    }
+
+    // ✅ DELETE
     @DeleteMapping("/{id}")
-    @Operation(summary = "Eliminar registro de no disponibilidad")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Registro eliminado"),
-            @ApiResponse(responseCode = "404", description = "No disponibilidad no encontrada")
-    })
-    public void deleteNoDisponibilidad(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteNoDisponibilidad(@PathVariable Long id) {
         LOGGER.debug("Eliminando registro de no disponibilidad con id: {}", id);
         service.eliminarNoDisponible(id);
+        return ResponseEntity.ok().build();
     }
 }
