@@ -3,6 +3,10 @@ package com.eventos.ms_reservas.controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
+import java.util.List;
+
+import com.eventos.ms_reservas.dto.ReservaDTO;
+import com.eventos.ms_reservas.model.Reserva;
 import jakarta.validation.Valid;
 
 import com.eventos.ms_reservas.dto.ReservaDTO;
@@ -95,5 +99,70 @@ public class ReservaController {
             throw new ReservaNotFoundException(String.valueOf(id), "Reserva no encontrada: " + id);
         }
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Buscar reservas conflictivas", description = "Devuelve reservas que se solapan con el rango proporcionado")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Lista de reservas conflictivas"),
+        @ApiResponse(responseCode = "400", description = "Parámetros inválidos")
+    })
+    @GetMapping("/conflictivas")
+    public ResponseEntity<List<ReservaDTO>> buscarConflictivas(
+        @RequestParam("inicio") String inicioStr,
+        @RequestParam("fin") String finStr
+    ) {
+        try {
+            java.time.LocalDateTime inicio = java.time.LocalDateTime.parse(inicioStr);
+            java.time.LocalDateTime fin = java.time.LocalDateTime.parse(finStr);
+            List<Reserva> conflictivas = reservaService.getReservasEnRango(inicio, fin);
+            List<ReservaDTO> dtoList = conflictivas.stream().map(ReservaMapper::toDTO).toList();
+            return ResponseEntity.ok(dtoList);
+        } catch (java.time.format.DateTimeParseException e) {
+            throw new IllegalArgumentException("Formato de fecha inválido. Use ISO_LOCAL_DATE_TIME, por ejemplo: 2025-10-17T14:30:00");
+        }
+    }
+
+    @Operation(summary = "Listar todas las reservas", description = "Devuelve todas las reservas")
+    @GetMapping
+    public ResponseEntity<List<ReservaDTO>> listarReservas() {
+        List<Reserva> all = reservaService.getAll();
+        List<ReservaDTO> dtoList = all.stream().map(ReservaMapper::toDTO).toList();
+        return ResponseEntity.ok(dtoList);
+    }
+
+    @GetMapping("/estado/{estado}")
+    public ResponseEntity<List<ReservaDTO>> listarPorEstado(@PathVariable String estado) {
+        List<Reserva> list = reservaService.getByEstado(estado);
+        return ResponseEntity.ok(list.stream().map(ReservaMapper::toDTO).toList());
+    }
+
+    @GetMapping("/solicitud/{idSolicitud}")
+    public ResponseEntity<List<ReservaDTO>> listarPorSolicitud(@PathVariable Integer idSolicitud) {
+        List<Reserva> list = reservaService.getByIdSolicitud(idSolicitud);
+        return ResponseEntity.ok(list.stream().map(ReservaMapper::toDTO).toList());
+    }
+
+    @GetMapping("/rango")
+    public ResponseEntity<List<ReservaDTO>> listarPorRango(@RequestParam("inicio") String inicioStr, @RequestParam("fin") String finStr) {
+        try {
+            java.time.LocalDateTime inicio = java.time.LocalDateTime.parse(inicioStr);
+            java.time.LocalDateTime fin = java.time.LocalDateTime.parse(finStr);
+            List<Reserva> list = reservaService.getReservasEnRango(inicio, fin);
+            return ResponseEntity.ok(list.stream().map(ReservaMapper::toDTO).toList());
+        } catch (java.time.format.DateTimeParseException e) {
+            throw new IllegalArgumentException("Formato de fecha inválido. Use ISO_LOCAL_DATE_TIME, por ejemplo: 2025-10-17T14:30:00");
+        }
+    }
+
+    @GetMapping("/conflictivas/native")
+    public ResponseEntity<List<ReservaDTO>> buscarConflictivasNative(@RequestParam("inicio") String inicioStr, @RequestParam("fin") String finStr) {
+        try {
+            java.time.LocalDateTime inicio = java.time.LocalDateTime.parse(inicioStr);
+            java.time.LocalDateTime fin = java.time.LocalDateTime.parse(finStr);
+            List<Reserva> list = reservaService.getReservasConflictivasNative(inicio, fin);
+            return ResponseEntity.ok(list.stream().map(ReservaMapper::toDTO).toList());
+        } catch (java.time.format.DateTimeParseException e) {
+            throw new IllegalArgumentException("Formato de fecha inválido. Use ISO_LOCAL_DATE_TIME, por ejemplo: 2025-10-17T14:30:00");
+        }
     }
 }
