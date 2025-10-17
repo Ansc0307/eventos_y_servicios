@@ -7,7 +7,8 @@ spring:
   profiles:
     active: openapi
   datasource:
-    url: jdbc:postgresql://localhost:5432/notifications_db
+    url: jdbc:postgresql://host.docker.internal:5432/notifications_db
+    #url: jdbc:postgresql://localhost:5432/notifications_db
     username: postgres
     password: admin
     driver-class-name: org.postgresql.Driver
