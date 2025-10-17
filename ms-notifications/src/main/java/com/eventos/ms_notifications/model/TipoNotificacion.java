@@ -27,7 +27,7 @@ public class TipoNotificacion {
     @Schema(description = "Descripción opcional del tipo de notificación", example = "Notificación informativa para el usuario")
     private String descripcion;
 
-    // 🔁 Relación con Notificacion
+    // Relación con Notificacion
     @OneToMany(mappedBy = "tipoNotificacion", cascade = CascadeType.ALL, orphanRemoval = false)
     @Schema(description = "Lista de notificaciones asociadas a este tipo.")
     private List<Notificacion> notificaciones = new ArrayList<>();

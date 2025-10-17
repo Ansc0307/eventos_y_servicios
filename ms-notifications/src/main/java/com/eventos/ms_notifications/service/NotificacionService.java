@@ -35,7 +35,6 @@ public class NotificacionService {
         this.notificacionMapper = notificacionMapper;
     }
 
-    // 🟢 Obtener todas las notificaciones
     public List<NotificacionDTO> obtenerTodas() {
         return notificacionRepository.findAll()
                 .stream()
@@ -57,15 +56,29 @@ public class NotificacionService {
         if (dto.getMensaje() == null || dto.getMensaje().isBlank()) {
             throw new InvalidInputException("El mensaje de la notificación no puede estar vacío.");
         }
+        if (dto.getPrioridad() == null || dto.getPrioridad().getId() == null) {
+            throw new InvalidInputException("La prioridad de la notificación no puede ser nula.");
+        }
+        if (dto.getTipoNotificacion() == null || dto.getTipoNotificacion().getId() == null) {
+            throw new InvalidInputException("El tipo de notificación no puede ser nulo.");
+        }
 
-        // Validar prioridad
+        if (dto.getUserId() == null) {
+            throw new InvalidInputException("El ID del usuario no puede ser nulo.");
+        }
+
+        if (dto.getLeido() == null) {
+            dto.setLeido(false); // Por defecto no leido
+        }
+
+        // Validar prioridad existente
         Prioridad prioridad = null;
         if (dto.getPrioridad() != null && dto.getPrioridad().getId() != null) {
             prioridad = prioridadRepository.findById(dto.getPrioridad().getId())
                     .orElseThrow(() -> new NotFoundException("Prioridad no encontrada con ID: " + dto.getPrioridad().getId()));
         }
 
-        // Validar tipo de notificación
+        // Validar tipo de notificación existente
         TipoNotificacion tipo = null;
         if (dto.getTipoNotificacion() != null && dto.getTipoNotificacion().getId() != null) {
             tipo = tipoNotificacionRepository.findById(dto.getTipoNotificacion().getId())
@@ -77,7 +90,7 @@ public class NotificacionService {
         notificacion.setPrioridad(prioridad);
         notificacion.setTipoNotificacion(tipo);
 
-        // ⚠️ Temporal: hasta que haya microservicio de usuarios
+        // Temporal: hasta que haya microservicio de usuarios
         if (notificacion.getUserId() == null) {
             notificacion.setUserId(999L); // valor estático temporal
         }
@@ -90,11 +103,22 @@ public class NotificacionService {
         Notificacion existente = notificacionRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("No se encontró la notificación con ID: " + id));
 
+        // Validaciones básicas
         if (dto.getAsunto() == null || dto.getAsunto().isBlank()) {
-            throw new InvalidInputException("El asunto no puede estar vacío.");
+            throw new InvalidInputException("El asunto de la notificación no puede estar vacío.");
         }
         if (dto.getMensaje() == null || dto.getMensaje().isBlank()) {
-            throw new InvalidInputException("El mensaje no puede estar vacío.");
+            throw new InvalidInputException("El mensaje de la notificación no puede estar vacío.");
+        }
+        if (dto.getPrioridad() == null || dto.getPrioridad().getId() == null) {
+            throw new InvalidInputException("La prioridad de la notificación no puede ser nula.");
+        }
+        if (dto.getTipoNotificacion() == null || dto.getTipoNotificacion().getId() == null) {
+            throw new InvalidInputException("El tipo de notificación no puede ser nulo.");
+        }
+
+        if (dto.getUserId() == null) {
+            throw new InvalidInputException("El ID del usuario no puede ser nulo.");
         }
 
         existente.setAsunto(dto.getAsunto());
@@ -118,7 +142,6 @@ public class NotificacionService {
         return notificacionMapper.toDto(notificacionRepository.save(existente));
     }
 
-    // Eliminar una notificación
     public void eliminar(Long id) {
         if (!notificacionRepository.existsById(id)) {
             throw new NotFoundException("No existe la notificación con ID: " + id);
@@ -126,7 +149,6 @@ public class NotificacionService {
         notificacionRepository.deleteById(id);
     }
 
-    // Obtener notificaciones por usuario
     public List<NotificacionDTO> obtenerPorUsuario(Long userId) {
         return notificacionRepository.findByUserId(userId)
                 .stream()

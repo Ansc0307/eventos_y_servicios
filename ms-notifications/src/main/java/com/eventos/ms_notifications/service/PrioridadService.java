@@ -59,6 +59,10 @@ public class PrioridadService {
             throw new InvalidInputException("El nombre no puede estar vacío.");
         }
 
+        if (prioridadRepository.existsByNombreIgnoreCase(prioridadDTO.getNombre())) {
+            throw new ConflictException("Ya existe una prioridad con el nombre '" + prioridadDTO.getNombre() + "'.");
+        }
+
         existente.setNombre(prioridadDTO.getNombre());
         existente.setDescripcion(prioridadDTO.getDescripcion());
 

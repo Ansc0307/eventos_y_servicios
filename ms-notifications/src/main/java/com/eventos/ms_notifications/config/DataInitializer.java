@@ -1,9 +1,14 @@
 package com.eventos.ms_notifications.config;
 
+//import com.eventos.ms_notifications.model.Notificacion;
 import com.eventos.ms_notifications.model.Prioridad;
 import com.eventos.ms_notifications.model.TipoNotificacion;
+//import com.eventos.ms_notifications.repository.NotificacionRepository;
 import com.eventos.ms_notifications.repository.PrioridadRepository;
 import com.eventos.ms_notifications.repository.TipoNotificacionRepository;
+
+//import java.time.LocalDateTime;
+
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

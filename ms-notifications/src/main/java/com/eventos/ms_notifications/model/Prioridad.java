@@ -27,7 +27,7 @@ public class Prioridad {
     @Schema(description = "Descripción opcional de la prioridad", example = "Atención inmediata")
     private String descripcion;
 
-    // 🔁 Relación con Notificacion
+    // Relación con Notificacion
     @OneToMany(mappedBy = "prioridad", cascade = CascadeType.ALL, orphanRemoval = false)
     @Schema(description = "Lista de notificaciones asociadas a esta prioridad.")
     private List<Notificacion> notificaciones = new ArrayList<>();

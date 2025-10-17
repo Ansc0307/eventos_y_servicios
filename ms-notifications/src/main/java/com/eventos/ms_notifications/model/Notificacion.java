@@ -48,7 +48,18 @@ public class Notificacion {
     // Constructores
     public Notificacion() {}
 
-    // 🔧 Inicialización automática
+    public Notificacion(Long id, String asunto, String mensaje, LocalDateTime fechaCreacion, Boolean leido, Long userId, Prioridad prioridad, TipoNotificacion tipoNotificacion) {
+        this.id = id;
+        this.asunto = asunto;
+        this.mensaje = mensaje;
+        this.fechaCreacion = fechaCreacion;
+        this.leido = leido;
+        this.userId = userId;
+        this.prioridad = prioridad;
+        this.tipoNotificacion = tipoNotificacion;
+    }
+
+    // Inicialización automática
     @PrePersist
     public void prePersist() {
         if (fechaCreacion == null) {
