@@ -5,14 +5,14 @@ package com.eventos.ms_reservas.exception;
  */
 public class NoDisponibleOcupadoException extends RuntimeException {
 
-    private final Long id;
+    private final Integer id;
 
-    public NoDisponibleOcupadoException(Long id, String message) {
+    public NoDisponibleOcupadoException(Integer id, String message) {
         super(message);
         this.id = id;
     }
 
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 }

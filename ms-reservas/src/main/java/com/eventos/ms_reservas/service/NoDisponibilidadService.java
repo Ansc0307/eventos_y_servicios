@@ -32,7 +32,7 @@ public class NoDisponibilidadService {
     }
 
     // ✅ Obtener por ID
-    public Optional<NoDisponibilidadDTO> obtenerPorId(Long id) {
+    public Optional<NoDisponibilidadDTO> obtenerPorId(Integer id) {
         return repository.findById(id)
                 .map(NoDisponibilidadMapper::toDTO);
     }
@@ -82,7 +82,7 @@ public class NoDisponibilidadService {
     }
 
     // ✅ Actualizar
-    public NoDisponibilidadDTO actualizar(Long id, NoDisponibilidadDTO dto) {
+    public NoDisponibilidadDTO actualizar(Integer id, NoDisponibilidadDTO dto) {
         validarFechas(dto.getFechaInicio(), dto.getFechaFin());
 
         NoDisponibilidad existente = repository.findById(id)
@@ -100,7 +100,7 @@ public class NoDisponibilidadService {
     }
 
     // ✅ Eliminar (compatible con tests)
-    public void eliminarNoDisponible(Long id) {
+    public void eliminarNoDisponible(Integer id) {
         NoDisponibilidad existente = repository.findById(id)
                 .orElseThrow(() -> new NoDisponibleNotFoundException(id,
                         "No se encontró la no disponibilidad con ID: " + id));
@@ -119,7 +119,7 @@ public class NoDisponibilidadService {
         return repository.save(nd);
     }
 
-    public NoDisponibilidad getById(Long id) {
+    public NoDisponibilidad getById(Integer id) {
         return repository.findById(id).orElse(null);
     }
 
@@ -127,7 +127,7 @@ public class NoDisponibilidadService {
         return repository.findAll();
     }
 
-    public NoDisponibilidad update(Long id, NoDisponibilidad update) {
+    public NoDisponibilidad update(Integer id, NoDisponibilidad update) {
         return repository.findById(id)
                 .map(existing -> {
                     existing.setMotivo(update.getMotivo());
@@ -140,7 +140,7 @@ public class NoDisponibilidadService {
                 .orElse(null);
     }
 
-    public boolean eliminar(Long id) {
+    public boolean eliminar(Integer id) {
         if (repository.existsById(id)) {
             repository.deleteById(id);
             return true;

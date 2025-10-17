@@ -16,7 +16,7 @@ public class NoDisponibilidad {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_no_disponiblilidad")
-    private Long idNoDisponibilidad;
+    private Integer idNoDisponibilidad;
 
     @Column(name = "id_oferta", nullable = false)
     private Integer idOferta;
@@ -36,11 +36,11 @@ public class NoDisponibilidad {
     
 
     // Getters y Setters
-    public Long getIdNoDisponibilidad() {
+    public Integer getIdNoDisponibilidad() {
         return idNoDisponibilidad;
     }
 
-    public void setIdNoDisponibilidad(Long idNoDisponibilidad) {
+    public void setIdNoDisponibilidad(Integer idNoDisponibilidad) {
         this.idNoDisponibilidad = idNoDisponibilidad;
     }
 

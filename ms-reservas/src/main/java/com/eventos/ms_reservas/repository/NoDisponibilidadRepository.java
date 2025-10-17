@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 import com.eventos.ms_reservas.model.NoDisponibilidad;
 
 @Repository
-public interface NoDisponibilidadRepository extends JpaRepository<NoDisponibilidad, Long> {
+public interface NoDisponibilidadRepository extends JpaRepository<NoDisponibilidad, Integer> {
 
     // Buscar todas las no disponibilidades por idOferta
     List<NoDisponibilidad> findByIdOferta(Integer idOferta);

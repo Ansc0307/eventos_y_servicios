@@ -11,7 +11,7 @@ import jakarta.validation.constraints.Size;
 public class NoDisponibilidadDTO {
 
     @Schema(description = "Identificador único de la no disponibilidad", example = "1")
-    private Long idNoDisponibilidad;
+    private Integer idNoDisponibilidad;
 
     @NotNull(message = "El ID de la oferta es obligatorio")
     @Positive(message = "El ID de la oferta debe ser un número positivo")
@@ -34,7 +34,7 @@ public class NoDisponibilidadDTO {
     @Schema(description = "Identificador de la reserva asociada (si existe)", example = "15")
     private Integer idReserva;
 
-   public NoDisponibilidadDTO(Long idNoDisponibilidad, Integer idOferta, String motivo, LocalDateTime fechaInicio, LocalDateTime fechaFin, Integer idReserva) {
+   public NoDisponibilidadDTO(Integer idNoDisponibilidad, Integer idOferta, String motivo, LocalDateTime fechaInicio, LocalDateTime fechaFin, Integer idReserva) {
     this.idNoDisponibilidad = idNoDisponibilidad;
     this.idOferta = idOferta;
     this.motivo = motivo;
@@ -50,8 +50,8 @@ public NoDisponibilidadDTO() {
 
 
     // Getters y Setters
-    public Long getIdNoDisponibilidad() { return idNoDisponibilidad; }
-    public void setIdNoDisponibilidad(Long idNoDisponibilidad) { this.idNoDisponibilidad = idNoDisponibilidad; }
+    public Integer getIdNoDisponibilidad() { return idNoDisponibilidad; }
+    public void setIdNoDisponibilidad(Integer idNoDisponibilidad) { this.idNoDisponibilidad = idNoDisponibilidad; }
 
     public Integer getIdOferta() { return idOferta; }
     public void setIdOferta(Integer idOferta) { this.idOferta = idOferta; }

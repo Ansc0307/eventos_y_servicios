@@ -43,7 +43,7 @@ public class NoDisponibilidadController {
 
     // ✅ GET por ID
     @GetMapping("/{id}")
-    public ResponseEntity<NoDisponibilidadDTO> getNoDisponibilidad(@PathVariable Long id) {
+    public ResponseEntity<NoDisponibilidadDTO> getNoDisponibilidad(@PathVariable Integer id) {
         LOGGER.info("Buscando no disponibilidad con id: {}", id);
         return service.obtenerPorId(id)
                 .map(ResponseEntity::ok)
@@ -67,7 +67,7 @@ public class NoDisponibilidadController {
 
     // ✅ PUT
     @PutMapping("/{id}")
-    public ResponseEntity<NoDisponibilidadDTO> updateNoDisponibilidad(@PathVariable Long id,
+    public ResponseEntity<NoDisponibilidadDTO> updateNoDisponibilidad(@PathVariable Integer id,
                                                                      @Valid @RequestBody NoDisponibilidadDTO dto) {
         LOGGER.debug("Actualizando no disponibilidad con id {}: {}", id, dto);
         NoDisponibilidadDTO actualizado = service.actualizar(id, dto);
@@ -79,7 +79,7 @@ public class NoDisponibilidadController {
 
     // ✅ DELETE
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteNoDisponibilidad(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteNoDisponibilidad(@PathVariable Integer id) {
         LOGGER.debug("Eliminando registro de no disponibilidad con id: {}", id);
         service.eliminarNoDisponible(id);
         return ResponseEntity.ok().build();

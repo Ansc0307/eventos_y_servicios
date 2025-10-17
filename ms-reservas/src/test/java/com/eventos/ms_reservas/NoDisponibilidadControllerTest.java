@@ -29,7 +29,7 @@ class NoDisponibilidadControllerTest {
 
     @Test
     void crudNoDisponibilidad() {
-        Long ndId = 1L;
+        Integer ndId = 1;
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime inicio = now.plusDays(1);
         LocalDateTime fin = now.plusDays(2);
@@ -88,7 +88,7 @@ class NoDisponibilidadControllerTest {
 
     @Test
     void testErrorResponseFormatOnGet() {
-        Long nonExistentId = 999L;
+        Integer nonExistentId = 999;
 
         // Stub para no encontrar el registro
         given(noDisponibleService.obtenerPorId(eq(nonExistentId)))
