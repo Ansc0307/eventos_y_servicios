@@ -12,6 +12,7 @@ import com.eventos.ms_reservas.exception.FechaInvalidaException;
 import com.eventos.ms_reservas.exception.NoDisponibleNotFoundException;
 import com.eventos.ms_reservas.mapper.NoDisponibilidadMapper;
 import com.eventos.ms_reservas.model.NoDisponibilidad;
+import com.eventos.ms_reservas.model.Reserva;
 import com.eventos.ms_reservas.repository.NoDisponibilidadRepository;
 
 @Service
@@ -146,5 +147,48 @@ public class NoDisponibilidadService {
             return true;
         }
         return false;
+    }
+
+    // ✅ Métodos de navegación de relaciones JPA
+    
+    /**
+     * Obtiene la reserva asociada a una no disponibilidad
+     * @param noDisponibilidadId ID de la no disponibilidad
+     * @return Reserva asociada o null si no existe
+     */
+    public Reserva getReservaByNoDisponibilidad(Integer noDisponibilidadId) {
+        NoDisponibilidad noDisp = repository.findById(noDisponibilidadId).orElse(null);
+        return noDisp != null ? noDisp.getReserva() : null;
+    }
+
+    /**
+     * Verifica si una no disponibilidad tiene una reserva asociada
+     * @param noDisponibilidadId ID de la no disponibilidad
+     * @return true si tiene reserva asociada
+     */
+    public boolean hasReserva(Integer noDisponibilidadId) {
+        return getReservaByNoDisponibilidad(noDisponibilidadId) != null;
+    }
+
+    /**
+     * Obtiene todas las no disponibilidades que tienen reserva asociada
+     * @return Lista de no disponibilidades con reserva
+     */
+    public List<NoDisponibilidadDTO> obtenerConReserva() {
+        return repository.findAll().stream()
+                .filter(nd -> nd.getIdReserva() != null)
+                .map(NoDisponibilidadMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Obtiene todas las no disponibilidades que NO tienen reserva asociada
+     * @return Lista de no disponibilidades sin reserva
+     */
+    public List<NoDisponibilidadDTO> obtenerSinReserva() {
+        return repository.findAll().stream()
+                .filter(nd -> nd.getIdReserva() == null)
+                .map(NoDisponibilidadMapper::toDTO)
+                .collect(Collectors.toList());
     }
 }

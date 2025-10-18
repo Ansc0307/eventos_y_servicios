@@ -1,6 +1,7 @@
 package com.eventos.ms_reservas.service;
 
 import com.eventos.ms_reservas.model.Reserva;
+import com.eventos.ms_reservas.model.NoDisponibilidad;
 import com.eventos.ms_reservas.repository.ReservaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -105,5 +106,28 @@ public class ReservaService {
         if (!conflictivas.isEmpty()) {
             throw new IllegalArgumentException("Existe conflicto de horarios con reservas existentes");
         }
+    }
+
+    // ✅ Métodos de navegación de relaciones JPA
+    
+    /**
+     * Obtiene la no disponibilidad asociada a una reserva
+     * @param reservaId ID de la reserva
+     * @return NoDisponibilidad asociada o null si no existe
+     */
+    @Transactional(readOnly = true)
+    public NoDisponibilidad getNoDisponibilidadByReserva(Integer reservaId) {
+        Reserva reserva = reservaRepository.findById(reservaId).orElse(null);
+        return reserva != null ? reserva.getNoDisponibilidad() : null;
+    }
+
+    /**
+     * Verifica si una reserva tiene una no disponibilidad asociada
+     * @param reservaId ID de la reserva
+     * @return true si tiene no disponibilidad asociada
+     */
+    @Transactional(readOnly = true)
+    public boolean hasNoDisponibilidad(Integer reservaId) {
+        return getNoDisponibilidadByReserva(reservaId) != null;
     }
 }

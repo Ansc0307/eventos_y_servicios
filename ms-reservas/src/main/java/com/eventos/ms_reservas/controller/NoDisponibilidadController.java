@@ -19,6 +19,7 @@ import com.eventos.ms_reservas.dto.NoDisponibilidadDTO;
 import com.eventos.ms_reservas.exception.NoDisponibleNotFoundException;
 import com.eventos.ms_reservas.service.NoDisponibilidadService;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
@@ -83,5 +84,44 @@ public class NoDisponibilidadController {
         LOGGER.debug("Eliminando registro de no disponibilidad con id: {}", id);
         service.eliminarNoDisponible(id);
         return ResponseEntity.ok().build();
+    }
+
+    // ✅ Endpoints para navegación de relaciones JPA
+
+    @Operation(summary = "Obtener reserva de una no disponibilidad", description = "Obtiene la reserva asociada a una no disponibilidad específica")
+    @GetMapping("/{id}/reserva")
+    public ResponseEntity<com.eventos.ms_reservas.dto.ReservaDTO> obtenerReservaDeNoDisponibilidad(@PathVariable Integer id) {
+        LOGGER.info("Obteniendo reserva de no disponibilidad con id: {}", id);
+        com.eventos.ms_reservas.model.Reserva reserva = service.getReservaByNoDisponibilidad(id);
+        if (reserva == null) {
+            throw new NoDisponibleNotFoundException(id, "No disponibilidad no encontrada o sin reserva asociada: " + id);
+        }
+        return ResponseEntity.ok(com.eventos.ms_reservas.mapper.ReservaMapper.toDTO(reserva));
+    }
+
+    @Operation(summary = "Verificar si no disponibilidad tiene reserva", description = "Verifica si una no disponibilidad tiene una reserva asociada")
+    @GetMapping("/{id}/has-reserva")
+    public ResponseEntity<Boolean> verificarReserva(@PathVariable Integer id) {
+        LOGGER.info("Verificando si no disponibilidad {} tiene reserva asociada", id);
+        // Verificar que la no disponibilidad existe
+        if (service.obtenerPorId(id).isEmpty()) {
+            throw new NoDisponibleNotFoundException(id, "No disponibilidad no encontrada: " + id);
+        }
+        boolean hasReserva = service.hasReserva(id);
+        return ResponseEntity.ok(hasReserva);
+    }
+
+    @Operation(summary = "Listar no disponibilidades con reserva", description = "Obtiene todas las no disponibilidades que tienen reserva asociada")
+    @GetMapping("/con-reserva")
+    public ResponseEntity<List<NoDisponibilidadDTO>> listarConReserva() {
+        LOGGER.info("Listando no disponibilidades con reserva asociada");
+        return ResponseEntity.ok(service.obtenerConReserva());
+    }
+
+    @Operation(summary = "Listar no disponibilidades sin reserva", description = "Obtiene todas las no disponibilidades que NO tienen reserva asociada")
+    @GetMapping("/sin-reserva")
+    public ResponseEntity<List<NoDisponibilidadDTO>> listarSinReserva() {
+        LOGGER.info("Listando no disponibilidades sin reserva asociada");
+        return ResponseEntity.ok(service.obtenerSinReserva());
     }
 }
