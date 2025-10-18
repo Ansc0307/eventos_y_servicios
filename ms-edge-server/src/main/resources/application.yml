@@ -12,26 +12,20 @@ spring:
           uri: http://ms-notifications:8087
           predicates:
             - Path=/notifications/**
-          filters:
-            - StripPrefix=1
+
 
         - id: ms-ofertas
           uri: http://ms-ofertas:8083
           predicates:
             - Path=/ofertas/**
-          filters:
-            - StripPrefix=1
+
 
         - id: ms-reservas
           uri: http://ms-reservas:8082
           predicates:
             - Path=/reservas/**
-          filters:
-            - StripPrefix=1
 
         - id: ms-usuarios
           uri: http://ms-usuarios:8081
           predicates:
             - Path=/usuarios/**
-          filters:
-            - StripPrefix=1
