@@ -124,4 +124,11 @@ public class NoDisponibilidadController {
         LOGGER.info("Listando no disponibilidades sin reserva asociada");
         return ResponseEntity.ok(service.obtenerSinReserva());
     }
+
+    // 🔹 GET: Buscar por motivo (Native Query)
+    @GetMapping("/buscar/motivo-native/{motivo}")
+    @Operation(summary = "Buscar no disponibilidades por motivo (Native Query)")
+    public ResponseEntity<List<NoDisponibilidadDTO>> buscarPorMotivoNative(@PathVariable String motivo) {
+        return ResponseEntity.ok(service.buscarPorMotivoNative(motivo));
+    }
 }

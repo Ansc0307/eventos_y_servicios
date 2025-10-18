@@ -191,4 +191,10 @@ public class NoDisponibilidadService {
                 .map(NoDisponibilidadMapper::toDTO)
                 .collect(Collectors.toList());
     }
+    // 🔹 Buscar por motivo (Native Query)
+    public List<NoDisponibilidadDTO> buscarPorMotivoNative(String motivo) {
+        return repository.findByMotivoNative(motivo).stream()
+                .map(NoDisponibilidadMapper::toDTO)
+                .collect(Collectors.toList());
+    }
 }
