@@ -12,9 +12,11 @@ import java.util.List;
 public interface OfertaRepository extends JpaRepository<Oferta, Long> {
     
     // Obtener todas las ofertas activas
+    //derived query 
     List<Oferta> findByActivoTrue();
     
     // Obtener ofertas por categoría
+    //Java Persistence Query Language (JPQL)    
     @Query("SELECT o FROM Oferta o WHERE o.categoria.idCategoria = :idCategoria AND o.activo = true")
     List<Oferta> findByCategoria(@Param("idCategoria") Long idCategoria);
     
