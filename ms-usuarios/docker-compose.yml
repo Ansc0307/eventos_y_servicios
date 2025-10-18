@@ -31,6 +31,12 @@ services:
       DB_PASSWORD: admin
     ports:
       - "8081:8081"
+    healthcheck:
+      # Requiere Actuator: /actuator/health
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8081/actuator/health | grep 'UP' >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
   usuarios_pg_data:
