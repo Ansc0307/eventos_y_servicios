@@ -41,7 +41,7 @@ public class UsuarioController {
       @ApiResponse(responseCode = "409", description = "Email duplicado")
   })
   @PostMapping
-  @PreAuthorize("hasRole('ORGANIZADOR')")
+  @PreAuthorize("hasAnyRole('ADMIN','ORGANIZADOR')")
   @SecurityRequirement(name = "bearerAuth")
   public ResponseEntity<UsuarioDto> crear(
       @Valid @org.springframework.web.bind.annotation.RequestBody UsuarioCreacionDto dto) {
@@ -147,11 +147,11 @@ public class UsuarioController {
   @ApiResponses(value = {
       @ApiResponse(responseCode = "204", description = "Usuario desactivado"),
       @ApiResponse(responseCode = "401", description = "No autenticado. Debe enviar Bearer token"),
-      @ApiResponse(responseCode = "403", description = "Prohibido. Requiere rol ORGANIZADOR"),
+      @ApiResponse(responseCode = "403", description = "Prohibido. Requiere rol ADMIN u ORGANIZADOR"),
       @ApiResponse(responseCode = "404", description = "Usuario no encontrado")
   })
   @DeleteMapping("/{id}")
-  @PreAuthorize("hasRole('ORGANIZADOR')")
+  @PreAuthorize("hasAnyRole('ADMIN','ORGANIZADOR')")
   @SecurityRequirement(name = "bearerAuth")
   public ResponseEntity<Void> desactivar(
       @Parameter(description = "ID del usuario", example = "1", required = true) @PathVariable Long id) {
@@ -163,11 +163,11 @@ public class UsuarioController {
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Usuario reactivado"),
       @ApiResponse(responseCode = "401", description = "No autenticado. Debe enviar Bearer token"),
-      @ApiResponse(responseCode = "403", description = "Prohibido. Requiere rol ORGANIZADOR"),
+      @ApiResponse(responseCode = "403", description = "Prohibido. Requiere rol ADMIN u ORGANIZADOR"),
       @ApiResponse(responseCode = "404", description = "Usuario no encontrado")
   })
   @PatchMapping("/{id}/activar")
-  @PreAuthorize("hasRole('ORGANIZADOR')")
+  @PreAuthorize("hasAnyRole('ADMIN','ORGANIZADOR')")
   @SecurityRequirement(name = "bearerAuth")
   public ResponseEntity<UsuarioDto> activar(
       @Parameter(description = "ID del usuario", example = "1", required = true) @PathVariable Long id) {
@@ -179,7 +179,7 @@ public class UsuarioController {
       @ApiResponse(responseCode = "200", description = "Usuario actualizado"),
       @ApiResponse(responseCode = "400", description = "Datos inválidos"),
       @ApiResponse(responseCode = "401", description = "No autenticado. Debe enviar Bearer token"),
-      @ApiResponse(responseCode = "403", description = "Prohibido. Requiere rol ORGANIZADOR"),
+      @ApiResponse(responseCode = "403", description = "Prohibido. Requiere rol ADMIN u ORGANIZADOR"),
       @ApiResponse(responseCode = "404", description = "Usuario no encontrado")
   })
   @PatchMapping("/{id}")

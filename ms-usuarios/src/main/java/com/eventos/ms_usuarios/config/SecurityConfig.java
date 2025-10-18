@@ -43,9 +43,9 @@ public class SecurityConfig {
             .requestMatchers("/openapi/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
             .requestMatchers("/actuator/health", "/actuator/info").permitAll()
             .requestMatchers(HttpMethod.GET, "/usuarios/**").authenticated()
-            .requestMatchers(HttpMethod.POST, "/usuarios/**").hasRole("ORGANIZADOR")
-            .requestMatchers(HttpMethod.DELETE, "/usuarios/**").hasRole("ORGANIZADOR")
-            .requestMatchers(HttpMethod.PATCH, "/usuarios/**").hasRole("ORGANIZADOR")
+            .requestMatchers(HttpMethod.POST, "/usuarios/**").hasAnyRole("ADMIN","ORGANIZADOR")
+            .requestMatchers(HttpMethod.DELETE, "/usuarios/**").hasAnyRole("ADMIN","ORGANIZADOR")
+            .requestMatchers(HttpMethod.PATCH, "/usuarios/**").hasAnyRole("ADMIN","ORGANIZADOR")
             .anyRequest().authenticated())
         .exceptionHandling(ex -> ex
             .authenticationEntryPoint((request, response, authException) -> {
