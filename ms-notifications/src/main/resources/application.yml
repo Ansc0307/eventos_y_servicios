@@ -6,18 +6,25 @@ spring:
     name: ms-notifications
 
   profiles:
-    active: local         # perfil por defecto local
-    include: openapi      # incluir openapi en todos los entornos
+    active: local
+    include: openapi
 
   jpa:
     hibernate:
-      ddl-auto: create    # update para no borrar datos, create para 1ra vez
+      ddl-auto: create
     show-sql: true
     properties:
-      '[hibernate.format_sql]': true
-      '[hibernate.dialect]': org.hibernate.dialect.PostgreSQLDialect
+      hibernate.format_sql: true
+      hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://localhost:8761/eureka/}
+    register-with-eureka: true
+    fetch-registry: true
 
 logging:
   level:
     root: INFO
-    '[com.eventos.ms_notifications]': DEBUG
+    com.eventos.ms_notifications: DEBUG
