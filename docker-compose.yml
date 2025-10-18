@@ -1,40 +1,171 @@
 version: '3.8'
 
 services:
-  ms-notifications:
-    image: ms-notifications:latest
-    container_name: ms-notifications
-    build:
-      context: ./ms-notifications
-      dockerfile: Dockerfile
+  # Base de datos para usuarios
+  usuarios-db:
+    image: postgres:16
+    container_name: usuarios_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: usuarios_eventos_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
     ports:
-      - "8087:8087"
-    environment:
-      - SPRING_PROFILES_ACTIVE=docker,openapi
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/notifications_db
-      - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=admin
-    depends_on:
-      postgres:
-        condition: service_healthy
+      - "5431:5432"
+    volumes:
+      - usuarios_pg_data:/var/lib/postgresql/data
+    networks:
+      - eventos-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d usuarios_eventos_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-  postgres:
-    image: postgres:16-alpine
-    container_name: postgres
-    restart: always
+  # Base de datos para reservas
+  reservas-db:
+    image: postgres:15-alpine
+    container_name: reservas_postgres
+    restart: unless-stopped
     environment:
-      - POSTGRES_DB=notifications_db
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=admin
+      POSTGRES_DB: reservas_db
+      POSTGRES_USER: reservas_user
+      POSTGRES_PASSWORD: reservas_password
     ports:
       - "5432:5432"
+    volumes:
+      - reservas_pg_data:/var/lib/postgresql/data
+    networks:
+      - eventos-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U reservas_user -d reservas_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Base de datos para ofertas
+  ofertas-db:
+    image: postgres:13
+    container_name: ofertas_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ms-ofertas
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5433:5432"
+    volumes:
+      - ofertas_pg_data:/var/lib/postgresql/data
+    networks:
+      - eventos-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ms-ofertas"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Base de datos para notificaciones
+  notifications-db:
+    image: postgres:16-alpine
+    container_name: notifications_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: notifications_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5434:5432"
+    volumes:
+      - notifications_pg_data:/var/lib/postgresql/data
+    networks:
+      - eventos-net
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d notifications_db"]
-      interval: 5s
-      timeout: 2s
-      retries: 10
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Microservicio de usuarios
+  ms-usuarios:
+    build: ./ms-usuarios
+    container_name: ms_usuarios
+    restart: unless-stopped
+    depends_on:
+      usuarios-db:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:postgresql://usuarios-db:5432/usuarios_eventos_db
+      DB_USERNAME: postgres
+      DB_PASSWORD: admin
+    ports:
+      - "8081:8081"
+    networks:
+      - eventos-net
+
+  # Microservicio de reservas
+  ms-reservas:
+    build: ./ms-reservas
+    container_name: ms_reservas
+    restart: unless-stopped
+    depends_on:
+      reservas-db:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://reservas-db:5432/reservas_db
+      SPRING_DATASOURCE_USERNAME: reservas_user
+      SPRING_DATASOURCE_PASSWORD: reservas_password
+    ports:
+      - "8082:8082"
+    networks:
+      - eventos-net
+
+  # Microservicio de ofertas
+  ms-ofertas:
+    build: ./ms-ofertas
+    container_name: ms_ofertas
+    restart: unless-stopped
+    depends_on:
+      ofertas-db:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://ofertas-db:5432/ms-ofertas
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: admin
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
+    ports:
+      - "8083:8083"
+    networks:
+      - eventos-net
+
+  # Microservicio de notificaciones
+  ms-notifications:
+    build: ./ms-notifications
+    container_name: ms_notifications
+    restart: unless-stopped
+    depends_on:
+      notifications-db:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: docker,openapi
+      SPRING_DATASOURCE_URL: jdbc:postgresql://notifications-db:5432/notifications_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: admin
+    ports:
+      - "8087:8087"
+    networks:
+      - eventos-net
+
+networks:
+  eventos-net:
+    driver: bridge
 
 volumes:
-  postgres_data:
+  usuarios_pg_data:
+    driver: local
+  reservas_pg_data:
+    driver: local
+  ofertas_pg_data:
+    driver: local
+  notifications_pg_data:
+    driver: local
