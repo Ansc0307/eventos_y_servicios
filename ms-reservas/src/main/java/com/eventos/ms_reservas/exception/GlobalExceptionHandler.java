@@ -119,4 +119,14 @@ public class GlobalExceptionHandler {
         error.put("error", "Error interno del servidor");
         return Mono.just(new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR));
     }
+// ✅ Nueva excepción para reservas cuando la solicitud no existe
+@ExceptionHandler(SolicitudNoExisteException.class)
+public Mono<ResponseEntity<Map<String, Object>>> handleSolicitudNoExiste(SolicitudNoExisteException ex) {
+    LOG.warn("Solicitud no existe: {}", ex.getMessage());
+    Map<String, Object> error = new HashMap<>();
+    error.put("error", ex.getMessage());
+    error.put("path", "/v1/reservas"); // puedes personalizar según tu endpoint
+    return Mono.just(ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(error));
+}
+
 }
