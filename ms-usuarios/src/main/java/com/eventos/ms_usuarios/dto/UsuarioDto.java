@@ -12,8 +12,12 @@ public class UsuarioDto {
   private String nombre;
   @Schema(description = "Correo electrónico", example = "juan.perez@example.com")
   private String email;
+  @Schema(description = "Número de teléfono", example = "+591 69705051")
+  private String telefono;
   @Schema(description = "Rol asignado", example = "ORGANIZADOR")
   private RolUsuario rol;
+  @Schema(description = "Cuenta activa", example = "true")
+  private Boolean activo;
   @Schema(description = "Fecha de creación", example = "2025-09-01T14:20:15Z")
   private Instant creadoEn;
   @Schema(description = "Última fecha de actualización", example = "2025-09-01T14:25:10Z")
@@ -55,12 +59,28 @@ public class UsuarioDto {
     this.email = email;
   }
 
+  public String getTelefono() {
+    return telefono;
+  }
+
+  public void setTelefono(String telefono) {
+    this.telefono = telefono;
+  }
+
   public RolUsuario getRol() {
     return rol;
   }
 
   public void setRol(RolUsuario rol) {
     this.rol = rol;
+  }
+
+  public Boolean getActivo() {
+    return activo;
+  }
+
+  public void setActivo(Boolean activo) {
+    this.activo = activo;
   }
 
   public Instant getCreadoEn() {
