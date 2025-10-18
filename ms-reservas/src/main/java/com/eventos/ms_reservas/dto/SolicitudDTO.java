@@ -1,106 +1,71 @@
 package com.eventos.ms_reservas.dto;
+
 import java.time.LocalDateTime;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PastOrPresent;
+import jakarta.validation.constraints.Positive;
 
 public class SolicitudDTO {
 
-
     @Schema(description = "Identificador único de la solicitud", example = "1")
-    private String id;
+    private Integer idSolicitud;
 
-    @NotBlank(message = "El nombre del recurso es obligatorio")
-    @Schema(description = "Nombre del recurso solicitado", example = "Reserva de salón de eventos")
-    private String nombreRecurso;
+    @NotNull(message = "La fecha de la solicitud no puede ser nula")
+    @PastOrPresent(message = "La fecha de la solicitud no puede estar en el futuro")
+    @Schema(description = "Fecha en que se realizó la solicitud", example = "2025-10-01T15:30:00")
+    private LocalDateTime fechaSolicitud;
 
-    @NotNull(message = "La fecha de inicio no puede ser nula")
-    @Future(message = "La fecha de inicio debe estar en el futuro")
-    @Schema(description = "Fecha y hora de inicio de la reserva", example = "2025-08-26T18:00:00")
-    private LocalDateTime fechaInicio;
+    @NotBlank(message = "El estado de la solicitud no puede estar vacío")
+    @Schema(description = "Estado actual de la solicitud", example = "pendiente")
+    private String estadoSolicitud;
 
-    @NotNull(message = "La fecha de fin no puede ser nula")
-    @Future(message = "La fecha de fin debe estar en el futuro")
-    @Schema(description = "Fecha y hora de fin de la reserva", example = "2025-08-26T21:00:00")
-    private LocalDateTime fechaFin;
+    @NotNull(message = "El ID del organizador es obligatorio")
+    @Positive(message = "El ID del organizador debe ser un número positivo")
+    @Schema(description = "Identificador del organizador que realiza la solicitud", example = "101")
+    private Integer idOrganizador;
 
-    @Schema(description = "Estado actual de la solicitud", example = "aceptada")
-    private String estado;
+    @NotNull(message = "El ID del proveedor es obligatorio")
+    @Positive(message = "El ID del proveedor debe ser un número positivo")
+    @Schema(description = "Identificador del proveedor asociado a la solicitud", example = "202")
+    private Integer idProovedor;
 
-   public SolicitudDTO() {}
+    @NotNull(message = "El ID de la oferta es obligatorio")
+    @Positive(message = "El ID de la oferta debe ser un número positivo")
+    @Schema(description = "Identificador de la oferta relacionada con la solicitud", example = "303")
+    private Integer idOferta;
 
-    public SolicitudDTO(String id, String nombreRecurso, LocalDateTime fechaInicio, LocalDateTime fechaFin, String estado) {
-        this.id = id;
-        this.nombreRecurso = nombreRecurso;
-        this.fechaInicio = fechaInicio;
-        this.fechaFin = fechaFin;
-        this.estado = estado;
-    }
-
-
-    /* 
-    private String id;
-    private String nombreRecurso;
-    private LocalDateTime fechaInicio;
-    private LocalDateTime fechaFin;
-    private String estado;
-
+    // Constructor vacío
     public SolicitudDTO() {}
 
-    public SolicitudDTO(String id, String nombreRecurso, LocalDateTime fechaInicio, LocalDateTime fechaFin, String estado) {
-        this.id = id;
-        this.nombreRecurso = nombreRecurso;
-        this.fechaInicio = fechaInicio;
-        this.fechaFin = fechaFin;
-        this.estado = estado;
-    }*/
-
-    public String getId() {
-        return id;
+    // Constructor con campos
+    public SolicitudDTO(Integer idSolicitud, LocalDateTime fechaSolicitud, String estadoSolicitud, Integer idOrganizador, Integer idProovedor, Integer idOferta) {
+        this.idSolicitud = idSolicitud;
+        this.fechaSolicitud = fechaSolicitud;
+        this.estadoSolicitud = estadoSolicitud;
+        this.idOrganizador = idOrganizador;
+        this.idProovedor = idProovedor;
+        this.idOferta = idOferta;
     }
 
-    public String getNombreRecurso() {
-        return nombreRecurso;
-    }
+    // Getters y Setters
+    public Integer getIdSolicitud() { return idSolicitud; }
+    public void setIdSolicitud(Integer idSolicitud) { this.idSolicitud = idSolicitud; }
 
-    public LocalDateTime getFechaInicio() {
-        return fechaInicio;
-    }
+    public LocalDateTime getFechaSolicitud() { return fechaSolicitud; }
+    public void setFechaSolicitud(LocalDateTime fechaSolicitud) { this.fechaSolicitud = fechaSolicitud; }
 
-    public LocalDateTime getFechaFin() {
-        return fechaFin;
-    }
+    public String getEstadoSolicitud() { return estadoSolicitud; }
+    public void setEstadoSolicitud(String estadoSolicitud) { this.estadoSolicitud = estadoSolicitud; }
 
-    public String getEstado() {
-        return estado;
-    }
+    public Integer getIdOrganizador() { return idOrganizador; }
+    public void setIdOrganizador(Integer idOrganizador) { this.idOrganizador = idOrganizador; }
 
-    public void setId(String id) {
-        this.id = id;
-    }
+    public Integer getIdProovedor() { return idProovedor; }
+    public void setIdProovedor(Integer idProovedor) { this.idProovedor = idProovedor; }
 
-    public void setNombreRecurso(String nombreRecurso) {
-        this.nombreRecurso = nombreRecurso;
-    }
-
-    public void setFechaInicio(LocalDateTime fechaInicio) {
-        this.fechaInicio = fechaInicio;
-    }
-
-    public void setFechaFin(LocalDateTime fechaFin) {
-        this.fechaFin = fechaFin;
-    }
-
-    public void setEstado(String estado) {
-        this.estado = estado;
-    }
-
-      @Override
-    public String toString() {
-        return "SolicitudDTO [id=" + id + ", nombreRecurso=" + nombreRecurso 
-                + ", fechaInicio=" + fechaInicio + ", fechaFin=" + fechaFin 
-                + ", estado=" + estado + "]";
-    }
+    public Integer getIdOferta() { return idOferta; }
+    public void setIdOferta(Integer idOferta) { this.idOferta = idOferta; }
 }
