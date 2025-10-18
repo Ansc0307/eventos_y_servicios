@@ -8,38 +8,74 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.eventos.ms_reservas.model.Solicitud;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
 
 @Repository
 public interface SolicitudRepository extends JpaRepository<Solicitud, Integer> {
 
-    // Buscar solicitudes por estado
+    // --- Derived Queries ---
     List<Solicitud> findByEstadoSolicitud(String estadoSolicitud);
 
-    // Buscar por ID de oferta
     Optional<Solicitud> findByIdOferta(Integer idOferta);
 
-    // Verificar existencia por organizador y proveedor
     boolean existsByIdOrganizadorAndIdProovedor(Integer idOrganizador, Integer idProovedor);
 
-    // Buscar solicitudes de un organizador específico
+    // --- JPQL Queries ---
     @Query("SELECT s FROM Solicitud s WHERE s.idOrganizador = :idOrganizador")
     List<Solicitud> findByOrganizador(@Param("idOrganizador") Integer idOrganizador);
 
-    // Buscar solicitudes de un proveedor específico
     @Query("SELECT s FROM Solicitud s WHERE s.idProovedor = :idProovedor")
     List<Solicitud> findByProovedor(@Param("idProovedor") Integer idProovedor);
 
-    // Buscar solicitudes creadas dentro de un rango de fechas (si tienes fechaSolicitud en el modelo)
     @Query("SELECT s FROM Solicitud s WHERE s.fechaSolicitud BETWEEN :inicio AND :fin")
     List<Solicitud> findByFechaSolicitudBetween(@Param("inicio") LocalDateTime inicio, @Param("fin") LocalDateTime fin);
 
-    // Buscar solicitudes con estado específico y dentro de un rango de fechas
     @Query("SELECT s FROM Solicitud s WHERE s.estadoSolicitud = :estado AND s.fechaSolicitud BETWEEN :inicio AND :fin")
     List<Solicitud> findByEstadoAndFechaSolicitudBetween(
             @Param("estado") String estado,
             @Param("inicio") LocalDateTime inicio,
             @Param("fin") LocalDateTime fin
     );
+
+    // --- Native Query Example ---
+    @Query(
+        value = "SELECT * FROM solicitud s WHERE s.estado_solicitud = :estado AND s.id_organizador = :idOrganizador",
+        nativeQuery = true
+    )
+    List<Solicitud> findNativeByEstadoAndOrganizador(
+            @Param("estado") String estado,
+            @Param("idOrganizador") Integer idOrganizador
+    );
+}
+
+// --- Criteria Query Example (requiere clase aparte) ---
+@Repository
+@Transactional
+class SolicitudRepositoryCustom {
+
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    public List<Solicitud> findByEstadoAndProveedorCriteria(String estado, Integer idProveedor) {
+        var cb = entityManager.getCriteriaBuilder();
+        var cq = cb.createQuery(Solicitud.class);
+        var root = cq.from(Solicitud.class);
+
+        cq.select(root)
+          .where(
+              cb.and(
+                  cb.equal(root.get("estadoSolicitud"), estado),
+                  cb.equal(root.get("idProovedor"), idProveedor)
+              )
+          );
+
+        TypedQuery<Solicitud> query = entityManager.createQuery(cq);
+        return query.getResultList();
+    }
 }
