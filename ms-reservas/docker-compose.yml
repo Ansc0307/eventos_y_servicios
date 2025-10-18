@@ -8,8 +8,6 @@ services:
       POSTGRES_DB: reservas_db
       POSTGRES_USER: reservas_user
       POSTGRES_PASSWORD: reservas_password
-    ports:
-      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./src/main/resources/db/reservas_create.sql:/docker-entrypoint-initdb.d/01-init.sql
@@ -21,12 +19,31 @@ services:
     container_name: reservas-app
     depends_on:
       - postgres
+      - eureka
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/reservas_db
       SPRING_DATASOURCE_USERNAME: reservas_user
       SPRING_DATASOURCE_PASSWORD: reservas_password
+      # Eureka configuration so the app can register to the discovery server by service name
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka:8761/eureka/
     ports:
       - "8082:8082"
+    networks:
+      - reservas-network
+
+  eureka:
+    image: eventos_y_servicios_eureka:latest
+    container_name: eureka-server
+    build:
+      context: ../eureka-server
+      dockerfile: Dockerfile
+    ports:
+      - "8761:8761"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
     networks:
       - reservas-network
 
