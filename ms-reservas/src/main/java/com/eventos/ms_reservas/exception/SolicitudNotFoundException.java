@@ -1,14 +1,18 @@
 package com.eventos.ms_reservas.exception;
 
+/**
+ * Excepción lanzada cuando no se encuentra una solicitud.
+ */
 public class SolicitudNotFoundException extends RuntimeException {
-    private final Long id; // ID de la solicitud que no se encontró
 
-    public SolicitudNotFoundException(Long id, String message) {
+    private final Integer id;
+
+    public SolicitudNotFoundException(Integer id, String message) {
         super(message);
         this.id = id;
     }
 
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 }
