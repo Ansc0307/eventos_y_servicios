@@ -6,6 +6,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -115,5 +116,44 @@ public class SolicitudController {
             @RequestParam Integer idProveedor) {
         LOGGER.info("Verificando existencia de solicitud entre organizador {} y proveedor {}", idOrganizador, idProveedor);
         return solicitudService.existePorOrganizadorYProveedor(idOrganizador, idProveedor);
+    }
+
+    // ✅ Endpoints para navegación de relaciones JPA
+
+    @Operation(summary = "Obtener reserva de una solicitud", description = "Obtiene la reserva asociada a una solicitud específica")
+    @GetMapping("/{id}/reserva")
+    public ResponseEntity<com.eventos.ms_reservas.dto.ReservaDTO> obtenerReservaDeSolicitud(@PathVariable Integer id) {
+        LOGGER.info("Obteniendo reserva de solicitud con id: {}", id);
+        com.eventos.ms_reservas.model.Reserva reserva = solicitudService.getReservaBySolicitud(id);
+        if (reserva == null) {
+            throw new RuntimeException("Solicitud no encontrada o sin reserva asociada: " + id);
+        }
+        return ResponseEntity.ok(com.eventos.ms_reservas.mapper.ReservaMapper.toDTO(reserva));
+    }
+
+    @Operation(summary = "Verificar si solicitud tiene reserva", description = "Verifica si una solicitud tiene una reserva asociada")
+    @GetMapping("/{id}/has-reserva")
+    public ResponseEntity<Boolean> verificarReserva(@PathVariable Integer id) {
+        LOGGER.info("Verificando si solicitud {} tiene reserva asociada", id);
+        // Verificar que la solicitud existe
+        if (solicitudService.obtenerPorId(id).isEmpty()) {
+            throw new RuntimeException("Solicitud no encontrada: " + id);
+        }
+        boolean hasReserva = solicitudService.hasReserva(id);
+        return ResponseEntity.ok(hasReserva);
+    }
+
+    @Operation(summary = "Listar solicitudes con reserva", description = "Obtiene todas las solicitudes que tienen reserva asociada")
+    @GetMapping("/con-reserva")
+    public ResponseEntity<List<SolicitudDTO>> listarConReserva() {
+        LOGGER.info("Listando solicitudes con reserva asociada");
+        return ResponseEntity.ok(solicitudService.obtenerConReserva());
+    }
+
+    @Operation(summary = "Listar solicitudes sin reserva", description = "Obtiene todas las solicitudes que NO tienen reserva asociada")
+    @GetMapping("/sin-reserva")
+    public ResponseEntity<List<SolicitudDTO>> listarSinReserva() {
+        LOGGER.info("Listando solicitudes sin reserva asociada");
+        return ResponseEntity.ok(solicitudService.obtenerSinReserva());
     }
 }

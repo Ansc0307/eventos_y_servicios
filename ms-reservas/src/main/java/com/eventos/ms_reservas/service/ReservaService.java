@@ -130,4 +130,25 @@ public class ReservaService {
     public boolean hasNoDisponibilidad(Integer reservaId) {
         return getNoDisponibilidadByReserva(reservaId) != null;
     }
+
+    /**
+     * Obtiene la solicitud asociada a una reserva
+     * @param reservaId ID de la reserva
+     * @return Solicitud asociada o null si no existe
+     */
+    @Transactional(readOnly = true)
+    public com.eventos.ms_reservas.model.Solicitud getSolicitudByReserva(Integer reservaId) {
+        Reserva reserva = reservaRepository.findById(reservaId).orElse(null);
+        return reserva != null ? reserva.getSolicitud() : null;
+    }
+
+    /**
+     * Verifica si una reserva tiene una solicitud asociada
+     * @param reservaId ID de la reserva
+     * @return true si tiene solicitud asociada
+     */
+    @Transactional(readOnly = true)
+    public boolean hasSolicitud(Integer reservaId) {
+        return getSolicitudByReserva(reservaId) != null;
+    }
 }

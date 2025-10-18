@@ -11,9 +11,13 @@ public class Reserva {
     @Column(name = "id_reserva")
     private Integer idReserva;
 
-    // Relación conceptual OneToOne con Solicitud (entidad externa en otro microservicio)
     @Column(name = "id_solicitud", nullable = false)
     private Integer idSolicitud;
+
+    // Relación OneToOne con Solicitud
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_solicitud", referencedColumnName = "id_solicitud", insertable = false, updatable = false)
+    private Solicitud solicitud;
 
     @Column(name = "fecha_reserva_inicio", nullable = false)
     private LocalDateTime fechaReservaInicio;
@@ -112,6 +116,14 @@ public class Reserva {
 
     public void setNoDisponibilidad(NoDisponibilidad noDisponibilidad) {
         this.noDisponibilidad = noDisponibilidad;
+    }
+
+    public Solicitud getSolicitud() {
+        return solicitud;
+    }
+
+    public void setSolicitud(Solicitud solicitud) {
+        this.solicitud = solicitud;
     }
 
     @PrePersist

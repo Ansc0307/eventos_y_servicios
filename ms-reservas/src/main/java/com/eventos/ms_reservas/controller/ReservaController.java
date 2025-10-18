@@ -202,4 +202,41 @@ public class ReservaController {
         boolean hasNoDisp = reservaService.hasNoDisponibilidad(id);
         return ResponseEntity.ok(hasNoDisp);
     }
+
+    @Operation(summary = "Obtener solicitud de una reserva", description = "Obtiene la solicitud asociada a una reserva específica")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Solicitud encontrada"),
+        @ApiResponse(responseCode = "404", description = "Reserva no encontrada o sin solicitud asociada"),
+        @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+    })
+    @GetMapping("/{id}/solicitud")
+    public ResponseEntity<com.eventos.ms_reservas.dto.SolicitudDTO> obtenerSolicitudDeReserva(
+        @Parameter(description = "ID de la reserva", example = "1")
+        @PathVariable Integer id
+    ) {
+        com.eventos.ms_reservas.model.Solicitud solicitud = reservaService.getSolicitudByReserva(id);
+        if (solicitud == null) {
+            throw new ReservaNotFoundException(String.valueOf(id), "Reserva no encontrada o sin solicitud asociada: " + id);
+        }
+        return ResponseEntity.ok(com.eventos.ms_reservas.mapper.SolicitudMapper.toDTO(solicitud));
+    }
+
+    @Operation(summary = "Verificar si reserva tiene solicitud", description = "Verifica si una reserva tiene una solicitud asociada")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Verificación completada"),
+        @ApiResponse(responseCode = "404", description = "Reserva no encontrada"),
+        @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+    })
+    @GetMapping("/{id}/has-solicitud")
+    public ResponseEntity<Boolean> verificarSolicitud(
+        @Parameter(description = "ID de la reserva", example = "1")
+        @PathVariable Integer id
+    ) {
+        // Verificar que la reserva existe
+        if (reservaService.getById(id) == null) {
+            throw new ReservaNotFoundException(String.valueOf(id), "Reserva no encontrada: " + id);
+        }
+        boolean hasSolicitud = reservaService.hasSolicitud(id);
+        return ResponseEntity.ok(hasSolicitud);
+    }
 }

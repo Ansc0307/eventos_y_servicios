@@ -107,4 +107,47 @@ public class SolicitudService {
                 .map(SolicitudMapper::toDTO)
                 .collect(Collectors.toList());
     }
+
+    // ✅ Métodos de navegación de relaciones JPA
+    
+    /**
+     * Obtiene la reserva asociada a una solicitud
+     * @param solicitudId ID de la solicitud
+     * @return Reserva asociada o null si no existe
+     */
+    public com.eventos.ms_reservas.model.Reserva getReservaBySolicitud(Integer solicitudId) {
+        Solicitud solicitud = solicitudRepository.findById(solicitudId).orElse(null);
+        return solicitud != null ? solicitud.getReserva() : null;
+    }
+
+    /**
+     * Verifica si una solicitud tiene una reserva asociada
+     * @param solicitudId ID de la solicitud
+     * @return true si tiene reserva asociada
+     */
+    public boolean hasReserva(Integer solicitudId) {
+        return getReservaBySolicitud(solicitudId) != null;
+    }
+
+    /**
+     * Obtiene todas las solicitudes que tienen reserva asociada
+     * @return Lista de solicitudes con reserva
+     */
+    public List<SolicitudDTO> obtenerConReserva() {
+        return solicitudRepository.findAll().stream()
+                .filter(s -> s.getReserva() != null)
+                .map(SolicitudMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Obtiene todas las solicitudes que NO tienen reserva asociada
+     * @return Lista de solicitudes sin reserva
+     */
+    public List<SolicitudDTO> obtenerSinReserva() {
+        return solicitudRepository.findAll().stream()
+                .filter(s -> s.getReserva() == null)
+                .map(SolicitudMapper::toDTO)
+                .collect(Collectors.toList());
+    }
 }
