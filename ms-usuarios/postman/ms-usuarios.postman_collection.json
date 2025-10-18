@@ -1,0 +1,150 @@
+{
+  "info": {
+    "name": "ms-usuarios (OAuth2.0)",
+    "_postman_id": "4e2d9a6a-7e0e-4b74-8e8f-9f2d0c123abc",
+    "description": "Colección para probar ms-usuarios con OAuth2 Password (Keycloak). Carpeta PROVEEDOR verifica 403 en escritura; ORGANIZADOR verifica 2xx.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "oauth2",
+    "oauth2": [
+      {
+        "key": "password",
+        "value": {
+          "password": "{{provPass}}",
+          "username": "{{provUser}}",
+          "tokenName": "Token PROVEEDOR (OAuth2 Password)",
+          "grant_type": "password",
+          "client_authentication": "header",
+          "accessTokenUrl": "{{tokenUrl}}",
+          "clientId": "{{clientId}}",
+          "clientSecret": "{{clientSecret}}",
+          "scope": "openid"
+        },
+        "type": "password"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "PROVEEDOR",
+      "description": "Requests ejecutadas con token de un usuario rol PROVEEDOR. Lectura permitida, escritura prohibida (403). Usa OAuth2 Password en la colección.",
+      "auth": {
+        "type": "oauth2",
+        "oauth2": [
+          {
+            "key": "password",
+            "value": {
+              "password": "{{provPass}}",
+              "username": "{{provUser}}",
+              "tokenName": "Token PROVEEDOR (OAuth2 Password)",
+              "grant_type": "password",
+              "client_authentication": "header",
+              "accessTokenUrl": "{{tokenUrl}}",
+              "clientId": "{{clientId}}",
+              "clientSecret": "{{clientSecret}}",
+              "scope": "openid"
+            },
+            "type": "password"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "GET /usuarios (200)",
+          "event": [ { "listen": "test", "script": { "exec": ["pm.test('200 OK', function(){ pm.response.to.have.status(200); });"], "type": "text/javascript" } } ],
+          "request": { "method": "GET", "url": "{{baseUrl}}/usuarios" }
+        },
+        {
+          "name": "POST /usuarios (403)",
+          "event": [ { "listen": "test", "script": { "exec": ["pm.test('403 Forbidden', function(){ pm.response.to.have.status(403); });"], "type": "text/javascript" } } ],
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "url": "{{baseUrl}}/usuarios",
+            "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Proveedor X\",\n  \"email\": \"provx@example.com\",\n  \"password\": \"Clave123\",\n  \"rol\": \"PROVEEDOR\"\n}" }
+          }
+        },
+        {
+          "name": "PATCH /usuarios/{id} (403)",
+          "event": [ { "listen": "test", "script": { "exec": ["pm.test('403 Forbidden', function(){ pm.response.to.have.status(403); });"], "type": "text/javascript" } } ],
+          "request": {
+            "method": "PATCH",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "url": "{{baseUrl}}/usuarios/1",
+            "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Prov Edit\"\n}" }
+          }
+        },
+        {
+          "name": "DELETE /usuarios/{id} (403)",
+          "event": [ { "listen": "test", "script": { "exec": ["pm.test('403 Forbidden', function(){ pm.response.to.have.status(403); });"], "type": "text/javascript" } } ],
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/usuarios/1" }
+        }
+      ]
+    },
+    {
+      "name": "ORGANIZADOR",
+      "description": "Requests ejecutadas con token de un usuario rol ORGANIZADOR. Lectura y escritura permitidas (2xx). Usa OAuth2 Password en la carpeta.",
+      "auth": {
+        "type": "oauth2",
+        "oauth2": [
+          {
+            "key": "password",
+            "value": {
+              "password": "{{orgPass}}",
+              "username": "{{orgUser}}",
+              "tokenName": "Token ORGANIZADOR (OAuth2 Password)",
+              "grant_type": "password",
+              "client_authentication": "header",
+              "accessTokenUrl": "{{tokenUrl}}",
+              "clientId": "{{clientId}}",
+              "clientSecret": "{{clientSecret}}",
+              "scope": "openid"
+            },
+            "type": "password"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "GET /usuarios (200)",
+          "event": [ { "listen": "test", "script": { "exec": ["pm.test('200 OK', function(){ pm.response.to.have.status(200); });"], "type": "text/javascript" } } ],
+          "request": { "method": "GET", "url": "{{baseUrl}}/usuarios" }
+        },
+        {
+          "name": "POST /usuarios (201)",
+          "event": [ { "listen": "test", "script": { "exec": ["pm.test('201 Created', function(){ pm.response.to.have.status(201); });"], "type": "text/javascript" } } ],
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "url": "{{baseUrl}}/usuarios",
+            "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Organizador X\",\n  \"email\": \"orgx@example.com\",\n  \"password\": \"Clave123\",\n  \"rol\": \"ORGANIZADOR\"\n}" }
+          }
+        },
+        {
+          "name": "PATCH /usuarios/{id} (200/204)",
+          "event": [ { "listen": "test", "script": { "exec": ["pm.test('2xx', function(){ pm.expect(pm.response.code).to.be.oneOf([200,204]); });"], "type": "text/javascript" } } ],
+          "request": {
+            "method": "PATCH",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "url": "{{baseUrl}}/usuarios/1",
+            "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Org Edit\"\n}" }
+          }
+        },
+        {
+          "name": "DELETE /usuarios/{id} (200/204)",
+          "event": [ { "listen": "test", "script": { "exec": ["pm.test('2xx', function(){ pm.expect(pm.response.code).to.be.oneOf([200,204]); });"], "type": "text/javascript" } } ],
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/usuarios/1" }
+        }
+      ]
+    },
+    {
+      "name": "SIN TOKEN",
+      "description": "Ejemplos que deben fallar con 401 (sin Authorization).",
+      "item": [
+        { "name": "GET /usuarios (401)", "request": { "method": "GET", "url": "{{baseUrl}}/usuarios" },
+          "event": [ { "listen": "test", "script": { "exec": ["pm.test('401 Unauthorized', function(){ pm.response.to.have.status(401); });"], "type": "text/javascript" } } ] }
+      ]
+    }
+  ]
+}
