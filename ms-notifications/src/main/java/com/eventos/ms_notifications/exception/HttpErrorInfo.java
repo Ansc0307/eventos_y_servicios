@@ -1,24 +1,42 @@
 package com.eventos.ms_notifications.exception;
 
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import org.springframework.http.HttpStatus;
 
 public class HttpErrorInfo {
-    private final ZonedDateTime timestamp;
-    private final String path;
-    private final HttpStatus httpStatus;
-    private final String message;
 
-    public HttpErrorInfo(HttpStatus httpStatus, String path, String message) {
-        this.timestamp = ZonedDateTime.now();
-        this.httpStatus = httpStatus;
+    private final String timestamp;
+    private final String path;
+    private final String message;
+    private final int status;
+    private final String error;
+
+    public HttpErrorInfo(HttpStatus status, String path, String message) {
+        this.timestamp = ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
         this.path = path;
+        this.status = status.value();
+        this.error = status.getReasonPhrase();
         this.message = message;
     }
 
-    public ZonedDateTime getTimestamp() { return timestamp; }
-    public String getPath() { return path; }
-    public int getStatus() { return httpStatus.value(); }
-    public String getError() { return httpStatus.getReasonPhrase(); }
-    public String getMessage() { return message; }
+    public String getTimestamp() {
+        return timestamp;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public String getError() {
+        return error;
+    }
+
+    public String getMessage() {
+        return message;
+    }
 }
