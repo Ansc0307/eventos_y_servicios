@@ -155,6 +155,28 @@ services:
       - "8087:8087"
     networks:
       - eventos-net
+  # Microservicio de gateway (edge server)
+  ms-edge-server:
+    build: ./ms-edge-server
+    container_name: ms_edge_server
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    networks:
+      - eventos-net
+    environment:
+      SPRING_CLOUD_DISCOVERY_ENABLED: 'false'
+      SPRING_CLOUD_CONFIG_ENABLED: 'false'
+      SPRING_PROFILES_ACTIVE: docker
+    depends_on:
+      ms-usuarios:
+        condition: service_started
+      ms-reservas:
+        condition: service_started
+      ms-ofertas:
+        condition: service_started
+      ms-notifications:
+        condition: service_started
 
 networks:
   eventos-net:
