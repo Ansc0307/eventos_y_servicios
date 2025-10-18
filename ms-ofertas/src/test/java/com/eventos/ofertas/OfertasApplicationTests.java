@@ -12,14 +12,15 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @Testcontainers
 class OfertasApplicationTests {
 
-    // 🔹 Inicia un contenedor PostgreSQL antes de los tests
-    @Container
+    //Inicia un contenedor PostgreSQL antes de los tests
+    @SuppressWarnings("resource")
+	@Container
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine")
             .withDatabaseName("testdb")
             .withUsername("postgres")
             .withPassword("admin");
 
-    // 🔹 Spring usará los datos del contenedor en vez del application.properties
+    //Spring usará los datos del contenedor en vez del application.properties
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.datasource.url", postgres::getJdbcUrl);
