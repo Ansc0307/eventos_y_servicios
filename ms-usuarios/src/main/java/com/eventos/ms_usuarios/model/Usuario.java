@@ -2,6 +2,8 @@ package com.eventos.ms_usuarios.model;
 
 import jakarta.persistence.*;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "usuarios", uniqueConstraints = {
@@ -26,11 +28,24 @@ public class Usuario {
   @Column(nullable = false, length = 20)
   private RolUsuario rol;
 
+  @Column(nullable = false)
+  private boolean activo = true;
+
+  @Column(length = 20)
+  private String telefono;
+
   @Column(nullable = false, updatable = false)
   private Instant creadoEn;
 
   @Column(nullable = false)
   private Instant actualizadoEn;
+
+  // Relación inversa: un usuario puede tener muchos registros de login
+  // No cambia el esquema porque el lado propietario ya existe en UsuarioLoginLog
+  // (usuario_id)
+  @OneToMany(mappedBy = "usuario", fetch = FetchType.LAZY)
+  @OrderBy("creadoEn DESC")
+  private List<UsuarioLoginLog> loginLogs = new ArrayList<>();
 
   public Usuario() {
   }
@@ -94,11 +109,35 @@ public class Usuario {
     this.rol = rol;
   }
 
+  public boolean isActivo() {
+    return activo;
+  }
+
+  public void setActivo(boolean activo) {
+    this.activo = activo;
+  }
+
+  public String getTelefono() {
+    return telefono;
+  }
+
+  public void setTelefono(String telefono) {
+    this.telefono = telefono;
+  }
+
   public Instant getCreadoEn() {
     return creadoEn;
   }
 
   public Instant getActualizadoEn() {
     return actualizadoEn;
+  }
+
+  public List<UsuarioLoginLog> getLoginLogs() {
+    return loginLogs;
+  }
+
+  public void setLoginLogs(List<UsuarioLoginLog> loginLogs) {
+    this.loginLogs = loginLogs;
   }
 }
