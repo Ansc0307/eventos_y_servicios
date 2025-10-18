@@ -7,25 +7,39 @@ spring:
 
   cloud:
     gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
       routes:
         - id: ms-notifications
-          uri: http://ms-notifications:8087
+          #uri: http://ms-notifications:8087
+          uri: lb://ms-notifications
           predicates:
             - Path=/notifications/**
 
 
         - id: ms-ofertas
-          uri: http://ms-ofertas:8083
+          #uri: http://ms-ofertas:8083
+          uri: lb://ms-ofertas
           predicates:
             - Path=/ofertas/**
 
 
         - id: ms-reservas
-          uri: http://ms-reservas:8082
+          #uri: http://ms-reservas:8082
+          uri: lb://ms-reservas
           predicates:
             - Path=/reservas/**
 
         - id: ms-usuarios
-          uri: http://ms-usuarios:8081
+          #uri: http://ms-usuarios:8081
+          uri: lb://ms-usuarios
           predicates:
             - Path=/usuarios/**
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka-server:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true

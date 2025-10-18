@@ -190,10 +190,10 @@ services:
     networks:
       - eventos-net
     environment:
-      SPRING_CLOUD_DISCOVERY_ENABLED: 'false'
-      SPRING_CLOUD_CONFIG_ENABLED: 'false'
-      SPRING_PROFILES_ACTIVE: docker
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
     depends_on:
+      eureka-server:
+        condition: service_healthy
       ms-usuarios:
         condition: service_started
       ms-reservas:
