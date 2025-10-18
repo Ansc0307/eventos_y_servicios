@@ -2,6 +2,7 @@ package com.eventos.ms_usuarios.service;
 
 import com.eventos.ms_usuarios.dto.UsuarioCreacionDto;
 import com.eventos.ms_usuarios.dto.UsuarioDto;
+import com.eventos.ms_usuarios.dto.UsuarioActualizacionDto;
 import com.eventos.ms_usuarios.model.Usuario;
 import com.eventos.ms_usuarios.repository.UsuarioRepository;
 import com.eventos.ms_usuarios.exception.EmailDuplicadoException;
@@ -112,6 +113,23 @@ public class UsuarioService {
   }
 
   @Transactional(readOnly = true)
+  public Page<UsuarioDto> listarActivos(Pageable pageable) {
+    return usuarioRepository.findByActivoTrue(pageable)
+        .map(u -> {
+          UsuarioDto d = new UsuarioDto();
+          d.setId(u.getId());
+          d.setNombre(u.getNombre());
+          d.setEmail(u.getEmail());
+          d.setTelefono(u.getTelefono());
+          d.setRol(u.getRol());
+          d.setActivo(u.isActivo());
+          d.setCreadoEn(u.getCreadoEn());
+          d.setActualizadoEn(u.getActualizadoEn());
+          return d;
+        });
+  }
+
+  @Transactional(readOnly = true)
   public Page<UsuarioDto> listar(Pageable pageable,
       String nombre,
       String email,
@@ -157,6 +175,79 @@ public class UsuarioService {
           d.setActualizadoEn(u.getActualizadoEn());
           return d;
         });
+  }
+
+  @Transactional(readOnly = true)
+  public Page<UsuarioDto> listarPorDominioEmail(Pageable pageable, String dominio) {
+    return usuarioRepository.buscarPorDominioEmail(dominio, pageable)
+        .map(u -> {
+          UsuarioDto d = new UsuarioDto();
+          d.setId(u.getId());
+          d.setNombre(u.getNombre());
+          d.setEmail(u.getEmail());
+          d.setTelefono(u.getTelefono());
+          d.setRol(u.getRol());
+          d.setActivo(u.isActivo());
+          d.setCreadoEn(u.getCreadoEn());
+          d.setActualizadoEn(u.getActualizadoEn());
+          return d;
+        });
+  }
+
+  @Transactional
+  public void desactivarUsuario(Long id) {
+    Usuario u = usuarioRepository.findById(id)
+        .orElseThrow(() -> new RecursoNoEncontradoException("Usuario", id));
+    if (u.isActivo()) {
+      u.setActivo(false);
+      usuarioRepository.save(u);
+    }
+  }
+
+  @Transactional
+  public UsuarioDto activarUsuario(Long id) {
+    Usuario u = usuarioRepository.findById(id)
+        .orElseThrow(() -> new RecursoNoEncontradoException("Usuario", id));
+    if (!u.isActivo()) {
+      u.setActivo(true);
+      usuarioRepository.save(u);
+    }
+    UsuarioDto d = new UsuarioDto();
+    d.setId(u.getId());
+    d.setNombre(u.getNombre());
+    d.setEmail(u.getEmail());
+    d.setTelefono(u.getTelefono());
+    d.setRol(u.getRol());
+    d.setActivo(u.isActivo());
+    d.setCreadoEn(u.getCreadoEn());
+    d.setActualizadoEn(u.getActualizadoEn());
+    return d;
+  }
+
+  @Transactional
+  public UsuarioDto actualizarParcial(Long id, UsuarioActualizacionDto dto) {
+    Usuario u = usuarioRepository.findById(id)
+        .orElseThrow(() -> new RecursoNoEncontradoException("Usuario", id));
+    if (dto.getNombre() != null) {
+      u.setNombre(dto.getNombre());
+    }
+    if (dto.getTelefono() != null) {
+      u.setTelefono(dto.getTelefono());
+    }
+    if (dto.getRol() != null) {
+      u.setRol(dto.getRol());
+    }
+    Usuario guardado = usuarioRepository.save(u);
+    UsuarioDto d = new UsuarioDto();
+    d.setId(guardado.getId());
+    d.setNombre(guardado.getNombre());
+    d.setEmail(guardado.getEmail());
+    d.setTelefono(guardado.getTelefono());
+    d.setRol(guardado.getRol());
+    d.setActivo(guardado.isActivo());
+    d.setCreadoEn(guardado.getCreadoEn());
+    d.setActualizadoEn(guardado.getActualizadoEn());
+    return d;
   }
 
   private boolean esPasswordFuerte(String pwd) {
