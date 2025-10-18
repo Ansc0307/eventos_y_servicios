@@ -5,7 +5,7 @@ services:
     image: ms-notifications:latest
     container_name: ms-notifications
     build:
-      context: ./ms-notifications
+      context: .
       dockerfile: Dockerfile
     ports:
       - "8087:8087"
