@@ -37,4 +37,12 @@ List<NoDisponibilidad> findActivasByOferta(@Param("idOferta") Integer idOferta);
     List<NoDisponibilidad> findConflictosDeFecha(
             @Param("inicio") LocalDateTime inicio,
             @Param("fin") LocalDateTime fin);
+
+ // 🔹 MÉTODOS NUEVOS (Native Query)
+    // ------------------------------------------------------------------
+
+    // Buscar por motivo (ignora mayúsculas/minúsculas)
+    @Query(value = "SELECT * FROM no_disponibilidad n WHERE LOWER(n.motivo) LIKE LOWER(CONCAT('%', :motivo, '%'))",
+           nativeQuery = true)
+    List<NoDisponibilidad> findByMotivoNative(@Param("motivo") String motivo);
 }
