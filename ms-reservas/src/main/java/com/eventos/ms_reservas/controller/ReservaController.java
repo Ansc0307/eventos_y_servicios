@@ -165,4 +165,41 @@ public class ReservaController {
             throw new IllegalArgumentException("Formato de fecha inválido. Use ISO_LOCAL_DATE_TIME, por ejemplo: 2025-10-17T14:30:00");
         }
     }
+
+    @Operation(summary = "Obtener no disponibilidad de una reserva", description = "Obtiene la no disponibilidad asociada a una reserva específica")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "No disponibilidad encontrada"),
+        @ApiResponse(responseCode = "404", description = "Reserva no encontrada o sin no disponibilidad asociada"),
+        @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+    })
+    @GetMapping("/{id}/no-disponibilidad")
+    public ResponseEntity<com.eventos.ms_reservas.dto.NoDisponibilidadDTO> obtenerNoDisponibilidadDeReserva(
+        @Parameter(description = "ID de la reserva", example = "1")
+        @PathVariable Integer id
+    ) {
+        com.eventos.ms_reservas.model.NoDisponibilidad noDisp = reservaService.getNoDisponibilidadByReserva(id);
+        if (noDisp == null) {
+            throw new ReservaNotFoundException(String.valueOf(id), "Reserva no encontrada o sin no disponibilidad asociada: " + id);
+        }
+        return ResponseEntity.ok(com.eventos.ms_reservas.mapper.NoDisponibilidadMapper.toDTO(noDisp));
+    }
+
+    @Operation(summary = "Verificar si reserva tiene no disponibilidad", description = "Verifica si una reserva tiene una no disponibilidad asociada")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Verificación completada"),
+        @ApiResponse(responseCode = "404", description = "Reserva no encontrada"),
+        @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+    })
+    @GetMapping("/{id}/has-no-disponibilidad")
+    public ResponseEntity<Boolean> verificarNoDisponibilidad(
+        @Parameter(description = "ID de la reserva", example = "1")
+        @PathVariable Integer id
+    ) {
+        // Verificar que la reserva existe
+        if (reservaService.getById(id) == null) {
+            throw new ReservaNotFoundException(String.valueOf(id), "Reserva no encontrada: " + id);
+        }
+        boolean hasNoDisp = reservaService.hasNoDisponibilidad(id);
+        return ResponseEntity.ok(hasNoDisp);
+    }
 }

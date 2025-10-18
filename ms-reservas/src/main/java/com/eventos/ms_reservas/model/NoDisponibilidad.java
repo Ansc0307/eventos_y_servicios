@@ -2,12 +2,7 @@ package com.eventos.ms_reservas.model;
 
 import java.time.LocalDateTime;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "no_disponibilidad")
@@ -32,6 +27,11 @@ public class NoDisponibilidad {
 
     @Column(name = "id_reserva")
     private Integer idReserva;
+
+    // Relación OneToOne con Reserva
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_reserva", referencedColumnName = "id_reserva", insertable = false, updatable = false)
+    private Reserva reserva;
 
     
 
@@ -82,5 +82,13 @@ public class NoDisponibilidad {
 
     public void setIdReserva(Integer idReserva) {
         this.idReserva = idReserva;
+    }
+
+    public Reserva getReserva() {
+        return reserva;
+    }
+
+    public void setReserva(Reserva reserva) {
+        this.reserva = reserva;
     }
 }

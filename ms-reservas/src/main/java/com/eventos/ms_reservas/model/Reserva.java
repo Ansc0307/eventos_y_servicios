@@ -11,6 +11,7 @@ public class Reserva {
     @Column(name = "id_reserva")
     private Integer idReserva;
 
+    // Relación conceptual OneToOne con Solicitud (entidad externa en otro microservicio)
     @Column(name = "id_solicitud", nullable = false)
     private Integer idSolicitud;
 
@@ -28,6 +29,10 @@ public class Reserva {
 
     @Column(name = "fecha_actualizacion", nullable = false)
     private LocalDateTime fechaActualizacion;
+
+    // Relación OneToOne con NoDisponibilidad
+    @OneToOne(mappedBy = "reserva", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private NoDisponibilidad noDisponibilidad;
 
     public Reserva() {}
 
@@ -99,6 +104,14 @@ public class Reserva {
 
     public void setFechaActualizacion(LocalDateTime fechaActualizacion) {
         this.fechaActualizacion = fechaActualizacion;
+    }
+
+    public NoDisponibilidad getNoDisponibilidad() {
+        return noDisponibilidad;
+    }
+
+    public void setNoDisponibilidad(NoDisponibilidad noDisponibilidad) {
+        this.noDisponibilidad = noDisponibilidad;
     }
 
     @PrePersist
