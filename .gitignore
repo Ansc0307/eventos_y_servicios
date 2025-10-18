@@ -1,89 +1,79 @@
-<<<<<<< HEAD
-HELP.md
-target/
-.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
+# =========================================
+# Archivos y carpetas generados (Java/Maven)
+# =========================================
+**/target/
+**/out/
+**/build/
+**/dependency-reduced-pom.xml
 
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
-
-### IntelliJ IDEA ###
-.idea
-*.iws
-*.iml
-*.ipr
-
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
-
-### VS Code ###
-.vscode/
-=======
-# Compilación
-target/
-build/
-out/
-
-# Archivos de dependencias
+# Archivos temporales de compilación
 *.class
 *.jar
 *.war
 *.ear
-
-# Logs
 *.log
 
-# IDEs
-# IntelliJ
-.idea/
+# =========================================
+# Configuración de IDEs
+# =========================================
+# IntelliJ IDEA
+**/.idea/
 *.iml
-*.iws
 *.ipr
+*.iws
 
-# Eclipse
-.project
-.classpath
-.settings/
-bin/
+# Eclipse / STS
+**/.classpath
+**/.project
+**/.settings/
 
 # VS Code
-.vscode/
+**/.vscode/
 
+# NetBeans
+**/nbproject/private/
+**/build/
+**/nbbuild/
+**/dist/
+**/nbdist/
+**/.nb-gradle/
+
+# =========================================
 # Sistema operativo
+# =========================================
 .DS_Store
 Thumbs.db
+ehthumbs.db
+desktop.ini
 
-# Archivos temporales
-*.tmp
-*.swp
-*.swo
-*~
-
+# =========================================
 # Maven Wrapper
+# =========================================
+# (mantén los scripts mvnw, pero ignora los ejecutables generados)
 .mvn/wrapper/maven-wrapper.jar
-.mvn/wrapper/maven-wrapper.properties
+!mvnw
+!mvnw.cmd
 
-# Gradle Wrapper
-.gradle/
-gradle-app.setting
-!gradle-wrapper.jar
+# =========================================
+# Archivos de logs y datos temporales
+# =========================================
+**/*.log
+**/*.tmp
+**/*.bak
+**/*.swp
 
-# Archivos de configuración sensibles
-#application-*.yml
-#application-*.yaml
-#application-*.properties
->>>>>>> 93913004ec563f4dfa69804b2fe911e83659f9c9
+# =========================================
+# Configuración de entorno local
+# =========================================
+.env
+.env.*
+**/application-local.yml
+**/application-local.properties
+
+# =========================================
+# Archivos del sistema o de herramientas CI/CD
+# =========================================
+**/test-output/
+**/surefire-reports/
+**/jacoco.exec
+**/.DS_Store

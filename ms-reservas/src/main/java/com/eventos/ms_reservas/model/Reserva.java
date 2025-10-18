@@ -14,8 +14,8 @@ public class Reserva {
     @Column(name = "id_solicitud", nullable = false)
     private Integer idSolicitud;
 
-    // Relación OneToOne con Solicitud
-    @OneToOne(fetch = FetchType.LAZY)
+    // Relación OneToOne con Solicitud (opcional)
+    @OneToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name = "id_solicitud", referencedColumnName = "id_solicitud", insertable = false, updatable = false)
     private Solicitud solicitud;
 
