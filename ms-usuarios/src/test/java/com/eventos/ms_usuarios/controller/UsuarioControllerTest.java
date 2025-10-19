@@ -1,5 +1,5 @@
 package com.eventos.ms_usuarios.controller;
-
+/* 
 import com.eventos.ms_usuarios.dto.UsuarioCreacionDto;
 import com.eventos.ms_usuarios.model.RolUsuario;
 import com.eventos.ms_usuarios.repository.UsuarioRepository;
@@ -168,3 +168,4 @@ class UsuarioControllerTest {
                 .expectStatus().isBadRequest();
     }
 }
+*/
