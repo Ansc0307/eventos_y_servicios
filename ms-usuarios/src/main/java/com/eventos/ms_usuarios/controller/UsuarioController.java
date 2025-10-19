@@ -183,7 +183,7 @@ public class UsuarioController {
       @ApiResponse(responseCode = "404", description = "Usuario no encontrado")
   })
   @PatchMapping("/{id}")
-  @PreAuthorize("hasRole('ORGANIZADOR')")
+  @PreAuthorize("hasAnyRole('ADMIN','ORGANIZADOR')")
   @SecurityRequirement(name = "bearerAuth")
   public ResponseEntity<UsuarioDto> actualizarParcial(
       @Parameter(description = "ID del usuario", example = "1", required = true) @PathVariable Long id,

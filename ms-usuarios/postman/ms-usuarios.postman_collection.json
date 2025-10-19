@@ -139,6 +139,46 @@
       ]
     },
     {
+      "name": "ADMIN",
+      "description": "Requests con token de un usuario rol ADMIN. Lectura y escritura permitidas (2xx). Usa OAuth2 Password.",
+      "auth": {
+        "type": "oauth2",
+        "oauth2": [
+          {
+            "key": "password",
+            "value": {
+              "password": "{{adminPass}}",
+              "username": "{{adminUser}}",
+              "tokenName": "Token ADMIN (OAuth2 Password)",
+              "grant_type": "password",
+              "client_authentication": "header",
+              "accessTokenUrl": "{{tokenUrl}}",
+              "clientId": "{{clientId}}",
+              "clientSecret": "{{clientSecret}}",
+              "scope": "openid"
+            },
+            "type": "password"
+          }
+        ]
+      },
+      "item": [
+        { "name": "GET /usuarios (200)",
+          "event": [ { "listen": "test", "script": { "exec": ["pm.test('200 OK', function(){ pm.response.to.have.status(200); });"], "type": "text/javascript" } } ],
+          "request": { "method": "GET", "url": "{{baseUrl}}/usuarios" } },
+        { "name": "POST /usuarios (201)",
+          "event": [ { "listen": "test", "script": { "exec": ["pm.test('201 Created', function(){ pm.response.to.have.status(201); });"], "type": "text/javascript" } } ],
+          "request": { "method": "POST", "header": [ { "key": "Content-Type", "value": "application/json" } ], "url": "{{baseUrl}}/usuarios",
+            "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Admin X\",\n  \"email\": \"adminx@example.com\",\n  \"password\": \"Clave123\",\n  \"rol\": \"ORGANIZADOR\"\n}" } } },
+        { "name": "PATCH /usuarios/{id} (2xx)",
+          "event": [ { "listen": "test", "script": { "exec": ["pm.test('2xx', function(){ pm.expect(pm.response.code).to.be.oneOf([200,204]); });"], "type": "text/javascript" } } ],
+          "request": { "method": "PATCH", "header": [ { "key": "Content-Type", "value": "application/json" } ], "url": "{{baseUrl}}/usuarios/1",
+            "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Admin Edit\"\n}" } } },
+        { "name": "DELETE /usuarios/{id} (2xx)",
+          "event": [ { "listen": "test", "script": { "exec": ["pm.test('2xx', function(){ pm.expect(pm.response.code).to.be.oneOf([200,204]); });"], "type": "text/javascript" } } ],
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/usuarios/1" } }
+      ]
+    },
+    {
       "name": "SIN TOKEN",
       "description": "Ejemplos que deben fallar con 401 (sin Authorization).",
       "item": [

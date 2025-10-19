@@ -22,10 +22,13 @@ COPY --from=build /app/target/*-SNAPSHOT.jar /app/app.jar
 ENV PORT=8081
 EXPOSE 8081
 
-# Default DB envs (override in compose or env)
-ENV DB_URL=jdbc:postgresql://localhost:5432/usuarios_eventos_db \
+# Default envs to work out-of-the-box hitting services on the host machine.
+# - DB at host.docker.internal:5432 (published by docker compose)
+# - Keycloak JWKS at host.docker.internal:8090 (avoids issuer mismatch inside container)
+ENV DB_URL=jdbc:postgresql://host.docker.internal:5432/usuarios_eventos_db \
     DB_USERNAME=postgres \
-    DB_PASSWORD=admin
+    DB_PASSWORD=admin \
+    SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI=http://host.docker.internal:8090/realms/eventos/protocol/openid-connect/certs
 
 # Run the app
 ENTRYPOINT ["java","-jar","/app/app.jar"]
