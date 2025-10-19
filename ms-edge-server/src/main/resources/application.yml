@@ -46,6 +46,36 @@ spring.cloud.gateway.routes:
   filters:
     - StripPrefix=1
 
+# === SWAGGER DEL MS-USUARIOS ===
+- id: ms-usuarios-swagger-ui
+  uri: lb://ms-usuarios
+  predicates:
+    - Path=/ms-usuarios/openapi/swagger-ui/**
+  filters:
+    - name: RewritePath
+      args:
+        regexp: "/ms-usuarios/openapi/(?<segment>.*)"
+        replacement: "/openapi/${segment}"
+
+- id: ms-usuarios-swagger-docs
+  uri: lb://ms-usuarios
+  predicates:
+    - Path=/ms-usuarios/openapi/v3/api-docs/**
+  filters:
+    - name: RewritePath
+      args:
+        regexp: "/ms-usuarios/openapi/v3/api-docs/(?<segment>.*)"
+        replacement: "/openapi/v3/api-docs/${segment}"
+
+- id: ms-usuarios-swagger-config
+  uri: lb://ms-usuarios
+  predicates:
+    - Path=/ms-usuarios/openapi/v3/api-docs/swagger-config
+  filters:
+    - name: RewritePath
+      args:
+        regexp: "/ms-usuarios/openapi/v3/api-docs/swagger-config"
+        replacement: "/openapi/v3/api-docs/swagger-config"
 logging:
   level:
     org.springframework.cloud.gateway: TRACE
