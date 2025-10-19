@@ -1,45 +1,52 @@
-server:
-  port: 8080
+server.port: 8080
 
-spring:
-  application:
-    name: edge-server
+spring.application.name: edge-server
 
-  cloud:
-    gateway:
-      discovery:
-        locator:
-          enabled: true
-          lower-case-service-id: true
-      routes:
-        - id: ms-notifications
-          #uri: http://ms-notifications:8087
-          uri: lb://ms-notifications
-          predicates:
-            - Path=/notifications/**
+app.eureka-server: eureka-server
 
-
-        - id: ms-ofertas
-          #uri: http://ms-ofertas:8083
-          uri: lb://ms-ofertas
-          predicates:
-            - Path=/ofertas/**
-
-
-        - id: ms-reservas
-          #uri: http://ms-reservas:8082
-          uri: lb://ms-reservas
-          predicates:
-            - Path=/reservas/**
-
-        - id: ms-usuarios
-          #uri: http://ms-usuarios:8081
-          uri: lb://ms-usuarios
-          predicates:
-            - Path=/usuarios/**
 eureka:
   client:
-    service-url:
-      defaultZone: http://eureka-server:8761/eureka/
-    register-with-eureka: true
-    fetch-registry: true
+    serviceUrl:
+      defaultZone: http://${app.eureka-server}:8761/eureka/
+    registerWithEureka: true
+    fetchRegistry: true
+  instance:
+    leaseRenewalIntervalInSeconds: 5
+    leaseExpirationDurationInSeconds: 5
+
+spring.cloud.gateway.discovery.locator.enabled: true
+spring.cloud.gateway.discovery.locator.lower-case-service-id: true
+
+spring.cloud.gateway.routes:
+- id: ms-notifications
+  uri: lb://ms-notifications
+  predicates:
+    - Path=/notifications/**
+  filters:
+    - StripPrefix=1
+
+- id: ms-ofertas
+  uri: lb://ms-ofertas
+  predicates:
+    - Path=/ofertas/**
+  filters:
+    - StripPrefix=1
+
+- id: ms-reservas
+  uri: lb://ms-reservas
+  predicates:
+    - Path=/reservas/**
+  filters:
+    - StripPrefix=1
+
+- id: ms-usuarios
+  uri: lb://ms-usuarios
+  predicates:
+    - Path=/usuarios/**
+  filters:
+    - StripPrefix=1
+
+logging:
+  level:
+    org.springframework.cloud.gateway: TRACE
+    org.springframework.cloud.loadbalancer: TRACE
