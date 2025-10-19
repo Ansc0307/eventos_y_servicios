@@ -180,6 +180,28 @@ services:
       - "8087:8087"
     networks:
       - eventos-net
+  # Microservicio de gateway (edge server)
+  ms-edge-server:
+    build: ./ms-edge-server
+    container_name: ms_edge_server
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    networks:
+      - eventos-net
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      ms-usuarios:
+        condition: service_started
+      ms-reservas:
+        condition: service_started
+      ms-ofertas:
+        condition: service_started
+      ms-notifications:
+        condition: service_started
 
 networks:
   eventos-net:
