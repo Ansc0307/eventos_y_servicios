@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.support.WebExchangeBindException;
+import org.springframework.web.reactive.resource.NoResourceFoundException;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 
 import reactor.core.publisher.Mono;
 
@@ -112,6 +114,18 @@ public class GlobalExceptionHandler {
     }
 
     // ---------- General ----------
+    @ExceptionHandler(NoResourceFoundException.class)
+    public Mono<ResponseEntity<Map<String, Object>>> handleNoResourceFound(NoResourceFoundException ex,
+            ServerHttpRequest request) {
+        LOG.warn("Recurso estático no encontrado: {}", ex.getMessage());
+        Map<String, Object> error = new HashMap<>();
+        error.put("error", ex.getMessage());
+        error.put("path", request.getURI().getPath());
+        error.put("status", HttpStatus.NOT_FOUND.value());
+        error.put("exceptionType", ex.getClass().getSimpleName());
+        return Mono.just(ResponseEntity.status(HttpStatus.NOT_FOUND).body(error));
+    }
+
     @ExceptionHandler(Exception.class)
     public Mono<ResponseEntity<Map<String, String>>> handleGeneral(Exception ex) {
         LOG.error("Error inesperado: {}", ex.getMessage(), ex);
@@ -119,4 +133,14 @@ public class GlobalExceptionHandler {
         error.put("error", "Error interno del servidor");
         return Mono.just(new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR));
     }
+// ✅ Nueva excepción para reservas cuando la solicitud no existe
+@ExceptionHandler(SolicitudNoExisteException.class)
+public Mono<ResponseEntity<Map<String, Object>>> handleSolicitudNoExiste(SolicitudNoExisteException ex) {
+    LOG.warn("Solicitud no existe: {}", ex.getMessage());
+    Map<String, Object> error = new HashMap<>();
+    error.put("error", ex.getMessage());
+    error.put("path", "/v1/reservas"); // puedes personalizar según tu endpoint
+    return Mono.just(ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(error));
+}
+
 }
