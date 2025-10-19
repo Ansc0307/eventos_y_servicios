@@ -1,7 +1,12 @@
 springdoc:
-  # Rutas personalizadas para Swagger UI y los docs JSON
-  swagger-ui.path: /openapi/swagger-ui.html
-  api-docs.path: /openapi/v3/api-docs
+  swagger-ui:
+    path: /openapi/swagger-ui.html
+    config-url: /ms-usuarios/openapi/v3/api-docs/swagger-config
+    urls:
+      - name: API Usuarios
+        url: /ms-usuarios/openapi/v3/api-docs
+  api-docs:
+    path: /openapi/v3/api-docs
   packagesToScan: com.eventos.ms_usuarios.controller
   pathsToMatch: /**
 
