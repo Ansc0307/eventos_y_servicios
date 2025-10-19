@@ -1,0 +1,218 @@
+
+
+services:
+
+  eureka-server:
+    build:
+      context: ./eureka-server
+      dockerfile: Dockerfile
+    container_name: eureka-server
+    ports:
+      - "8761:8761"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+    networks:
+      - eventos-net
+  # Base de datos para usuarios
+  usuarios-db:
+    image: postgres:16
+    container_name: usuarios_db
+    restart: unless-stopped
+    
+    environment:
+      POSTGRES_DB: usuarios_eventos_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5431:5432"
+    volumes:
+      - usuarios_pg_data:/var/lib/postgresql/data
+    networks:
+      - eventos-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d usuarios_eventos_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Base de datos para reservas
+  reservas-db:
+    image: postgres:15-alpine
+    container_name: reservas_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: reservas_db
+      POSTGRES_USER: reservas_user
+      POSTGRES_PASSWORD: reservas_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - reservas_pg_data:/var/lib/postgresql/data
+    networks:
+      - eventos-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U reservas_user -d reservas_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Base de datos para ofertas
+  ofertas-db:
+    image: postgres:13
+    container_name: ofertas_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ms-ofertas
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5433:5432"
+    volumes:
+      - ofertas_pg_data:/var/lib/postgresql/data
+    networks:
+      - eventos-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ms-ofertas"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Base de datos para notificaciones
+  notifications-db:
+    image: postgres:16-alpine
+    container_name: notifications_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: notifications_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5434:5432"
+    volumes:
+      - notifications_pg_data:/var/lib/postgresql/data
+    networks:
+      - eventos-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d notifications_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Microservicio de usuarios
+  ms-usuarios:
+    build: ./ms-usuarios
+    container_name: ms_usuarios
+    restart: unless-stopped
+    depends_on:
+      usuarios-db:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:postgresql://usuarios-db:5432/usuarios_eventos_db
+      DB_USERNAME: postgres
+      DB_PASSWORD: admin
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+    ports:
+      - "8081:8081"
+    networks:
+      - eventos-net
+
+  # Microservicio de reservas
+  ms-reservas:
+    build: ./ms-reservas
+    container_name: ms_reservas
+    restart: unless-stopped
+    depends_on:
+      reservas-db:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://reservas-db:5432/reservas_db
+      SPRING_DATASOURCE_USERNAME: reservas_user
+      SPRING_DATASOURCE_PASSWORD: reservas_password
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+    ports:
+      - "8082:8082"
+    networks:
+      - eventos-net
+
+  # Microservicio de ofertas
+  ms-ofertas:
+    build: ./ms-ofertas
+    container_name: ms_ofertas
+    restart: unless-stopped
+    depends_on:
+      ofertas-db:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://ofertas-db:5432/ms-ofertas
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: admin
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+    ports:
+      - "8083:8083"
+    networks:
+      - eventos-net
+
+  # Microservicio de notificaciones
+  ms-notifications:
+    build: ./ms-notifications
+    container_name: ms_notifications
+    restart: unless-stopped
+    depends_on:
+      notifications-db:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://notifications-db:5432/notifications_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: admin
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+    ports:
+      - "8087:8087"
+    networks:
+      - eventos-net
+  # Microservicio de gateway (edge server)
+  ms-edge-server:
+    build: ./ms-edge-server
+    container_name: ms_edge_server
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    networks:
+      - eventos-net
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      ms-usuarios:
+        condition: service_started
+      ms-reservas:
+        condition: service_started
+      ms-ofertas:
+        condition: service_started
+      ms-notifications:
+        condition: service_started
+
+networks:
+  eventos-net:
+    driver: bridge
+
+volumes:
+  usuarios_pg_data:
+    driver: local
+  reservas_pg_data:
+    driver: local
+  ofertas_pg_data:
+    driver: local
+  notifications_pg_data:
+    driver: local

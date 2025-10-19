@@ -1,0 +1,64 @@
+{
+  "info": {"name":"ms-usuarios (Keycloak 8090)","schema":"https://schema.getpostman.com/json/collection/v2.1.0/collection.json"},
+  "item": [
+    {"name":"SIN TOKEN","item":[
+      {"name":"GET /usuarios -> 401","request":{"method":"GET","url":{"raw":"{{baseUrl}}/usuarios","host":["{{baseUrl}}"],"path":["usuarios"]}},
+       "event":[{"listen":"test","script":{"type":"text/javascript","exec":["pm.test('401 esperado',()=>pm.response.to.have.status(401));"]}}]}
+    ]},
+    {"name":"PROVEEDOR","event":[{"listen":"prerequest","script":{"type":"text/javascript","exec":[
+      "pm.sendRequest({",
+      "  url: pm.environment.get('tokenUrl'),",
+      "  method: 'POST',",
+      "  header: { 'Content-Type': 'application/x-www-form-urlencoded' },",
+      "  body: { mode: 'urlencoded', urlencoded: [",
+      "    { key: 'grant_type', value: 'password' },",
+      "    { key: 'client_id', value: pm.environment.get('clientId') },",
+      "    { key: 'client_secret', value: pm.environment.get('clientSecret') },",
+      "    { key: 'username', value: pm.environment.get('prov_user') },",
+      "    { key: 'password', value: pm.environment.get('prov_pass') }",
+      "  ] }",
+      "}, (err, res) => { if (!err) pm.environment.set('accessToken', res.json().access_token); });"
+    ]}}],"item":[
+      {"name":"GET /usuarios","request":{"method":"GET","header":[{"key":"Authorization","value":"Bearer {{accessToken}}"}],"url":{"raw":"{{baseUrl}}/usuarios","host":["{{baseUrl}}"],"path":["usuarios"]}}},
+      {"name":"POST /usuarios -> 403","request":{"method":"POST","header":[{"key":"Authorization","value":"Bearer {{accessToken}}"},{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\n  \"nombre\": \"Ana\",\n  \"email\": \"ana@example.com\",\n  \"telefono\": \"999\",\n  \"rol\": \"PROVEEDOR\"\n}"},"url":{"raw":"{{baseUrl}}/usuarios","host":["{{baseUrl}}"],"path":["usuarios"]}},"event":[{"listen":"test","script":{"type":"text/javascript","exec":["pm.test('403 esperado',()=>pm.response.to.have.status(403));"]}}]} 
+    ]},
+    {"name":"ORGANIZADOR","event":[{"listen":"prerequest","script":{"type":"text/javascript","exec":[
+      "pm.sendRequest({",
+      "  url: pm.environment.get('tokenUrl'),",
+      "  method: 'POST',",
+      "  header: { 'Content-Type': 'application/x-www-form-urlencoded' },",
+      "  body: { mode: 'urlencoded', urlencoded: [",
+      "    { key: 'grant_type', value: 'password' },",
+      "    { key: 'client_id', value: pm.environment.get('clientId') },",
+      "    { key: 'client_secret', value: pm.environment.get('clientSecret') },",
+      "    { key: 'username', value: pm.environment.get('org_user') },",
+      "    { key: 'password', value: pm.environment.get('org_pass') }",
+      "  ] }",
+      "}, (err, res) => { if (!err) pm.environment.set('accessToken', res.json().access_token); });"
+    ]}}],"item":[
+      {"name":"GET /usuarios","request":{"method":"GET","header":[{"key":"Authorization","value":"Bearer {{accessToken}}"}],"url":{"raw":"{{baseUrl}}/usuarios","host":["{{baseUrl}}"],"path":["usuarios"]}}},
+      {"name":"POST /usuarios -> 201","request":{"method":"POST","header":[{"key":"Authorization","value":"Bearer {{accessToken}}"},{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\n  \"nombre\": \"Ana\",\n  \"email\": \"ana.org@example.com\",\n  \"telefono\": \"999\",\n  \"rol\": \"PROVEEDOR\"\n}"},"url":{"raw":"{{baseUrl}}/usuarios","host":["{{baseUrl}}"],"path":["usuarios"]}},"event":[{"listen":"test","script":{"type":"text/javascript","exec":["pm.test('201 esperado',()=>pm.response.to.have.status(201));"]}}]},
+      {"name":"PATCH /usuarios/{id}","request":{"method":"PATCH","header":[{"key":"Authorization","value":"Bearer {{accessToken}}"},{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\n  \"nombre\": \"Ana Mod\",\n  \"telefono\": \"123\",\n  \"rol\": \"ORGANIZADOR\"\n}"},"url":{"raw":"{{baseUrl}}/usuarios/1","host":["{{baseUrl}}"],"path":["usuarios","1"]}}},
+      {"name":"DELETE /usuarios/{id} -> 204","request":{"method":"DELETE","header":[{"key":"Authorization","value":"Bearer {{accessToken}}"}],"url":{"raw":"{{baseUrl}}/usuarios/1","host":["{{baseUrl}}"],"path":["usuarios","1"]}}}
+    ]},
+    {"name":"ADMIN","event":[{"listen":"prerequest","script":{"type":"text/javascript","exec":[
+      "pm.sendRequest({",
+      "  url: pm.environment.get('tokenUrl'),",
+      "  method: 'POST',",
+      "  header: { 'Content-Type': 'application/x-www-form-urlencoded' },",
+      "  body: { mode: 'urlencoded', urlencoded: [",
+      "    { key: 'grant_type', value: 'password' },",
+      "    { key: 'client_id', value: pm.environment.get('clientId') },",
+      "    { key: 'client_secret', value: pm.environment.get('clientSecret') },",
+      "    { key: 'username', value: pm.environment.get('admin_user') },",
+      "    { key: 'password', value: pm.environment.get('admin_pass') }",
+      "  ] }",
+      "}, (err, res) => { if (!err) pm.environment.set('accessToken', res.json().access_token); });"
+    ]}}],"item":[
+      {"name":"GET /usuarios","request":{"method":"GET","header":[{"key":"Authorization","value":"Bearer {{accessToken}}"}],"url":{"raw":"{{baseUrl}}/usuarios","host":["{{baseUrl}}"],"path":["usuarios"]}}},
+      {"name":"POST /usuarios -> 201","request":{"method":"POST","header":[{"key":"Authorization","value":"Bearer {{accessToken}}"},{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\n  \"nombre\": \"Carlos\",\n  \"email\": \"carlos.admin@example.com\",\n  \"telefono\": \"555\",\n  \"rol\": \"ORGANIZADOR\"\n}"},"url":{"raw":"{{baseUrl}}/usuarios","host":["{{baseUrl}}"],"path":["usuarios"]}}},
+      {"name":"PATCH /usuarios/{id}","request":{"method":"PATCH","header":[{"key":"Authorization","value":"Bearer {{accessToken}}"},{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\n  \"nombre\": \"Carlos Mod\",\n  \"telefono\": \"777\",\n  \"rol\": \"ADMIN\"\n}"},"url":{"raw":"{{baseUrl}}/usuarios/1","host":["{{baseUrl}}"],"path":["usuarios","1"]}}},
+      {"name":"DELETE /usuarios/{id} -> 204","request":{"method":"DELETE","header":[{"key":"Authorization","value":"Bearer {{accessToken}}"}],"url":{"raw":"{{baseUrl}}/usuarios/1","host":["{{baseUrl}}"],"path":["usuarios","1"]}}}
+    ]}
+  ]
+}

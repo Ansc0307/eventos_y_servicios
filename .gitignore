@@ -1,0 +1,79 @@
+# =========================================
+# Archivos y carpetas generados (Java/Maven)
+# =========================================
+**/target/
+**/out/
+**/build/
+**/dependency-reduced-pom.xml
+
+# Archivos temporales de compilación
+*.class
+*.jar
+*.war
+*.ear
+*.log
+
+# =========================================
+# Configuración de IDEs
+# =========================================
+# IntelliJ IDEA
+**/.idea/
+*.iml
+*.ipr
+*.iws
+
+# Eclipse / STS
+**/.classpath
+**/.project
+**/.settings/
+
+# VS Code
+**/.vscode/
+
+# NetBeans
+**/nbproject/private/
+**/build/
+**/nbbuild/
+**/dist/
+**/nbdist/
+**/.nb-gradle/
+
+# =========================================
+# Sistema operativo
+# =========================================
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# =========================================
+# Maven Wrapper
+# =========================================
+# (mantén los scripts mvnw, pero ignora los ejecutables generados)
+.mvn/wrapper/maven-wrapper.jar
+!mvnw
+!mvnw.cmd
+
+# =========================================
+# Archivos de logs y datos temporales
+# =========================================
+**/*.log
+**/*.tmp
+**/*.bak
+**/*.swp
+
+# =========================================
+# Configuración de entorno local
+# =========================================
+.env
+.env.*
+**/application-local.yml
+**/application-local.properties
+
+# =========================================
+# Archivos del sistema o de herramientas CI/CD
+# =========================================
+**/test-output/
+**/surefire-reports/
+**/jacoco.exec
+**/.DS_Store

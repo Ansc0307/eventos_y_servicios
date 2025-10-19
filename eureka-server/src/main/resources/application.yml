@@ -1,0 +1,17 @@
+server:
+  port: 8761
+
+eureka:
+  client:
+    register-with-eureka: false
+    fetch-registry: false
+  server:
+    wait-time-in-ms-when-sync-empty: 0
+
+spring:
+  application:
+    name: eureka-server
+    # Disable the compatibility verifier temporarily to allow startup while we align versions
+    cloud:
+      compatibility-verifier:
+        enabled: false

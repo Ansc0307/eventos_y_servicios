@@ -1,0 +1,26 @@
+springdoc:
+  swagger-ui:
+    path: /openapi/swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+    enabled: true
+  api-docs:
+    path: /openapi/v3/api-docs
+    enabled: true
+  packages-to-scan: com.eventos.ms_notifications.controller
+  paths-to-match: /v1/**
+
+api:
+  common:
+    version: 1.0.0
+    title: "MS Notificaciones - Ambiente de Desarrollo"
+    description: "Servicio de gestión de notificaciones de usuarios"
+    termsOfService: "https://www.miempresa.com/terminos"
+    license: "Licencia MIT"
+    licenseUrl: "https://opensource.org/licenses/MIT"
+    externalDocDesc: "Documentación en Wiki"
+    externalDocUrl: "https://www.miempresa.com/wiki"
+    contact:
+      name: "Soporte Eventos"
+      url: "https://www.miempresa.com/contacto"
+      email: "soporte@miempresa.com"
