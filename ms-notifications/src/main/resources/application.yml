@@ -4,9 +4,8 @@ server:
 spring:
   application:
     name: ms-notifications
-
+  
   profiles:
-    active: local
     include: openapi
 
   jpa:
@@ -17,11 +16,17 @@ spring:
       hibernate.format_sql: true
       hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
 
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/notifications_db}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:admin}
+    driver-class-name: org.postgresql.Driver
+
 eureka:
   client:
     service-url:
       defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://localhost:8761/eureka/}
-    register-with-eureka: true
+    register-with-eureka: true #si no encender el eureka o cambiar a false en local (ambos)
     fetch-registry: true
 
 logging:
