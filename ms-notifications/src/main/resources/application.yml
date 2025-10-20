@@ -19,6 +19,7 @@ spring:
 
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/notifications_db}
+    #url: jdbc:postgresql://notifications_db:5432/notifications_db #para cuando corra solo sin docker compose, pero si en docker
     username: ${SPRING_DATASOURCE_USERNAME:postgres}
     password: ${SPRING_DATASOURCE_PASSWORD:admin}
     driver-class-name: org.postgresql.Driver
