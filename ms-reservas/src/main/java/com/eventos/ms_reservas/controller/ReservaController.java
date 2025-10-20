@@ -31,9 +31,12 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import org.springframework.security.access.prepost.PreAuthorize;
 import jakarta.validation.Valid;
 
 @Tag(name = "Reservas", description = "Operaciones relacionadas con las reservas de eventos")
+@SecurityRequirement(name = "bearerAuth")
 @RestController
 @RequestMapping("/v1/reservas")
 public class ReservaController {
@@ -53,6 +56,7 @@ public class ReservaController {
             @ApiResponse(responseCode = "404", description = "Reserva no encontrada")
     })
     @GetMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ReservaDTO> obtenerPorId(
             @Parameter(description = "ID de la reserva", example = "1") @PathVariable Integer id) {
         Reserva reserva = reservaService.getById(id);
@@ -72,6 +76,7 @@ public class ReservaController {
             @ApiResponse(responseCode = "404", description = "La solicitud asociada no existe")
     })
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN','ORGANIZADOR') or hasAuthority('SCOPE_reservas.write')")
     public ResponseEntity<ReservaDTO> crearReserva(@Valid @RequestBody ReservaDTO reservaDTO) {
         Reserva reserva = ReservaMapper.toEntity(reservaDTO);
         Reserva saved = reservaService.save(reserva);
@@ -87,6 +92,7 @@ public class ReservaController {
             @ApiResponse(responseCode = "404", description = "Reserva no encontrada")
     })
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN','ORGANIZADOR') or hasAuthority('SCOPE_reservas.write')")
     public ResponseEntity<ReservaDTO> actualizarReserva(
             @PathVariable Integer id,
             @Valid @RequestBody ReservaDTO reservaDTO) {
@@ -109,6 +115,7 @@ public class ReservaController {
             @ApiResponse(responseCode = "404", description = "Reserva no encontrada")
     })
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN','ORGANIZADOR')")
     public ResponseEntity<Void> eliminarReserva(@PathVariable Integer id) {
         boolean deleted = reservaService.delete(id);
         if (!deleted)
@@ -120,7 +127,13 @@ public class ReservaController {
     // 🔹 GET Todas las reservas
     // ============================================================
     @Operation(summary = "Listar todas las reservas", description = "Devuelve la lista completa de reservas")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Lista de reservas"),
+        @ApiResponse(responseCode = "401", description = "No autorizado"),
+        @ApiResponse(responseCode = "403", description = "Acceso denegado")
+    })
     @GetMapping
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<ReservaDTO>> listarTodas() {
         List<ReservaDTO> lista = reservaService.getAll().stream()
                 .map(ReservaMapper::toDTO)
@@ -132,7 +145,13 @@ public class ReservaController {
     // 🔹 GET Reservas por estado
     // ============================================================
     @Operation(summary = "Buscar reservas por estado", description = "Devuelve todas las reservas con un estado específico")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Lista de reservas por estado"),
+        @ApiResponse(responseCode = "401", description = "No autorizado"),
+        @ApiResponse(responseCode = "403", description = "Acceso denegado")
+    })
     @GetMapping("/estado/{estado}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<ReservaDTO>> listarPorEstado(@PathVariable String estado) {
         List<ReservaDTO> lista = reservaService.getByEstado(estado).stream()
                 .map(ReservaMapper::toDTO)
@@ -144,7 +163,13 @@ public class ReservaController {
     // 🔹 GET Reservas por ID de solicitud
     // ============================================================
     @Operation(summary = "Buscar reservas por ID de solicitud", description = "Obtiene las reservas asociadas a una solicitud específica")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Lista de reservas por solicitud"),
+        @ApiResponse(responseCode = "401", description = "No autorizado"),
+        @ApiResponse(responseCode = "403", description = "Acceso denegado")
+    })
     @GetMapping("/solicitud/{idSolicitud}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<ReservaDTO>> listarPorSolicitud(@PathVariable Integer idSolicitud) {
         List<ReservaDTO> lista = reservaService.getByIdSolicitud(idSolicitud).stream()
                 .map(ReservaMapper::toDTO)
@@ -156,7 +181,14 @@ public class ReservaController {
     // 🔹 GET Reservas en rango
     // ============================================================
     @Operation(summary = "Buscar reservas por rango de fechas", description = "Obtiene las reservas dentro de un rango de tiempo")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Lista de reservas en rango"),
+        @ApiResponse(responseCode = "400", description = "Formato de fecha inválido"),
+        @ApiResponse(responseCode = "401", description = "No autorizado"),
+        @ApiResponse(responseCode = "403", description = "Acceso denegado")
+    })
     @GetMapping("/rango")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<ReservaDTO>> listarPorRango(
             @RequestParam("inicio") String inicioStr,
             @RequestParam("fin") String finStr) {
@@ -176,7 +208,14 @@ public class ReservaController {
     // 🔹 GET Reservas conflictivas (JPQL)
     // ============================================================
     @Operation(summary = "Buscar reservas conflictivas", description = "Devuelve las reservas que se solapan con un rango dado")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Lista de reservas conflictivas"),
+        @ApiResponse(responseCode = "400", description = "Formato de fecha inválido"),
+        @ApiResponse(responseCode = "401", description = "No autorizado"),
+        @ApiResponse(responseCode = "403", description = "Acceso denegado")
+    })
     @GetMapping("/conflictivas")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<ReservaDTO>> buscarConflictivas(
             @RequestParam("inicio") String inicioStr,
             @RequestParam("fin") String finStr) {
@@ -196,7 +235,14 @@ public class ReservaController {
     // 🔹 GET Reservas conflictivas (Native)
     // ============================================================
     @Operation(summary = "Buscar reservas conflictivas (consulta nativa)", description = "Devuelve las reservas conflictivas usando SQL nativo")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Lista de reservas conflictivas (nativa)"),
+        @ApiResponse(responseCode = "400", description = "Formato de fecha inválido"),
+        @ApiResponse(responseCode = "401", description = "No autorizado"),
+        @ApiResponse(responseCode = "403", description = "Acceso denegado")
+    })
     @GetMapping("/conflictivas/native")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<ReservaDTO>> buscarConflictivasNative(
             @RequestParam("inicio") String inicioStr,
             @RequestParam("fin") String finStr) {
@@ -221,6 +267,7 @@ public class ReservaController {
             @ApiResponse(responseCode = "404", description = "Reserva no encontrada o sin no disponibilidad")
     })
     @GetMapping("/{id}/no-disponibilidad")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<NoDisponibilidadDTO> obtenerNoDisponibilidad(@PathVariable Integer id) {
         var noDisp = reservaService.getNoDisponibilidadByReserva(id);
         if (noDisp == null)
@@ -229,6 +276,7 @@ public class ReservaController {
     }
 
     @GetMapping("/{id}/has-no-disponibilidad")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Boolean> tieneNoDisponibilidad(@PathVariable Integer id) {
         if (reservaService.getById(id) == null)
             throw new ReservaNotFoundException(String.valueOf(id), "Reserva no encontrada: " + id);
@@ -244,6 +292,7 @@ public class ReservaController {
             @ApiResponse(responseCode = "404", description = "Reserva no encontrada o sin solicitud asociada")
     })
     @GetMapping("/{id}/solicitud")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<SolicitudDTO> obtenerSolicitud(@PathVariable Integer id) {
         var solicitud = reservaService.getSolicitudByReserva(id);
         if (solicitud == null)
@@ -252,6 +301,7 @@ public class ReservaController {
     }
 
     @GetMapping("/{id}/has-solicitud")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Boolean> tieneSolicitud(@PathVariable Integer id) {
         if (reservaService.getById(id) == null)
             throw new ReservaNotFoundException(String.valueOf(id), "Reserva no encontrada: " + id);

@@ -17,6 +17,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
@@ -45,19 +50,19 @@ public class SecurityConfig {
 
                 // --- Rutas ms_reservas ---
                 // Solo lectura para cualquier autenticado
-                .requestMatchers(HttpMethod.GET, "/reserva/**", "/solicitud/**", "/no-disponibilidad/**").authenticated()
+                .requestMatchers(HttpMethod.GET, "/v1/reservas/**", "/solicitudes/**", "/no-disponibilidad/**").authenticated()
 
                 // Crear reservas: ORGANIZADOR o ADMIN
-                .requestMatchers(HttpMethod.POST, "/reserva/**").hasAnyRole("ORGANIZADOR", "ADMIN")
+                .requestMatchers(HttpMethod.POST, "/v1/reservas/**").hasAnyRole("ORGANIZADOR", "ADMIN")
 
                 // Crear solicitudes: ORGANIZADOR o ADMIN
-                .requestMatchers(HttpMethod.POST, "/solicitud/**").hasAnyRole("ORGANIZADOR", "ADMIN")
+                .requestMatchers(HttpMethod.POST, "/solicitudes/**").hasAnyRole("ORGANIZADOR", "ADMIN")
 
                 // Crear no disponibilidades: solo ADMIN
                 .requestMatchers(HttpMethod.POST, "/no-disponibilidad/**").hasRole("ADMIN")
 
                 // Eliminar recursos (ADMIN u ORGANIZADOR)
-                .requestMatchers(HttpMethod.DELETE, "/reserva/**", "/solicitud/**").hasAnyRole("ADMIN", "ORGANIZADOR")
+                .requestMatchers(HttpMethod.DELETE, "/v1/reservas/**", "/solicitudes/**").hasAnyRole("ADMIN", "ORGANIZADOR")
 
                 // Eliminar no disponibilidad (solo ADMIN)
                 .requestMatchers(HttpMethod.DELETE, "/no-disponibilidad/**").hasRole("ADMIN")
@@ -65,36 +70,34 @@ public class SecurityConfig {
                 // Cualquier otra petición autenticada
                 .anyRequest().authenticated()
             )
-            // Manejo de errores (401 y 403 personalizados)
+            // Manejo de errores (401 y 403) — devolver JSON consistente con RestExceptionHandler
             .exceptionHandling(ex -> ex
-                .authenticationEntryPoint((request, response, authException) -> {
-                    String msg = "No autenticado: envíe un token Bearer válido.";
-                    response.setStatus(HttpStatus.UNAUTHORIZED.value());
-                    response.setHeader(HttpHeaders.WWW_AUTHENTICATE,
-                        "Bearer error=\"unauthorized\", error_description=\"" + msg + "\"");
-                    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-                    String body = String.format(
-                        "{\"timestamp\":\"%s\",\"status\":%d,\"error\":\"Unauthorized\",\"message\":\"%s\",\"path\":\"%s\"}",
-                        java.time.Instant.now().toString(),
-                        HttpStatus.UNAUTHORIZED.value(),
-                        msg,
-                        request.getRequestURI());
-                    response.getWriter().write(body);
-                })
-                .accessDeniedHandler((request, response, accessDeniedException) -> {
-                    String msg = "Acceso denegado: el rol no tiene permisos para esta operación.";
-                    response.setStatus(HttpStatus.FORBIDDEN.value());
-                    response.setHeader(HttpHeaders.WWW_AUTHENTICATE,
-                        "Bearer error=\"insufficient_scope\", error_description=\"" + msg + "\"");
-                    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-                    String body = String.format(
-                        "{\"timestamp\":\"%s\",\"status\":%d,\"error\":\"Forbidden\",\"message\":\"%s\",\"path\":\"%s\"}",
-                        java.time.Instant.now().toString(),
-                        HttpStatus.FORBIDDEN.value(),
-                        msg,
-                        request.getRequestURI());
-                    response.getWriter().write(body);
-                })
+                    .authenticationEntryPoint((request, response, authException) -> {
+                        String path = request.getRequestURI();
+                        Map<String, Object> body = new HashMap<>();
+                        body.put("timestamp", Instant.now().toString());
+                        body.put("status", HttpStatus.UNAUTHORIZED.value());
+                        body.put("error", "Unauthorized");
+                        body.put("message", "No autenticado: envíe un token Bearer válido");
+                        body.put("path", path);
+                        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                        ObjectMapper om = new ObjectMapper();
+                        om.writeValue(response.getWriter(), body);
+                    })
+                    .accessDeniedHandler((request, response, accessDeniedException) -> {
+                        String path = request.getRequestURI();
+                        Map<String, Object> body = new HashMap<>();
+                        body.put("timestamp", Instant.now().toString());
+                        body.put("status", HttpStatus.FORBIDDEN.value());
+                        body.put("error", "Forbidden");
+                        body.put("message", "Acceso denegado: no tiene permisos");
+                        body.put("path", path);
+                        response.setStatus(HttpStatus.FORBIDDEN.value());
+                        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                        ObjectMapper om = new ObjectMapper();
+                        om.writeValue(response.getWriter(), body);
+                    })
             )
             // Integración con Keycloak (JWT)
             .oauth2ResourceServer(oauth2 ->
