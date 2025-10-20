@@ -197,8 +197,8 @@ services:
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: admin
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
-    ports:
-      - "8087:8087"
+    # ports:
+    #   - "8087:8087" #descomentar esto si quieres que funcione a través de 8087
     networks:
       - eventos-net
   # Microservicio de gateway (edge server)
