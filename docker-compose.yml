@@ -143,6 +143,7 @@ services:
       - eventos-net
 
   # Microservicio de reservas
+ 
   ms-reservas:
     build: ./ms-reservas
     container_name: ms_reservas
@@ -152,15 +153,20 @@ services:
         condition: service_healthy
       eureka-server:
         condition: service_healthy
+      keycloak:
+        condition: service_healthy
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://reservas-db:5432/reservas_db
       SPRING_DATASOURCE_USERNAME: reservas_user
       SPRING_DATASOURCE_PASSWORD: reservas_password
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/eventos/protocol/openid-connect/certs
     ports:
       - "8082:8082"
     networks:
       - eventos-net
+
+
 
   # Microservicio de ofertas
   ms-ofertas:

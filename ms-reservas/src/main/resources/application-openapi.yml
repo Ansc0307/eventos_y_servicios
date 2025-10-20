@@ -1,6 +1,12 @@
 springdoc:
-  swagger-ui.path: /openapi/swagger-ui.html
-  api-docs.path: /openapi/v3/api-docs
+  swagger-ui:
+    path: /openapi/swagger-ui.html
+    config-url: /ms-reservas/openapi/v3/api-docs/swagger-config
+    urls:
+      - name: API Reservas
+        url: /ms-reservas/openapi/v3/api-docs
+  api-docs:
+    path: /openapi/v3/api-docs
   packagesToScan: com.eventos.ms_reservas.controller
   pathsToMatch: /**
 
@@ -13,17 +19,19 @@ api:
     license: Licencia MIT
     licenseUrl: https://opensource.org/licenses/MIT
     externalDocDesc: Documentación en Wiki
-    externalDocUrl: https://www.miempresa.com/wiki
+    externalDocUrl: https://www.miempresa.com/wiki/reservas
     contact:
       name: Soporte Reservas
       url: https://www.miempresa.com/contacto
       email: soporte@miempresa.com
 
   responseCodes:
-    ok.description: OK
-    badRequest.description: Solicitud inválida. Verifica los parámetros enviados.
-    notFound.description: No encontrado. El recurso especificado no existe.
-    unprocessableEntity.description: No se pueden procesar los parámetros de entrada. Verifica la información enviada.
+    ok.description: Operación exitosa.
+    created.description: Recurso creado correctamente.
+    badRequest.description: Formato inválido de la solicitud. Ver mensaje de respuesta para más información.
+    notFound.description: El id de reserva especificado no existe.
+    unprocessableEntity.description: Los datos suministrados no pueden procesarse. Ver mensaje de respuesta para más información.
+    conflict.description: Conflicto, por ejemplo, reserva duplicada.
 
   reserva:
     get-reserva:
@@ -36,3 +44,7 @@ api:
         1. Si ninguna reserva se encontró se devuelve un error **404 - Not Found**
       parameters:
         reservaId: ID de la reserva a buscar
+    listar-reservas:
+      description: Lista todas las reservas registradas.
+    crear-reserva:
+      description: Crea una nueva reserva en el sistema.
