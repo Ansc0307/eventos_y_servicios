@@ -1,6 +1,26 @@
 
 
 services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:25.0.1
+    command:
+      - start-dev
+      - --import-realm
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    ports:
+      - "8090:8080"
+    restart: unless-stopped
+    volumes:
+      - ./keycloak/realm-eventos.json:/opt/keycloak/data/import/realm-eventos.json:ro
+    networks:
+      - eventos-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/realms/eventos/.well-known/openid-configuration"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
 
   eureka-server:
     build:
@@ -107,39 +127,40 @@ services:
     container_name: ms_usuarios
     restart: unless-stopped
     depends_on:
-      usuarios-db:
-        condition: service_healthy
-      eureka-server:
-        condition: service_healthy
+      - usuarios-db
+      - eureka-server
     environment:
       DB_URL: jdbc:postgresql://usuarios-db:5432/usuarios_eventos_db
       DB_USERNAME: postgres
       DB_PASSWORD: admin
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/eventos/protocol/openid-connect/certs
     ports:
       - "8081:8081"
     networks:
       - eventos-net
 
   # Microservicio de reservas
+ 
   ms-reservas:
     build: ./ms-reservas
     container_name: ms_reservas
     restart: unless-stopped
     depends_on:
-      reservas-db:
-        condition: service_healthy
-      eureka-server:
-        condition: service_healthy
+      - reservas-db
+      - eureka-server
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://reservas-db:5432/reservas_db
       SPRING_DATASOURCE_USERNAME: reservas_user
       SPRING_DATASOURCE_PASSWORD: reservas_password
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/eventos/protocol/openid-connect/certs
     ports:
       - "8082:8082"
     networks:
       - eventos-net
+
+
 
   # Microservicio de ofertas
   ms-ofertas:
@@ -147,10 +168,8 @@ services:
     container_name: ms_ofertas
     restart: unless-stopped
     depends_on:
-      ofertas-db:
-        condition: service_healthy
-      eureka-server:
-        condition: service_healthy
+      - ofertas-db
+      - eureka-server
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://ofertas-db:5432/ms-ofertas
       SPRING_DATASOURCE_USERNAME: postgres
@@ -167,10 +186,8 @@ services:
     container_name: ms_notifications
     restart: unless-stopped
     depends_on:
-      notifications-db:
-        condition: service_healthy
-      eureka-server:
-        condition: service_healthy
+      - notifications-db
+      - eureka-server
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://notifications-db:5432/notifications_db
       SPRING_DATASOURCE_USERNAME: postgres
@@ -180,8 +197,25 @@ services:
       - "8087:8087"
     networks:
       - eventos-net
+  # Microservicio de gateway (edge server)
+  ms-edge-server:
+    build: ./ms-edge-server
+    container_name: ms_edge_server
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    networks:
+      - eventos-net
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+    depends_on:
+      - eureka-server
+      - ms-usuarios
+      - ms-reservas
+      - ms-ofertas
+      - ms-notifications
 
-networks:
+networks: 
   eventos-net:
     driver: bridge
 

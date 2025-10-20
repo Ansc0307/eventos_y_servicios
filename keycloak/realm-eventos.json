@@ -1,0 +1,59 @@
+{
+  "realm": "eventos",
+  "enabled": true,
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "roles": {
+    "realm": [
+      { "name": "ADMIN" },
+      { "name": "ORGANIZADOR" },
+      { "name": "PROVEEDOR" }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "ms-usuarios",
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "secret": "d36zzVA8cwaqQuDNi195b581sTLHEsTM",
+      "directAccessGrantsEnabled": true,
+      "standardFlowEnabled": true,
+      "redirectUris": ["*"],
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      }
+    }
+  ],
+  "users": [
+    {
+      "username": "admin",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "admin@eventos.local",
+      "firstName": "Admin",
+      "lastName": "Eventos",
+      "credentials": [ { "type": "password", "value": "Adm1234", "temporary": false } ],
+      "realmRoles": ["ADMIN"]
+    },
+    {
+      "username": "org1",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "org1@eventos.local",
+      "firstName": "Org",
+      "lastName": "Uno",
+      "credentials": [ { "type": "password", "value": "Org12345", "temporary": false } ],
+      "realmRoles": ["ORGANIZADOR"]
+    },
+    {
+      "username": "prov1",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "prov1@eventos.local",
+      "firstName": "Prov",
+      "lastName": "Uno",
+      "credentials": [ { "type": "password", "value": "Prov12345", "temporary": false } ],
+      "realmRoles": ["PROVEEDOR"]
+    }
+  ]
+}
