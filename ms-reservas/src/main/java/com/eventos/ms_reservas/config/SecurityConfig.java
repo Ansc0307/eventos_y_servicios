@@ -1,8 +1,10 @@
 package com.eventos.ms_reservas.config;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -11,22 +13,18 @@ import java.util.Set;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Configuration
 @EnableMethodSecurity
@@ -50,7 +48,7 @@ public class SecurityConfig {
 
                 // --- Rutas ms_reservas ---
                 // Solo lectura para cualquier autenticado
-                .requestMatchers(HttpMethod.GET, "/v1/reservas/**", "/solicitudes/**", "/no-disponibilidad/**").authenticated()
+                .requestMatchers(HttpMethod.GET, "/v1/reservas/**", "/solicitudes/**", "/no-disponibilidades/**").authenticated()
 
                 // Crear reservas: ORGANIZADOR o ADMIN
                 .requestMatchers(HttpMethod.POST, "/v1/reservas/**").hasAnyRole("ORGANIZADOR", "ADMIN")
@@ -59,13 +57,13 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/solicitudes/**").hasAnyRole("ORGANIZADOR", "ADMIN")
 
                 // Crear no disponibilidades: solo ADMIN
-                .requestMatchers(HttpMethod.POST, "/no-disponibilidad/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.POST, "/no-disponibilidades/**").hasRole("ADMIN")
 
                 // Eliminar recursos (ADMIN u ORGANIZADOR)
                 .requestMatchers(HttpMethod.DELETE, "/v1/reservas/**", "/solicitudes/**").hasAnyRole("ADMIN", "ORGANIZADOR")
 
                 // Eliminar no disponibilidad (solo ADMIN)
-                .requestMatchers(HttpMethod.DELETE, "/no-disponibilidad/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/no-disponibilidades/**").hasRole("ADMIN")
 
                 // Cualquier otra petición autenticada
                 .anyRequest().authenticated()
