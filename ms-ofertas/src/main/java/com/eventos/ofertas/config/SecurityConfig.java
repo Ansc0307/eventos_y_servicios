@@ -15,9 +15,6 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    /**
-     * Configura el convertidor de JWT para que Spring Security entienda los roles de Keycloak.
-     */
     @Bean
     public JwtAuthenticationConverter jwtAuthenticationConverter(@Value("${keycloak.client-id:api-ms}") String clientId) {
         JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
@@ -25,25 +22,26 @@ public class SecurityConfig {
         return converter;
     }
 
-    /**
-     * Define la cadena de filtros de seguridad que protege todos los endpoints.
-     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationConverter jwtConverter) throws Exception {
         http
             .csrf(csrf -> csrf.disable())
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authz -> authz
-            .requestMatchers(
-                "/actuator/health", "/actuator/info",
-                "/swagger-ui.html", "/swagger-ui/**",
-                "/v3/api-docs/**", "/api-docs/**"
-            ).permitAll()
-            .anyRequest().authenticated()
+                .requestMatchers(
+                    "/openapi/**", 
+                    "/swagger-ui/**",
+                    "/swagger-ui.html",
+                    "/v3/api-docs/**",
+                    "/actuator/**",
+                    "/webjars/**",
+                    "/swagger-resources/**"
+                ).permitAll()
+                // Todas las demás rutas requieren autenticación
+                .anyRequest().authenticated()
             )
-            .anonymous(anon -> anon.disable()) // 👈 SIN token => 401 seguro
             .oauth2ResourceServer(oauth2 -> oauth2
-            .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtConverter))
+                .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtConverter))
             );
 
         return http.build();

@@ -15,9 +15,15 @@ public class OpenApiConfig {
     
     @Bean
     public OpenAPI customOpenAPI() {
+        // Servidor a través del Gateway
+        Server gatewayServer = new Server();
+        gatewayServer.setUrl("http://localhost:8080/ofertas");
+        gatewayServer.setDescription("Servidor a través del Gateway");
+        
+        // Servidor directo (desarrollo)
         Server devServer = new Server();
-        devServer.setUrl("http://localhost:8080");
-        devServer.setDescription("Servidor de Desarrollo");
+        devServer.setUrl("http://localhost:8083");
+        devServer.setDescription("Servidor Directo (Desarrollo)");
         
         Contact contact = new Contact();
         contact.setEmail("contacto@ofertas.com");
@@ -39,6 +45,6 @@ public class OpenApiConfig {
         
         return new OpenAPI()
                 .info(info)
-                .servers(List.of(devServer));
+                .servers(List.of(gatewayServer, devServer));
     }
 }
