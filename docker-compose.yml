@@ -127,10 +127,8 @@ services:
     container_name: ms_usuarios
     restart: unless-stopped
     depends_on:
-      usuarios-db:
-        condition: service_healthy
-      eureka-server:
-        condition: service_healthy
+      - usuarios-db
+      - eureka-server
     environment:
       DB_URL: jdbc:postgresql://usuarios-db:5432/usuarios_eventos_db
       DB_USERNAME: postgres
@@ -149,12 +147,8 @@ services:
     container_name: ms_reservas
     restart: unless-stopped
     depends_on:
-      reservas-db:
-        condition: service_healthy
-      eureka-server:
-        condition: service_healthy
-      keycloak:
-        condition: service_healthy
+      - reservas-db
+      - eureka-server
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://reservas-db:5432/reservas_db
       SPRING_DATASOURCE_USERNAME: reservas_user
@@ -174,10 +168,8 @@ services:
     container_name: ms_ofertas
     restart: unless-stopped
     depends_on:
-      ofertas-db:
-        condition: service_healthy
-      eureka-server:
-        condition: service_healthy
+      - ofertas-db
+      - eureka-server
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://ofertas-db:5432/ms-ofertas
       SPRING_DATASOURCE_USERNAME: postgres
@@ -194,10 +186,8 @@ services:
     container_name: ms_notifications
     restart: unless-stopped
     depends_on:
-      notifications-db:
-        condition: service_healthy
-      eureka-server:
-        condition: service_healthy
+      - notifications-db
+      - eureka-server
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://notifications-db:5432/notifications_db
       SPRING_DATASOURCE_USERNAME: postgres
@@ -219,18 +209,13 @@ services:
     environment:
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
     depends_on:
-      eureka-server:
-        condition: service_healthy
-      ms-usuarios:
-        condition: service_started
-      ms-reservas:
-        condition: service_started
-      ms-ofertas:
-        condition: service_started
-      ms-notifications:
-        condition: service_started
+      - eureka-server
+      - ms-usuarios
+      - ms-reservas
+      - ms-ofertas
+      - ms-notifications
 
-networks:
+networks: 
   eventos-net:
     driver: bridge
 
