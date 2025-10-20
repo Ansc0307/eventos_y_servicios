@@ -1,18 +1,31 @@
 {
 	"info": {
-		"_postman_id": "81442610-2409-4d76-92d7-a908b655f744",
-		"name": "MS-Reservas OAuth2",
-		"description": "Colección completa para probar el microservicio de reservas, solicitudes y no disponibilidades con autenticación Keycloak.",
+		"_postman_id": "52371896-1371-4ac8-9f05-8fc35a8fce85",
+		"name": "ms-reservas (OAuth2.0)",
+		"description": "Colección Postman para probar ms-reservas, solicitudes y no disponibilidades con autenticación Keycloak OAuth2 Password. Incluye pruebas automatizadas de roles.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "47645353",
-		"_collection_link": "https://ayana-siegle-4708691.postman.co/workspace/40948d75-815c-423e-846f-0ceabc09dfb2/collection/47645353-81442610-2409-4d76-92d7-a908b655f744?action=share&source=collection_link&creator=47645353"
+		"_collection_link": "https://ayana-siegle-4708691.postman.co/workspace/Ayana-Natalia-Siegle-Clavijo's-~40948d75-815c-423e-846f-0ceabc09dfb2/collection/47645353-52371896-1371-4ac8-9f05-8fc35a8fce85?action=share&source=collection_link&creator=47645353"
 	},
 	"item": [
 		{
-			"name": "📂 Reservas",
+			"name": "PROVEEDOR",
 			"item": [
 				{
-					"name": "GET - Obtener todas las reservas",
+					"name": "GET /reserva (200)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('200 OK', ()=>pm.response.to.have.status(200));"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
 					"request": {
 						"method": "GET",
 						"header": [
@@ -22,48 +35,57 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/v1/reserva",
+							"raw": "{{baseUrl}}/v1/reservas",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"v1",
-								"reserva"
+								"reservas"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "GET - Obtener reserva por ID",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{token}}"
+					"name": "POST /reserva (403)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('403 Forbidden', ()=>pm.response.to.have.status(403));"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
 							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/v1/reserva/1",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"v1",
-								"reserva",
-								"1"
-							]
 						}
-					},
-					"response": []
-				},
-				{
-					"name": "POST - Crear reserva",
+					],
 					"request": {
 						"auth": {
 							"type": "oauth2",
 							"oauth2": [
+								{
+									"key": "tokenName",
+									"value": "http://localhost:8082",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "{{orgPass}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{orgUser}}",
+									"type": "string"
+								},
+								{
+									"key": "accessTokenUrl",
+									"value": "http://localhost:8090/realms/eventos/protocol/openid-connect/token",
+									"type": "string"
+								},
 								{
 									"key": "clientSecret",
 									"value": "{{clientSecret}}",
@@ -75,26 +97,6 @@
 									"type": "string"
 								},
 								{
-									"key": "accessTokenUrl",
-									"value": "{{tokenUrl}}",
-									"type": "string"
-								},
-								{
-									"key": "username",
-									"value": "{{adminUser}}",
-									"type": "string"
-								},
-								{
-									"key": "password",
-									"value": "{{adminPass}}",
-									"type": "string"
-								},
-								{
-									"key": "scope",
-									"value": "openid",
-									"type": "string"
-								},
-								{
 									"key": "grant_type",
 									"value": "password_credentials",
 									"type": "string"
@@ -102,11 +104,6 @@
 								{
 									"key": "addTokenTo",
 									"value": "header",
-									"type": "string"
-								},
-								{
-									"key": "authUrl",
-									"value": "http://localhost:8081",
 									"type": "string"
 								}
 							]
@@ -124,84 +121,61 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"idSolicitud\": 2,\n  \"fechaReservaInicio\": \"2025-12-01T10:06:00\",\n  \"fechaReservaFin\": \"2025-12-01T12:06:00\",\n  \"estado\": \"ACTIVA\"\n}\n"
+							"raw": "{\n  \"idSolicitud\": 1,\n  \"fechaReservaInicio\": \"2025-10-20T10:00:00\",\n  \"fechaReservaFin\": \"2025-10-21T10:00:00\",\n  \"estado\": \"CONFIRMADA\"\n}"
 						},
 						"url": {
-							"raw": "{{baseUrl}}/v1/reserva",
+							"raw": "{{baseUrl}}/v1/reservas",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"v1",
-								"reserva"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "PUT - Actualizar reserva",
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{token}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"nombre\": \"Reserva Modificada\",\n  \"estado\": \"CANCELADA\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/v1/reserva/1",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"v1",
-								"reserva",
-								"1"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "DELETE - Eliminar reserva",
-					"request": {
-						"method": "DELETE",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{token}}"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/v1/reserva/1",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"v1",
-								"reserva",
-								"1"
+								"reservas"
 							]
 						}
 					},
 					"response": []
 				}
-			]
+			],
+			"description": "Rol PROVEEDOR: solo puede leer reservas (403 en creación).",
+			"auth": {
+				"type": "oauth2",
+				"oauth2": [
+					{
+						"key": "password",
+						"value": {
+							"grant_type": "password",
+							"client_authentication": "header",
+							"accessTokenUrl": "{{tokenUrl}}",
+							"clientId": "{{clientId}}",
+							"clientSecret": "{{clientSecret}}",
+							"scope": "openid",
+							"username": "{{provUser}}",
+							"password": "{{provPass}}"
+						},
+						"type": "any"
+					}
+				]
+			}
 		},
 		{
-			"name": "📂 Solicitudes",
+			"name": "ORGANIZADOR",
 			"item": [
 				{
-					"name": "GET - Obtener todas las solicitudes",
+					"name": "GET /reserva (200)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('200 OK', ()=>pm.response.to.have.status(200));"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
 					"request": {
 						"method": "GET",
 						"header": [
@@ -211,24 +185,57 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/v1/solicitudes",
+							"raw": "{{baseUrl}}/v1/reservas",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"v1",
-								"solicitudes"
+								"reservas"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "POST - Crear solicitud",
+					"name": "POST /solicitudes (201)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('201 Created', ()=>pm.response.to.have.status(201));"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
 					"request": {
 						"auth": {
 							"type": "oauth2",
 							"oauth2": [
+								{
+									"key": "tokenName",
+									"value": "http://localhost:8082",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "{{orgPass}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{orgUser}}",
+									"type": "string"
+								},
+								{
+									"key": "accessTokenUrl",
+									"value": "http://localhost:8090/realms/eventos/protocol/openid-connect/token",
+									"type": "string"
+								},
 								{
 									"key": "clientSecret",
 									"value": "{{clientSecret}}",
@@ -240,26 +247,6 @@
 									"type": "string"
 								},
 								{
-									"key": "accessTokenUrl",
-									"value": "{{tokenUrl}}",
-									"type": "string"
-								},
-								{
-									"key": "username",
-									"value": "{{adminUser}}",
-									"type": "string"
-								},
-								{
-									"key": "password",
-									"value": "{{adminPass}}",
-									"type": "string"
-								},
-								{
-									"key": "scope",
-									"value": "openid",
-									"type": "string"
-								},
-								{
 									"key": "grant_type",
 									"value": "password_credentials",
 									"type": "string"
@@ -267,11 +254,6 @@
 								{
 									"key": "addTokenTo",
 									"value": "header",
-									"type": "string"
-								},
-								{
-									"key": "authUrl",
-									"value": "http://localhost:8081",
 									"type": "string"
 								}
 							]
@@ -292,12 +274,11 @@
 							"raw": "{\n  \"fechaSolicitud\": \"2025-07-01T10:00:00\",\n  \"fechaInicio\": \"2025-07-10T10:00:00\",\n  \"fechaFin\": \"2025-09-10T12:00:00\",\n  \"idProovedor\": 1,\n  \"idOferta\": 2,\n  \"estadoSolicitud\": \"PENDIENTE\",\n  \"idOrganizador\": 3\n}"
 						},
 						"url": {
-							"raw": "{{baseUrl}}/v1/solicitudes",
+							"raw": "{{baseUrl}}/solicitudes",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
-								"v1",
 								"solicitudes"
 							]
 						}
@@ -305,7 +286,18 @@
 					"response": []
 				},
 				{
-					"name": "DELETE - Eliminar solicitud",
+					"name": "DELETE /solicitudes/{id} (204)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('204 No Content', ()=>pm.expect(pm.response.code).to.be.oneOf([200,204]));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "DELETE",
 						"header": [
@@ -315,12 +307,11 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/v1/solicitudes/1",
+							"raw": "{{baseUrl}}/solicitudes/1",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
-								"v1",
 								"solicitudes",
 								"1"
 							]
@@ -328,36 +319,44 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"description": "Rol ORGANIZADOR: puede crear, modificar y ver reservas/solicitudes (2xx).",
+			"auth": {
+				"type": "oauth2",
+				"oauth2": [
+					{
+						"key": "password",
+						"value": {
+							"grant_type": "password",
+							"client_authentication": "header",
+							"accessTokenUrl": "{{tokenUrl}}",
+							"clientId": "{{clientId}}",
+							"clientSecret": "{{clientSecret}}",
+							"scope": "openid",
+							"username": "{{orgUser}}",
+							"password": "{{orgPass}}"
+						},
+						"type": "any"
+					}
+				]
+			}
 		},
 		{
-			"name": "📂 No Disponibilidades",
+			"name": "ADMIN",
 			"item": [
 				{
-					"name": "GET - Obtener todas las no disponibilidades",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{token}}"
+					"name": "POST /no-disponibilidades (201)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('201 Created', ()=>pm.response.to.have.status(201));"
+								],
+								"type": "text/javascript"
 							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/v1/no-disponibilidades",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"v1",
-								"no-disponibilidades"
-							]
 						}
-					},
-					"response": []
-				},
-				{
-					"name": "POST - Crear no disponibilidad",
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -372,15 +371,14 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"idOferta\": 303,\n  \"motivo\": \"Mantenimiento preventivo del sistema eléctrico\",\n  \"fechaInicio\": \"2025-11-01T08:00:00\",\n  \"fechaFin\": \"2025-11-02T18:00:00\",\n  \"idReserva\": 1\n}\n"
+							"raw": "{\n  \"idOferta\": 303,\n  \"motivo\": \"Mantenimiento preventivo del sistema eléctrico\",\n  \"fechaInicio\": \"2025-11-01T08:00:00\",\n  \"fechaFin\": \"2025-11-02T18:00:00\",\n  \"idReserva\": 1\n}"
 						},
 						"url": {
-							"raw": "{{baseUrl}}/v1/no-disponibilidades",
+							"raw": "{{baseUrl}}/no-disponibilidades",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
-								"v1",
 								"no-disponibilidades"
 							]
 						}
@@ -388,7 +386,18 @@
 					"response": []
 				},
 				{
-					"name": "DELETE - Eliminar no disponibilidad",
+					"name": "DELETE /no-disponibilidades/{id} (204)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('204 No Content', ()=>pm.expect(pm.response.code).to.be.oneOf([200,204]));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "DELETE",
 						"header": [
@@ -398,12 +407,11 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/v1/no-disponibilidades/1",
+							"raw": "{{baseUrl}}/no-disponibilidades/1",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
-								"v1",
 								"no-disponibilidades",
 								"1"
 							]
@@ -411,11 +419,109 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"description": "Rol ADMIN: puede realizar cualquier acción (reservas, solicitudes, no disponibilidades)."
 		},
 		{
-			"name": "🔐 Obtener Token Keycloak",
+			"name": "SIN TOKEN",
+			"item": [
+				{
+					"name": "GET /reserva (401)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('401 Unauthorized', ()=>pm.response.to.have.status(401));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/reserva",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"reserva"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Solicitudes sin token deberían devolver 401 Unauthorized."
+		},
+		{
+			"name": "AUTH - Obtener Token (ADMIN)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let jsonData = pm.response.json();",
+							"pm.environment.set('token', jsonData.access_token);",
+							"console.log('✅ Token guardado en variable de entorno:', jsonData.access_token);",
+							"pm.test('Token generado correctamente', function () {",
+							"    pm.expect(jsonData).to.have.property('access_token');",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
 			"request": {
+				"auth": {
+					"type": "oauth2",
+					"oauth2": [
+						{
+							"key": "tokenName",
+							"value": "http://localhost:8082",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "{{orgPass}}",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "{{orgUser}}",
+							"type": "string"
+						},
+						{
+							"key": "accessTokenUrl",
+							"value": "http://localhost:8090/realms/eventos/protocol/openid-connect/token",
+							"type": "string"
+						},
+						{
+							"key": "clientSecret",
+							"value": "{{clientSecret}}",
+							"type": "string"
+						},
+						{
+							"key": "clientId",
+							"value": "{{clientId}}",
+							"type": "string"
+						},
+						{
+							"key": "grant_type",
+							"value": "password_credentials",
+							"type": "string"
+						},
+						{
+							"key": "addTokenTo",
+							"value": "header",
+							"type": "string"
+						}
+					]
+				},
 				"method": "POST",
 				"header": [
 					{
@@ -440,128 +546,22 @@
 						},
 						{
 							"key": "username",
-							"value": "{{username}}"
+							"value": "{{adminUser}}"
 						},
 						{
 							"key": "password",
-							"value": "{{password}}"
+							"value": "{{adminPass}}"
 						}
 					]
 				},
 				"url": {
-					"raw": "{{keycloakUrl}}/realms/{{realm}}/protocol/openid-connect/token",
+					"raw": "{{tokenUrl}}",
 					"host": [
-						"{{keycloakUrl}}"
-					],
-					"path": [
-						"realms",
-						"{{realm}}",
-						"protocol",
-						"openid-connect",
-						"token"
+						"{{tokenUrl}}"
 					]
 				}
 			},
 			"response": []
-		}
-	],
-	"auth": {
-		"type": "oauth2",
-		"oauth2": [
-			{
-				"key": "refreshRequestParams",
-				"value": [],
-				"type": "any"
-			},
-			{
-				"key": "tokenRequestParams",
-				"value": [],
-				"type": "any"
-			},
-			{
-				"key": "authRequestParams",
-				"value": [],
-				"type": "any"
-			},
-			{
-				"key": "challengeAlgorithm",
-				"value": "S256",
-				"type": "string"
-			},
-			{
-				"key": "username",
-				"value": "{{adminUser}}",
-				"type": "string"
-			},
-			{
-				"key": "scope",
-				"value": "openid",
-				"type": "string"
-			},
-			{
-				"key": "password",
-				"value": "{{adminPass}}",
-				"type": "string"
-			},
-			{
-				"key": "grant_type",
-				"value": "password_credentials",
-				"type": "string"
-			},
-			{
-				"key": "clientSecret",
-				"value": "{{clientSecret}}",
-				"type": "string"
-			},
-			{
-				"key": "clientId",
-				"value": "{{clientId}}",
-				"type": "string"
-			},
-			{
-				"key": "authUrl",
-				"value": "http://localhost:8081",
-				"type": "string"
-			},
-			{
-				"key": "addTokenTo",
-				"value": "header",
-				"type": "string"
-			},
-			{
-				"key": "client_authentication",
-				"value": "header",
-				"type": "string"
-			},
-			{
-				"key": "accessTokenUrl",
-				"value": "{{tokenUrl}}",
-				"type": "string"
-			}
-		]
-	},
-	"event": [
-		{
-			"listen": "prerequest",
-			"script": {
-				"type": "text/javascript",
-				"packages": {},
-				"requests": {},
-				"exec": [
-					""
-				]
-			}
-		},
-		{
-			"listen": "test",
-			"script": {
-				"type": "text/javascript",
-				"packages": {},
-				"requests": {},
-				"exec": [
-					""
-				]
-			}
 		}
 	]
 }
