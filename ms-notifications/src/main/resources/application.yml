@@ -5,17 +5,10 @@ server:
 spring:
   application:
     name: ms-notifications
-  
-  profiles:
-    include: openapi
 
-  jpa:
-    hibernate:
-      ddl-auto: create
-    show-sql: true
-    properties:
-      hibernate.format_sql: true
-      hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
+  # Importa configuración OpenAPI
+  config:
+    import: classpath:application-openapi.yml
 
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/notifications_db}
@@ -24,17 +17,53 @@ spring:
     password: ${SPRING_DATASOURCE_PASSWORD:admin}
     driver-class-name: org.postgresql.Driver
 
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: create
+    show-sql: true
+    properties:
+      hibernate.format_sql: true
+    defer-datasource-initialization: true
+
+  sql:
+    init:
+      mode: never
+
+  flyway:
+    enabled: false
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://keycloak:8080/realms/eventos/protocol/openid-connect/certs
+
 eureka:
   client:
     service-url:
       defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://localhost:8761/eureka/}
-    register-with-eureka: true #si no encender el eureka o cambiar a false en local (ambos)
+    register-with-eureka: true
     fetch-registry: true
   instance:
-    leaseRenewalIntervalInSeconds: 5 # tiempo entre latidos(por defecto 30s)
-    leaseExpirationDurationInSeconds: 5 # tiempo para considerar que la instancia esta caída (por defecto 90s)
+    leaseRenewalIntervalInSeconds: 5
+    leaseExpirationDurationInSeconds: 5
 
 logging:
   level:
     root: INFO
     com.eventos.ms_notifications: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+
+keycloak:
+  client-id: noti-api

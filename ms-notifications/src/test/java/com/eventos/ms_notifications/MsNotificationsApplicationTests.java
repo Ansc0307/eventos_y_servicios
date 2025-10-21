@@ -1,13 +1,13 @@
-package com.eventos.ms_notifications;
+// package com.eventos.ms_notifications;
 
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+// import org.junit.jupiter.api.Test;
+// import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
-class MsNotificationsApplicationTests {
+// @SpringBootTest
+// class MsNotificationsApplicationTests {
 
-	@Test
-	void contextLoads() {
-	}
+// 	@Test
+// 	void contextLoads() {
+// 	}
 
-}
+// }

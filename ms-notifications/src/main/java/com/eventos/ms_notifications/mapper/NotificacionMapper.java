@@ -20,7 +20,7 @@ public class NotificacionMapper {
         dto.setLeido(entity.getLeido());
         dto.setUserId(entity.getUserId());
 
-        // 🔗 Convertir prioridad a su versión simple
+        // Convertir prioridad a su versión simple
         if (entity.getPrioridad() != null) {
             dto.setPrioridad(
                 new NotificacionDTO.PrioridadSimpleDTO(
@@ -30,7 +30,7 @@ public class NotificacionMapper {
             );
         }
 
-        // 🔗 Convertir tipoNotificacion a su versión simple
+        // Convertir tipoNotificacion a su versión simple
         if (entity.getTipoNotificacion() != null) {
             dto.setTipoNotificacion(
                 new NotificacionDTO.TipoSimpleDTO(
