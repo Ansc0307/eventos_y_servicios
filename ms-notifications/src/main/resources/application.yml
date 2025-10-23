@@ -24,12 +24,18 @@ spring:
     password: ${SPRING_DATASOURCE_PASSWORD:admin}
     driver-class-name: org.postgresql.Driver
 
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8090/realms/eventos
+
 eureka:
   client:
     service-url:
       defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://localhost:8761/eureka/}
-    register-with-eureka: true #si no encender el eureka o cambiar a false en local (ambos)
-    fetch-registry: true
+    register-with-eureka: false #si no encender el eureka o cambiar a false en local (ambos)
+    fetch-registry: false #si no encender el eureka o cambiar a false en local (ambos)
   instance:
     leaseRenewalIntervalInSeconds: 5 # tiempo entre latidos(por defecto 30s)
     leaseExpirationDurationInSeconds: 5 # tiempo para considerar que la instancia esta caída (por defecto 90s)

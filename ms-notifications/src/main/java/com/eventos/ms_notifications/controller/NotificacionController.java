@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,6 +26,7 @@ public class NotificacionController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN', 'PROVEEDOR', 'ORGANIZADOR')")
     @Operation(summary = "Listar todas las notificaciones", description = "Obtiene una lista completa de todas las notificaciones registradas en el sistema")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Lista obtenida correctamente"),
@@ -35,6 +37,7 @@ public class NotificacionController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN', 'PROVEEDOR', 'ORGANIZADOR')")
     @Operation(summary = "Obtener una notificación por ID", description = "Devuelve los datos de una notificación específica según su identificador")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Notificación encontrada correctamente"),
@@ -45,6 +48,7 @@ public class NotificacionController {
     }
 
     @GetMapping("/usuario/{userId}")
+    @PreAuthorize("hasRole('ADMIN', 'PROVEEDOR', 'ORGANIZADOR')")
     @Operation(summary = "Listar notificaciones por usuario", description = "Obtiene todas las notificaciones asociadas a un usuario específico")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Lista obtenida correctamente"),
@@ -55,6 +59,7 @@ public class NotificacionController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN', 'PROVEEDOR', 'ORGANIZADOR')")
     @Operation(summary = "Crear una nueva notificación", description = "Registra una nueva notificación en el sistema")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "201", description = "Notificación creada correctamente"),
@@ -66,6 +71,7 @@ public class NotificacionController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN', 'PROVEEDOR', 'ORGANIZADOR')")
     @Operation(summary = "Actualizar una notificación", description = "Modifica los datos de una notificación existente")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Notificación actualizada correctamente"),
@@ -77,6 +83,7 @@ public class NotificacionController {
     }
 
     @PatchMapping("/{id}/leida")
+    @PreAuthorize("hasRole('ADMIN', 'PROVEEDOR', 'ORGANIZADOR')")
     @Operation(summary = "Marcar una notificación como leída", description = "Actualiza el estado de lectura de una notificación a 'leída'")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Notificación marcada como leída correctamente"),
@@ -87,6 +94,7 @@ public class NotificacionController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN', 'PROVEEDOR', 'ORGANIZADOR')")
     @Operation(summary = "Eliminar una notificación", description = "Elimina una notificación existente por su identificador")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "204", description = "Notificación eliminada correctamente"),
