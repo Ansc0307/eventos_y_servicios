@@ -1,22 +1,16 @@
 package com.eventos.ms_notifications.repository;
 
 import com.eventos.ms_notifications.model.Prioridad;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.r2dbc.repository.Query;
+import org.springframework.data.repository.reactive.ReactiveCrudRepository;
+import reactor.core.publisher.Mono;
 
-@Repository
-public interface PrioridadRepository extends JpaRepository<Prioridad, Long> {
-    // Derived Query - Generada automáticamente por Spring
-    boolean existsByNombreIgnoreCase(String nombre);
+public interface PrioridadRepository extends ReactiveCrudRepository<Prioridad, Long> {
 
-    // Native Query - usando SQL puro
-    @Query(value = "SELECT CASE WHEN COUNT(*) > 0 THEN true ELSE false END FROM prioridad WHERE LOWER(nombre) = LOWER(:nombre)", nativeQuery = true)
-    boolean existePorNombre(@Param("nombre") String nombre);
+    // Derived Query
+    Mono<Boolean> existsByNombreIgnoreCase(String nombre);
 
-    // JPQL - Similar a SQL pero orientado a entidades
-    @Query("SELECT CASE WHEN COUNT(p) > 0 THEN true ELSE false END FROM Prioridad p WHERE LOWER(p.nombre) = LOWER(:nombre)")
-    boolean existePorNombreJPQL(@Param("nombre") String nombre);
-
+    // Query nativa
+    @Query("SELECT CASE WHEN COUNT(*) > 0 THEN true ELSE false END FROM prioridad WHERE LOWER(nombre) = LOWER(:nombre)")
+    Mono<Boolean> existePorNombre(String nombre);
 }

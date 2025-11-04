@@ -2,13 +2,12 @@ package com.eventos.ms_notifications.mapper;
 
 import com.eventos.ms_notifications.dto.NotificacionDTO;
 import com.eventos.ms_notifications.model.Notificacion;
-import com.eventos.ms_notifications.model.Prioridad;
-import com.eventos.ms_notifications.model.TipoNotificacion;
 import org.springframework.stereotype.Component;
 
 @Component
 public class NotificacionMapper {
 
+    // Convierte de entidad a DTO
     public NotificacionDTO toDto(Notificacion entity) {
         if (entity == null) return null;
 
@@ -20,29 +19,26 @@ public class NotificacionMapper {
         dto.setLeido(entity.getLeido());
         dto.setUserId(entity.getUserId());
 
-        // 🔗 Convertir prioridad a su versión simple
-        if (entity.getPrioridad() != null) {
-            dto.setPrioridad(
-                new NotificacionDTO.PrioridadSimpleDTO(
-                    entity.getPrioridad().getId(),
-                    entity.getPrioridad().getNombre()
-                )
-            );
+        // Convertir prioridadId a PrioridadSimpleDTO
+        if (entity.getPrioridadId() != null) {
+            dto.setPrioridad(new NotificacionDTO.PrioridadSimpleDTO(
+                    entity.getPrioridadId(),
+                    null // El nombre no lo tenemos, se podría setear desde servicio si es necesario
+            ));
         }
 
-        // 🔗 Convertir tipoNotificacion a su versión simple
-        if (entity.getTipoNotificacion() != null) {
-            dto.setTipoNotificacion(
-                new NotificacionDTO.TipoSimpleDTO(
-                    entity.getTipoNotificacion().getId(),
-                    entity.getTipoNotificacion().getNombre()
-                )
-            );
+        // Convertir tipoNotificacionId a TipoSimpleDTO
+        if (entity.getTipoNotificacionId() != null) {
+            dto.setTipoNotificacion(new NotificacionDTO.TipoSimpleDTO(
+                    entity.getTipoNotificacionId(),
+                    null // El nombre no lo tenemos, se podría setear desde servicio si es necesario
+            ));
         }
 
         return dto;
     }
 
+    // Convierte de DTO a entidad
     public Notificacion toEntity(NotificacionDTO dto) {
         if (dto == null) return null;
 
@@ -54,17 +50,13 @@ public class NotificacionMapper {
         entity.setLeido(dto.getLeido());
         entity.setUserId(dto.getUserId());
 
-        // ⚙️ Solo seteamos los objetos relacionados con su ID
+        // Solo seteamos los IDs relacionados
         if (dto.getPrioridad() != null) {
-            Prioridad prioridad = new Prioridad();
-            prioridad.setId(dto.getPrioridad().getId());
-            entity.setPrioridad(prioridad);
+            entity.setPrioridadId(dto.getPrioridad().getId());
         }
 
         if (dto.getTipoNotificacion() != null) {
-            TipoNotificacion tipo = new TipoNotificacion();
-            tipo.setId(dto.getTipoNotificacion().getId());
-            entity.setTipoNotificacion(tipo);
+            entity.setTipoNotificacionId(dto.getTipoNotificacion().getId());
         }
 
         return entity;

@@ -1,22 +1,16 @@
 package com.eventos.ms_notifications.repository;
 
 import com.eventos.ms_notifications.model.TipoNotificacion;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.r2dbc.repository.Query;
+import org.springframework.data.repository.reactive.ReactiveCrudRepository;
+import reactor.core.publisher.Mono;
 
-@Repository
-public interface TipoNotificacionRepository extends JpaRepository<TipoNotificacion, Long> {
-    
-    // Derived Query - Generada automáticamente por Spring
-    boolean existsByNombreIgnoreCase(String nombre);
+public interface TipoNotificacionRepository extends ReactiveCrudRepository<TipoNotificacion, Long> {
 
-    // Native Query - usando SQL puro (referencia, no se usa actualmente)
-    @Query(value = "SELECT CASE WHEN COUNT(*) > 0 THEN true ELSE false END FROM tipo_notificacion WHERE LOWER(nombre) = LOWER(:nombre)", nativeQuery = true)
-    boolean existePorNombre(@Param("nombre") String nombre);
-    
-    // JPQL - Similar a SQL pero orientado a entidades (referencia, no se usa actualmente)
-    @Query("SELECT CASE WHEN COUNT(t) > 0 THEN true ELSE false END FROM TipoNotificacion t WHERE LOWER(t.nombre) = LOWER(:nombre)")
-    boolean existePorNombreJPQL(@Param("nombre") String nombre);
+    // Derived Query
+    Mono<Boolean> existsByNombreIgnoreCase(String nombre);
+
+    // Query nativa
+    @Query("SELECT CASE WHEN COUNT(*) > 0 THEN true ELSE false END FROM tipo_notificacion WHERE LOWER(nombre) = LOWER(:nombre)")
+    Mono<Boolean> existePorNombre(String nombre);
 }

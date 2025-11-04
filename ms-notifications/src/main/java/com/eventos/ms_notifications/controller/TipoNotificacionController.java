@@ -11,8 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/v1/tipos-notificacion")
@@ -29,58 +29,62 @@ public class TipoNotificacionController {
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Listar todos los tipos de notificación", description = "Obtiene la lista completa de tipos de notificación registrados")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Lista obtenida correctamente"),
-        @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+            @ApiResponse(responseCode = "200", description = "Lista obtenida correctamente"),
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor")
     })
-    public ResponseEntity<List<TipoNotificacionDTO>> listarTodos() {
-        return ResponseEntity.ok(tipoNotificacionService.obtenerTodas());
+    public Flux<TipoNotificacionDTO> listarTodos() {
+        return tipoNotificacionService.obtenerTodas();
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Obtener un tipo de notificación por ID", description = "Devuelve un tipo de notificación según su identificador")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Tipo de notificación encontrado correctamente"),
-        @ApiResponse(responseCode = "404", description = "No se encontró el tipo de notificación con el ID especificado")
+            @ApiResponse(responseCode = "200", description = "Tipo de notificación encontrado correctamente"),
+            @ApiResponse(responseCode = "404", description = "No se encontró el tipo de notificación con el ID especificado")
     })
-    public ResponseEntity<TipoNotificacionDTO> obtenerPorId(@PathVariable Long id) {
-        return ResponseEntity.ok(tipoNotificacionService.obtenerPorId(id));
+    public Mono<ResponseEntity<TipoNotificacionDTO>> obtenerPorId(@PathVariable Long id) {
+        return tipoNotificacionService.obtenerPorId(id)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Crear un nuevo tipo de notificación", description = "Registra un nuevo tipo de notificación en el sistema")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "201", description = "Tipo de notificación creado correctamente"),
-        @ApiResponse(responseCode = "409", description = "Ya existe un tipo con el mismo nombre"),
-        @ApiResponse(responseCode = "422", description = "Entrada inválida o datos incompletos")
+            @ApiResponse(responseCode = "201", description = "Tipo de notificación creado correctamente"),
+            @ApiResponse(responseCode = "409", description = "Ya existe un tipo con el mismo nombre"),
+            @ApiResponse(responseCode = "422", description = "Entrada inválida o datos incompletos")
     })
-    public ResponseEntity<TipoNotificacionDTO> crear(@Valid @RequestBody TipoNotificacionDTO tipoDTO) {
-        TipoNotificacionDTO creado = tipoNotificacionService.crear(tipoDTO);
-        return new ResponseEntity<>(creado, HttpStatus.CREATED);
+    public Mono<ResponseEntity<TipoNotificacionDTO>> crear(@Valid @RequestBody TipoNotificacionDTO tipoDTO) {
+        return tipoNotificacionService.crear(tipoDTO)
+                .map(dto -> ResponseEntity.status(HttpStatus.CREATED).body(dto));
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Actualizar un tipo de notificación existente", description = "Modifica los datos de un tipo de notificación existente")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Tipo de notificación actualizado correctamente"),
-        @ApiResponse(responseCode = "404", description = "Tipo de notificación no encontrado"),
-        @ApiResponse(responseCode = "422", description = "Datos inválidos enviados")
+            @ApiResponse(responseCode = "200", description = "Tipo de notificación actualizado correctamente"),
+            @ApiResponse(responseCode = "404", description = "Tipo de notificación no encontrado"),
+            @ApiResponse(responseCode = "422", description = "Datos inválidos enviados")
     })
-    public ResponseEntity<TipoNotificacionDTO> actualizar(@PathVariable Long id, @Valid @RequestBody TipoNotificacionDTO tipoDTO) {
-        return ResponseEntity.ok(tipoNotificacionService.actualizar(id, tipoDTO));
+    public Mono<ResponseEntity<TipoNotificacionDTO>> actualizar(@PathVariable Long id, @Valid @RequestBody TipoNotificacionDTO tipoDTO) {
+        return tipoNotificacionService.actualizar(id, tipoDTO)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Eliminar un tipo de notificación por ID", description = "Elimina un tipo de notificación existente por su identificador")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "204", description = "Tipo de notificación eliminado correctamente"),
-        @ApiResponse(responseCode = "404", description = "Tipo de notificación no encontrado")
+            @ApiResponse(responseCode = "204", description = "Tipo de notificación eliminado correctamente"),
+            @ApiResponse(responseCode = "404", description = "Tipo de notificación no encontrado")
     })
-    public ResponseEntity<String> eliminar(@PathVariable Long id) {
-        tipoNotificacionService.eliminar(id);
-        return ResponseEntity.ok("Tipo de notificación con ID " + id + " eliminada correctamente");
+    public Mono<ResponseEntity<Void>> eliminar(@PathVariable Long id) {
+        return tipoNotificacionService.eliminar(id)
+                .then(Mono.just(ResponseEntity.noContent().build()));
     }
 }

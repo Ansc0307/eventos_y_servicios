@@ -17,7 +17,7 @@ import io.swagger.v3.oas.models.info.License;
     servers = {
         @Server(
             url = "/ms-notifications",
-            description = "Ruta del microservicio a través del Gateway"
+            description = "Microservicio de Notificaciones"
         )
     }
 )

@@ -8,13 +8,10 @@ import com.eventos.ms_notifications.mapper.TipoNotificacionMapper;
 import com.eventos.ms_notifications.model.TipoNotificacion;
 import com.eventos.ms_notifications.repository.TipoNotificacionRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.stream.Collectors;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @Service
-@Transactional
 public class TipoNotificacionService {
 
     private final TipoNotificacionRepository tipoNotificacionRepository;
@@ -26,50 +23,61 @@ public class TipoNotificacionService {
         this.tipoNotificacionMapper = tipoNotificacionMapper;
     }
 
-    public List<TipoNotificacionDTO> obtenerTodas() {
+    // Obtener todas las notificaciones
+    public Flux<TipoNotificacionDTO> obtenerTodas() {
         return tipoNotificacionRepository.findAll()
-                .stream()
-                .map(tipoNotificacionMapper::toDto)
-                .collect(Collectors.toList());
+                .map(tipoNotificacionMapper::toDto);
     }
 
-    public TipoNotificacionDTO obtenerPorId(Long id) {
-        TipoNotificacion tipo = tipoNotificacionRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Tipo de notificación no encontrado con ID: " + id));
-        return tipoNotificacionMapper.toDto(tipo);
+    // Obtener por ID
+    public Mono<TipoNotificacionDTO> obtenerPorId(Long id) {
+        return tipoNotificacionRepository.findById(id)
+                .switchIfEmpty(Mono.error(new NotFoundException("Tipo de notificación no encontrado con ID: " + id)))
+                .map(tipoNotificacionMapper::toDto);
     }
 
-    public TipoNotificacionDTO crear(TipoNotificacionDTO tipoDTO) {
+    // Crear
+    public Mono<TipoNotificacionDTO> crear(TipoNotificacionDTO tipoDTO) {
         if (tipoDTO.getNombre() == null || tipoDTO.getNombre().isBlank()) {
-            throw new InvalidInputException("El nombre del tipo de notificación no puede estar vacío.");
+            return Mono.error(new InvalidInputException("El nombre del tipo de notificación no puede estar vacío."));
         }
 
-        if (tipoNotificacionRepository.existsByNombreIgnoreCase(tipoDTO.getNombre())) {
-            throw new ConflictException("Ya existe un tipo de notificación con el nombre '" + tipoDTO.getNombre() + "'.");
-        }
-
-        TipoNotificacion tipo = tipoNotificacionMapper.toEntity(tipoDTO);
-        return tipoNotificacionMapper.toDto(tipoNotificacionRepository.save(tipo));
+        return tipoNotificacionRepository.existsByNombreIgnoreCase(tipoDTO.getNombre())
+                .flatMap(existe -> {
+                    if (existe) {
+                        return Mono.error(new ConflictException(
+                                "Ya existe un tipo de notificación con el nombre '" + tipoDTO.getNombre() + "'."));
+                    }
+                    TipoNotificacion tipo = tipoNotificacionMapper.toEntity(tipoDTO);
+                    return tipoNotificacionRepository.save(tipo)
+                            .map(tipoNotificacionMapper::toDto);
+                });
     }
 
-    public TipoNotificacionDTO actualizar(Long id, TipoNotificacionDTO tipoDTO) {
-        TipoNotificacion existente = tipoNotificacionRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("No se encontró el tipo de notificación con ID: " + id));
-
+    // Actualizar
+    public Mono<TipoNotificacionDTO> actualizar(Long id, TipoNotificacionDTO tipoDTO) {
         if (tipoDTO.getNombre() == null || tipoDTO.getNombre().isBlank()) {
-            throw new InvalidInputException("El nombre no puede estar vacío.");
+            return Mono.error(new InvalidInputException("El nombre no puede estar vacío."));
         }
 
-        existente.setNombre(tipoDTO.getNombre());
-        existente.setDescripcion(tipoDTO.getDescripcion());
-
-        return tipoNotificacionMapper.toDto(tipoNotificacionRepository.save(existente));
+        return tipoNotificacionRepository.findById(id)
+                .switchIfEmpty(Mono.error(new NotFoundException("No se encontró el tipo de notificación con ID: " + id)))
+                .flatMap(existente -> {
+                    existente.setNombre(tipoDTO.getNombre());
+                    existente.setDescripcion(tipoDTO.getDescripcion());
+                    return tipoNotificacionRepository.save(existente)
+                            .map(tipoNotificacionMapper::toDto);
+                });
     }
 
-    public void eliminar(Long id) {
-        if (!tipoNotificacionRepository.existsById(id)) {
-            throw new NotFoundException("No existe el tipo de notificación con ID: " + id);
-        }
-        tipoNotificacionRepository.deleteById(id);
+    // Eliminar
+    public Mono<Void> eliminar(Long id) {
+        return tipoNotificacionRepository.existsById(id)
+                .flatMap(existe -> {
+                    if (!existe) {
+                        return Mono.error(new NotFoundException("No existe el tipo de notificación con ID: " + id));
+                    }
+                    return tipoNotificacionRepository.deleteById(id);
+                });
     }
 }
