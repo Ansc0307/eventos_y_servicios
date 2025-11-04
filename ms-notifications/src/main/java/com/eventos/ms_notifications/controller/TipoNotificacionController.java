@@ -26,7 +26,7 @@ public class TipoNotificacionController {
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @Operation(summary = "Listar todos los tipos de notificación", description = "Obtiene la lista completa de tipos de notificación registrados")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Lista obtenida correctamente"),
@@ -37,7 +37,7 @@ public class TipoNotificacionController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @Operation(summary = "Obtener un tipo de notificación por ID", description = "Devuelve un tipo de notificación según su identificador")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Tipo de notificación encontrado correctamente"),
@@ -50,7 +50,7 @@ public class TipoNotificacionController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @Operation(summary = "Crear un nuevo tipo de notificación", description = "Registra un nuevo tipo de notificación en el sistema")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Tipo de notificación creado correctamente"),
@@ -63,7 +63,7 @@ public class TipoNotificacionController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @Operation(summary = "Actualizar un tipo de notificación existente", description = "Modifica los datos de un tipo de notificación existente")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Tipo de notificación actualizado correctamente"),
@@ -77,7 +77,7 @@ public class TipoNotificacionController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @Operation(summary = "Eliminar un tipo de notificación por ID", description = "Elimina un tipo de notificación existente por su identificador")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Tipo de notificación eliminado correctamente"),

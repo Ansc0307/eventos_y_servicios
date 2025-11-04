@@ -26,7 +26,7 @@ public class PrioridadController {
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @Operation(summary = "Listar todas las prioridades", description = "Obtiene una lista completa de las prioridades registradas")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Lista obtenida correctamente"),
@@ -37,7 +37,7 @@ public class PrioridadController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @Operation(summary = "Obtener prioridad por ID", description = "Devuelve una prioridad según su identificador")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Prioridad encontrada correctamente"),
@@ -50,7 +50,7 @@ public class PrioridadController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @Operation(summary = "Crear una nueva prioridad", description = "Registra una nueva prioridad en el sistema")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Prioridad creada correctamente"),
@@ -63,7 +63,7 @@ public class PrioridadController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @Operation(summary = "Actualizar una prioridad", description = "Modifica los datos de una prioridad existente")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Prioridad actualizada correctamente"),
@@ -77,7 +77,7 @@ public class PrioridadController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @Operation(summary = "Eliminar una prioridad", description = "Elimina una prioridad existente por su ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Prioridad eliminada correctamente"),
