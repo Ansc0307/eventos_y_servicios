@@ -1,12 +1,15 @@
 package com.eventos.ms_notifications.controller;
 
+import com.eventos.ms_notifications.config.TestSecurityConfig;
 import com.eventos.ms_notifications.dto.PrioridadDTO;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@Import(TestSecurityConfig.class)
 class PrioridadControllerMockTest {
 
     @Autowired

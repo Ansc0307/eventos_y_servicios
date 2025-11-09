@@ -58,7 +58,7 @@ public class GlobalControllerExceptionHandler {
     @ResponseStatus(FORBIDDEN)
     @ExceptionHandler(AccessDeniedException.class)
     public @ResponseBody HttpErrorInfo handleAccessDenied(ServerHttpRequest request, AccessDeniedException ex) {
-        return createHttpErrorInfo(FORBIDDEN, request, new Exception("Acceso denegado: no tienes permisos para este recurso."));
+        return createHttpErrorInfo(FORBIDDEN, request, new Exception("Acceso denegado: no tiene permisos para este recurso."));
     }
 
     @ResponseStatus(UNAUTHORIZED)
