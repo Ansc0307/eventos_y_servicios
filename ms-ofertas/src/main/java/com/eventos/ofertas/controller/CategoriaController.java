@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
 
@@ -41,9 +42,12 @@ public class CategoriaController {
         @ApiResponse(
             responseCode = "400",
             description = "Datos inválidos"
-        )
+        ),
+         @ApiResponse(responseCode = "401", description = "No autorizado"),
+        @ApiResponse(responseCode = "403", description = "Acceso denegado")
     })
     @PostMapping
+    @PreAuthorize("hasAnyRole('USER', 'PROVEEDOR')")
     public ResponseEntity<CategoriaDTO> crearCategoria(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                 description = "Datos de la categoría a crear",
@@ -90,6 +94,7 @@ public class CategoriaController {
         )
     })
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('USER', 'PROVEEDOR')")
     public ResponseEntity<CategoriaDTO> obtenerCategoriaPorId(
             @Parameter(description = "ID de la categoría", required = true)
             @PathVariable Long id) {
@@ -117,9 +122,12 @@ public class CategoriaController {
         @ApiResponse(
             responseCode = "400",
             description = "Datos inválidos"
-        )
+        ),
+        @ApiResponse(responseCode = "401", description = "No autorizado"),
+        @ApiResponse(responseCode = "403", description = "Acceso denegado")
     })
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('USER', 'PROVEEDOR')")
     public ResponseEntity<CategoriaDTO> actualizarCategoria(
             @Parameter(description = "ID de la categoría", required = true)
             @PathVariable Long id,
@@ -147,9 +155,12 @@ public class CategoriaController {
         @ApiResponse(
             responseCode = "404",
             description = "Categoría no encontrada"
-        )
+        ),
+        @ApiResponse(responseCode = "401", description = "No autorizado"),
+        @ApiResponse(responseCode = "403", description = "Acceso denegado")
     })
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('USER', 'PROVEEDOR')")
     public ResponseEntity<Void> eliminarCategoria(
             @Parameter(description = "ID de la categoría", required = true)
             @PathVariable Long id) {
