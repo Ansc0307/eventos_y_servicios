@@ -8,13 +8,10 @@ import com.eventos.ms_notifications.mapper.PrioridadMapper;
 import com.eventos.ms_notifications.model.Prioridad;
 import com.eventos.ms_notifications.repository.PrioridadRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.stream.Collectors;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @Service
-@Transactional
 public class PrioridadService {
 
     private final PrioridadRepository prioridadRepository;
@@ -25,54 +22,66 @@ public class PrioridadService {
         this.prioridadMapper = prioridadMapper;
     }
 
-    public List<PrioridadDTO> obtenerTodas() {
+    // Obtener todas las prioridades
+    public Flux<PrioridadDTO> obtenerTodas() {
         return prioridadRepository.findAll()
-                .stream()
-                .map(prioridadMapper::toDto)
-                .collect(Collectors.toList());
+                .map(prioridadMapper::toDto);
     }
 
-    public PrioridadDTO obtenerPorId(Long id) {
-        Prioridad prioridad = prioridadRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Prioridad no encontrada con ID: " + id));
-        return prioridadMapper.toDto(prioridad);
+    // Obtener por ID
+    public Mono<PrioridadDTO> obtenerPorId(Long id) {
+        return prioridadRepository.findById(id)
+                .switchIfEmpty(Mono.error(new NotFoundException("Prioridad no encontrada con ID: " + id)))
+                .map(prioridadMapper::toDto);
     }
 
-    public PrioridadDTO crear(PrioridadDTO prioridadDTO) {
+    // Crear
+    public Mono<PrioridadDTO> crear(PrioridadDTO prioridadDTO) {
         if (prioridadDTO.getNombre() == null || prioridadDTO.getNombre().isBlank()) {
-            throw new InvalidInputException("El nombre de la prioridad no puede estar vacío.");
+            return Mono.error(new InvalidInputException("El nombre de la prioridad no puede estar vacío."));
         }
 
-        if (prioridadRepository.existsByNombreIgnoreCase(prioridadDTO.getNombre())) {
-            throw new ConflictException("Ya existe una prioridad con el nombre '" + prioridadDTO.getNombre() + "'.");
-        }
-
-        Prioridad prioridad = prioridadMapper.toEntity(prioridadDTO);
-        return prioridadMapper.toDto(prioridadRepository.save(prioridad));
+        return prioridadRepository.existsByNombreIgnoreCase(prioridadDTO.getNombre())
+                .flatMap(existe -> {
+                    if (existe) {
+                        return Mono.error(new ConflictException(
+                                "Ya existe una prioridad con el nombre '" + prioridadDTO.getNombre() + "'."));
+                    }
+                    Prioridad prioridad = prioridadMapper.toEntity(prioridadDTO);
+                    return prioridadRepository.save(prioridad)
+                            .map(prioridadMapper::toDto);
+                });
     }
 
-    public PrioridadDTO actualizar(Long id, PrioridadDTO prioridadDTO) {
-        Prioridad existente = prioridadRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("No se encontró la prioridad con ID: " + id));
-
+    // Actualizar
+    public Mono<PrioridadDTO> actualizar(Long id, PrioridadDTO prioridadDTO) {
         if (prioridadDTO.getNombre() == null || prioridadDTO.getNombre().isBlank()) {
-            throw new InvalidInputException("El nombre no puede estar vacío.");
+            return Mono.error(new InvalidInputException("El nombre no puede estar vacío."));
         }
 
-        if (prioridadRepository.existsByNombreIgnoreCase(prioridadDTO.getNombre())) {
-            throw new ConflictException("Ya existe una prioridad con el nombre '" + prioridadDTO.getNombre() + "'.");
-        }
-
-        existente.setNombre(prioridadDTO.getNombre());
-        existente.setDescripcion(prioridadDTO.getDescripcion());
-
-        return prioridadMapper.toDto(prioridadRepository.save(existente));
+        return prioridadRepository.findById(id)
+                .switchIfEmpty(Mono.error(new NotFoundException("No se encontró la prioridad con ID: " + id)))
+                .flatMap(existente -> prioridadRepository.existsByNombreIgnoreCase(prioridadDTO.getNombre())
+                        .flatMap(existe -> {
+                            if (existe && !existente.getId().equals(id)) {
+                                return Mono.error(new ConflictException(
+                                        "Ya existe una prioridad con el nombre '" + prioridadDTO.getNombre() + "'."));
+                            }
+                            existente.setNombre(prioridadDTO.getNombre());
+                            existente.setDescripcion(prioridadDTO.getDescripcion());
+                            return prioridadRepository.save(existente)
+                                    .map(prioridadMapper::toDto);
+                        }));
     }
 
-    public void eliminar(Long id) {
-        if (!prioridadRepository.existsById(id)) {
-            throw new NotFoundException("No existe la prioridad con ID: " + id);
-        }
-        prioridadRepository.deleteById(id);
+    // Eliminar
+    public Mono<Void> eliminar(Long id) {
+        return prioridadRepository.existsById(id)
+                .flatMap(existe -> {
+                    if (!existe) {
+                        return Mono.error(new NotFoundException("No existe la prioridad con ID: " + id));
+                    }
+                    return prioridadRepository.deleteById(id);
+                });
     }
 }

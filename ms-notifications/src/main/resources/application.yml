@@ -1,30 +1,64 @@
 server:
   port: 8087
+  forward-headers-strategy: framework
 
 spring:
   application:
     name: ms-notifications
-
+  
   profiles:
-    active: local
     include: openapi
 
-  jpa:
-    hibernate:
-      ddl-auto: create
-    show-sql: true
-    properties:
-      hibernate.format_sql: true
-      hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
+  r2dbc:
+    url: ${SPRING_R2DBC_URL:r2dbc:postgresql://localhost:5432/notifications_db}
+    username: ${SPRING_R2DBC_USERNAME:postgres}
+    password: ${SPRING_R2DBC_PASSWORD:admin}
+    pool:
+      enabled: true
+      initial-size: 5
+      max-size: 20
+
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
+      # data-locations: classpath:data.sql
+
+  #JPA configuración para postgresql
+  # jpa:
+  #   hibernate:
+  #     ddl-auto: create
+  #   show-sql: true
+  #   properties:
+  #     hibernate.format_sql: true
+  #     hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  # datasource:
+  #   url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/notifications_db}
+  #   #url: jdbc:postgresql://notifications_db:5432/notifications_db #para cuando corra solo sin docker compose, pero si en docker
+  #   username: ${SPRING_DATASOURCE_USERNAME:postgres}
+  #   password: ${SPRING_DATASOURCE_PASSWORD:admin}
+  #   driver-class-name: org.postgresql.Driver
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # Usa 8090 en local, dentro de Compose usa keycloak:8080
+          issuer-uri: ${OIDC_ISSUER:http://localhost:8090/realms/eventos}
+          jwk-set-uri: ${OIDC_JWK_SET_URI:http://localhost:8090/realms/eventos/protocol/openid-connect/certs}
 
 eureka:
   client:
     service-url:
       defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://localhost:8761/eureka/}
-    register-with-eureka: true
-    fetch-registry: true
+    register-with-eureka: true #si no encender el eureka o cambiar a false en local (ambos)
+    fetch-registry: true #si no encender el eureka o cambiar a false en local (ambos)
+  #instance:
+    #leaseRenewalIntervalInSeconds: 5 # tiempo entre latidos(por defecto 30s)
+    #leaseExpirationDurationInSeconds: 5 # tiempo para considerar que la instancia esta caída (por defecto 90s)
 
 logging:
   level:
     root: INFO
-    com.eventos.ms_notifications: DEBUG
+    '[com.eventos.ms_notifications]': DEBUG

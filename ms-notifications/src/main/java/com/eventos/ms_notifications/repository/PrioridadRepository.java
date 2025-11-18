@@ -1,12 +1,16 @@
 package com.eventos.ms_notifications.repository;
 
 import com.eventos.ms_notifications.model.Prioridad;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.r2dbc.repository.Query;
+import org.springframework.data.repository.reactive.ReactiveCrudRepository;
+import reactor.core.publisher.Mono;
 
-@Repository
-public interface PrioridadRepository extends JpaRepository<Prioridad, Long> {
-    boolean existsByNombreIgnoreCase(String nombre);
+public interface PrioridadRepository extends ReactiveCrudRepository<Prioridad, Long> {
 
-    //no se si agregar algo más...
+    // Derived Query
+    Mono<Boolean> existsByNombreIgnoreCase(String nombre);
+
+    // Query nativa
+    @Query("SELECT CASE WHEN COUNT(*) > 0 THEN true ELSE false END FROM prioridad WHERE LOWER(nombre) = LOWER(:nombre)")
+    Mono<Boolean> existePorNombre(String nombre);
 }

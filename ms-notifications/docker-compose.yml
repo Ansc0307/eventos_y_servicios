@@ -11,9 +11,9 @@ services:
       - "8087:8087"
     environment:
       - SPRING_PROFILES_ACTIVE=docker,openapi
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/notifications_db
-      - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=admin
+      - SPRING_R2DBC_URL=r2dbc:postgresql://postgres:5432/notifications_db
+      - SPRING_R2DBC_USERNAME=postgres
+      - SPRING_R2DBC_PASSWORD=admin
     depends_on:
       postgres:
         condition: service_healthy

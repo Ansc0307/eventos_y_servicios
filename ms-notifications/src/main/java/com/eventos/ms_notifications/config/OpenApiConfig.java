@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.servers.Server;
 import io.swagger.v3.oas.models.ExternalDocumentation;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
@@ -11,6 +13,14 @@ import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
 
 @Configuration
+@OpenAPIDefinition(
+    servers = {
+        @Server(
+            url = "/ms-notifications",
+            description = "Microservicio de Notificaciones"
+        )
+    }
+)
 public class OpenApiConfig {
     
     @Value("${api.common.version}")
@@ -47,9 +57,9 @@ public class OpenApiConfig {
     String apiContactEmail;
 
     /**
-     * Will be exposed on $HOST:$PORT/openapi/swagger-ui.html
-     *
-     * @return the OpenAPI documentation
+     * Será expuesto en:
+     * - SIN GW (sólo el ms) http://localhost:8087/openapi/webjars/swagger-ui/index.html (este no debería, porque en el dockerfile no se expone el puerto 8087)
+     * - CON DOCKER COMPOSE: http://localhost:8080/ms-notifications/openapi/webjars/swagger-ui/index.html (a través del Gateway)
      */
     @Bean
     public OpenAPI getOpenApiDocumentation() {
@@ -69,5 +79,5 @@ public class OpenApiConfig {
                 .externalDocs(new ExternalDocumentation()
                         .description(apiExternalDocDesc)
                         .url(apiExternalDocUrl));
-    }  
+    }
 }

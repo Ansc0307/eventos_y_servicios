@@ -118,6 +118,41 @@ spring.cloud.gateway.routes:
       args:
         regexp: "/ms-usuarios/openapi/v3/api-docs/swagger-config"
         replacement: "/openapi/v3/api-docs/swagger-config"
+
+# == SWAGGER MS-NOTIFICATIONS ==
+# 1ro ui principal (interfaz grafica de swager)
+- id: ms-notifications-swagger-ui
+  uri: lb://ms-notifications
+  predicates:
+    - Path=/ms-notifications/openapi/swagger-ui/**
+  filters:
+    - name: RewritePath
+      args:
+        regexp: "/ms-notifications/openapi/(?<segment>.*)"
+        replacement: "/openapi/${segment}"
+
+# 2do DOcumentación JSON (API docs)
+- id: ms-notifications-swagger-docs
+  uri: lb://ms-notifications
+  predicates:
+    - Path=/ms-notifications/openapi/v3/api-docs/**
+  filters:
+    - name: RewritePath
+      args:
+        regexp: "/ms-notifications/openapi/v3/api-docs/(?<segment>.*)"
+        replacement: "/openapi/v3/api-docs/${segment}"
+
+# 3ro configuracion del swagger
+- id: ms-notifications-swagger-config
+  uri: lb://ms-notifications
+  predicates:
+    - Path=/ms-notifications/openapi/v3/api-docs/swagger-config
+  filters:
+    - name: RewritePath
+      args:
+        regexp: "/ms-notifications/openapi/v3/api-docs/swagger-config"
+        replacement: "/openapi/v3/api-docs/swagger-config"
+
 logging:
   level:
     org.springframework.cloud.gateway: TRACE

@@ -194,12 +194,14 @@ services:
       eureka-server:
         condition: service_healthy
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://notifications-db:5432/notifications_db
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: admin
+      SPRING_R2DBC_URL: r2dbc:postgresql://notifications-db:5432/notifications_db
+      SPRING_R2DBC_USERNAME: postgres
+      SPRING_R2DBC_PASSWORD: admin
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
-    ports:
-      - "8087:8087"
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8080/realms/eventos
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/eventos/protocol/openid-connect/certs
+    # ports: #quitar esto, no debe exponerse los ms
+    #   - "8087:8087"
     networks:
       - eventos-net
   # Microservicio de gateway (edge server)
