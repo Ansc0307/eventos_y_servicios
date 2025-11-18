@@ -1,0 +1,28 @@
+springdoc:
+  swagger-ui:
+    path: /openapi/swagger-ui.html
+    # Esta es la URL que la UI usará para encontrar su configuración A TRAVÉS DEL GATEWAY
+    config-url: /ofertas/openapi/v3/api-docs/swagger-config
+    urls:
+      - name: API Ofertas
+        # Esta es la URL que la UI usará para obtener la definición de la API A TRAVÉS DEL GATEWAY
+        url: /ofertas/openapi/v3/api-docs
+  api-docs:
+    # Esta es la ruta interna en el microservicio
+    path: /openapi/v3/api-docs
+  # Asegúrate que el paquete apunte a donde están tus Controllers
+  packagesToScan: com.eventos.ofertas.controller 
+  pathsToMatch: /categorias/**, /ofertas/**
+
+api:
+  common:
+    version: 1.0.0
+    title: API de Ofertas
+    description: "API RESTful para gestionar ofertas, categorías, descuentos, medias y reseñas."
+    termsOfService: https://www.ofertas.com/terms
+    license: Licencia MIT
+    licenseUrl: https://choosealicense.com/licenses/mit/
+    contact:
+      name: Equipo de Ofertas
+      url: https://www.ofertas.com
+      email: contacto@ofertas.com

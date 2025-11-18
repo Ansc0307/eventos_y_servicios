@@ -25,6 +25,48 @@ spring.cloud.gateway.routes:
   filters:
     - StripPrefix=1
 
+# === SWAGGER DEL MS-OFERTAS ===
+- id: ms-ofertas-swagger
+  uri: lb://ms-ofertas
+  predicates:
+    - Path=/ofertas/openapi/**
+  filters:
+    - name: RewritePath
+      args:
+        regexp: "/ofertas/(?<segment>.*)"
+        replacement: "/${segment}"
+        
+- id: ms-ofertas-swagger-ui
+  uri: lb://ms-ofertas
+  predicates:
+    - Path=/ofertas/openapi/swagger-ui/**
+  filters:
+    - name: RewritePath
+      args:
+        regexp: "/ofertas/openapi/(?<segment>.*)"
+        replacement: "/openapi/${segment}"
+
+- id: ms-ofertas-swagger-docs
+  uri: lb://ms-ofertas
+  predicates:
+    - Path=/ofertas/openapi/v3/api-docs/**
+  filters:
+    - name: RewritePath
+      args:
+        regexp: "/ofertas/openapi/v3/api-docs/(?<segment>.*)"
+        replacement: "/openapi/v3/api-docs/${segment}"
+
+- id: ms-ofertas-swagger-config
+  uri: lb://ms-ofertas
+  predicates:
+    - Path=/ofertas/openapi/v3/api-docs/swagger-config
+  filters:
+    - name: RewritePath
+      args:
+        regexp: "/ofertas/openapi/v3/api-docs/swagger-config"
+        replacement: "/openapi/v3/api-docs/swagger-config"
+
+#ms-ofertas API
 - id: ms-ofertas
   uri: lb://ms-ofertas
   predicates:
