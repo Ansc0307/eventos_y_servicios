@@ -25,6 +25,13 @@ spring.cloud.gateway.routes:
   filters:
     - StripPrefix=1
 
+- id: config-server
+  uri: lb://config-server
+  predicates:
+    - Path=/config/**
+  filters:
+    - StripPrefix=1
+
 # === SWAGGER DEL MS-OFERTAS ===
 - id: ms-ofertas-swagger
   uri: lb://ms-ofertas

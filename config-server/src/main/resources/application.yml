@@ -1,0 +1,32 @@
+server:
+  port: 8888
+
+spring:
+  application:
+    name: config-server
+  profiles:
+    active: native
+  cloud:
+    config:
+      # Forzamos composite->native y desactivamos explícitamente Git
+      server:
+        composite:
+          - native:
+              searchLocations: file:/config-repo, classpath:/config
+        git:
+          enabled: false
+        # En caso de que se haya habilitado bootstrap en algún lugar, evitar conflicto
+        bootstrap: false
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://eureka-server:8761/eureka/}
+    registerWithEureka: true
+    fetchRegistry: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,env

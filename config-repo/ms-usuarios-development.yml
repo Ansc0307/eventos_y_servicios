@@ -1,0 +1,9 @@
+# Ejemplo de archivo de configuración para la aplicación 'ms-usuarios' con perfil 'development'
+spring:
+  datasource:
+    url: jdbc:postgresql://usuarios-db:5432/usuarios_eventos_db
+    username: postgres
+    password: admin
+
+app:
+  example-property: "valor-local"

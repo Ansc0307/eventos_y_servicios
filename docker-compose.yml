@@ -36,6 +36,27 @@ services:
       retries: 6
     networks:
       - eventos-net
+  config-server:
+    build:
+      context: ./config-server
+      dockerfile: Dockerfile
+    container_name: config-server
+    restart: unless-stopped
+    ports:
+      - "8888:8888"
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      # Usamos backend 'native' con un volumen local montado en /config-repo
+      # (no se necesita CONFIG_GIT_* cuando se usa 'native')
+      CONFIG_SERVER_USER: ${CONFIG_SERVER_USER}
+      CONFIG_SERVER_PASSWORD: ${CONFIG_SERVER_PASSWORD}
+    networks:
+      - eventos-net
+    volumes:
+      - ./config-repo:/config-repo:ro
   # Base de datos para usuarios
   usuarios-db:
     image: postgres:16
