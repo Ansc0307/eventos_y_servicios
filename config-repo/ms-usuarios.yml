@@ -1,0 +1,11 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://usuarios-db:5432/usuarios_eventos_db
+    username: postgres
+    password: admin
+
+server:
+  port: 8081
+
+usuarios:
+  mensaje-bienvenida: "Hola desde Config Server (perfil default)"
