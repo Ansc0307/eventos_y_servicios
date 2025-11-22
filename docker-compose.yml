@@ -49,14 +49,14 @@ services:
         condition: service_healthy
     environment:
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
-      # Usamos backend 'native' con un volumen local montado en /config-repo
-      # (no se necesita CONFIG_GIT_* cuando se usa 'native')
       CONFIG_SERVER_USER: ${CONFIG_SERVER_USER}
       CONFIG_SERVER_PASSWORD: ${CONFIG_SERVER_PASSWORD}
+      CONFIG_GIT_URI: ${CONFIG_GIT_URI}
     networks:
       - eventos-net
-    volumes:
-      - ./config-repo:/config-repo:ro
+    # Ya no montamos config-repo local, el backend ahora es Git
+    # volumes:
+    #   - ./config-repo:/config-repo:ro
   # Base de datos para usuarios
   usuarios-db:
     image: postgres:16

@@ -5,14 +5,13 @@ spring:
   application:
     name: config-server
   profiles:
-    active: native
+    active: git
   cloud:
     config:
       server:
-        native:
-          searchLocations: file:/config-repo,classpath:/config
         git:
-          enabled: false
+          uri: ${CONFIG_GIT_URI}
+          clone-on-start: true
         bootstrap: false
 
 eureka:
