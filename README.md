@@ -28,6 +28,9 @@ Evidencias vía Config Server (Basic Auth `config:config`):
 - `GET http://localhost:8888/ms-usuarios/default` -> propertySources: primero `ms-usuarios.yml`, luego `application.yml`.
 - `GET http://localhost:8888/eureka-server/default` -> propertySources: `eureka-server.yml` + `application.yml`.
 - `GET http://localhost:8888/edge-server/default` -> propertySources: `edge-server.yml` + `application.yml`.
+- `GET http://localhost:8888/ms-reservas/default` -> propertySources: `ms-reservas.yml` + `application.yml`.
+- `GET http://localhost:8888/ms-ofertas/default` -> propertySources: `ms-ofertas.yml` + `application.yml`.
+- `GET http://localhost:8888/ms-notifications/default` -> propertySources: `ms-notifications.yml` + `application.yml`.
 
 Ejemplo de respuesta (edge-server): muestra `propertySources[0].name = .../edge-server.yml` y `propertySources[1].name = .../application.yml` confirmando la composición.
 

@@ -5,6 +5,8 @@ server:
 spring:
   application:
     name: ms-notifications
+  config:
+    import: optional:configserver:http://config-server:8888
   
   profiles:
     include: openapi
