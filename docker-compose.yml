@@ -52,6 +52,7 @@ services:
       CONFIG_SERVER_USER: ${CONFIG_SERVER_USER}
       CONFIG_SERVER_PASSWORD: ${CONFIG_SERVER_PASSWORD}
       CONFIG_GIT_URI: ${CONFIG_GIT_URI}
+      ENCRYPT_KEY: ${ENCRYPT_KEY}
     networks:
       - eventos-net
     # Ya no montamos config-repo local, el backend ahora es Git
