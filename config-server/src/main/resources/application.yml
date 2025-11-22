@@ -12,7 +12,12 @@ spring:
         git:
           uri: ${CONFIG_GIT_URI}
           clone-on-start: true
+          default-label: main
         bootstrap: false
+
+logging:
+  level:
+    org.springframework.cloud.config.server: DEBUG
 
 eureka:
   client:
