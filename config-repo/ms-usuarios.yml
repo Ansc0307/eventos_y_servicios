@@ -2,7 +2,7 @@ spring:
   datasource:
     url: jdbc:postgresql://usuarios-db:5432/usuarios_eventos_db
     username: postgres
-    password: admin
+    password: '{cipher}802f7d1cfcf260745620994d79fab0e6a8febf1d1501aede11b4e7daf20d106e'
 
 server:
   port: 8081
