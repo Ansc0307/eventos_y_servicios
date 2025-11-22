@@ -16,7 +16,10 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/actuator/health").permitAll()
+                .anyRequest().authenticated()
+            )
             .httpBasic(Customizer.withDefaults())
             .csrf(csrf -> csrf.disable());
         return http.build();
@@ -26,10 +29,12 @@ public class SecurityConfig {
     public InMemoryUserDetailsManager userDetailsService(
             @Value("${CONFIG_SERVER_USER:config}") String user,
             @Value("${CONFIG_SERVER_PASSWORD:config}") String password) {
+        String effectiveUser = (user == null || user.isBlank()) ? "config" : user;
+        String effectivePassword = (password == null || password.isBlank()) ? "config" : password;
 
         UserDetails userDetails = User.withDefaultPasswordEncoder()
-                .username(user)
-                .password(password)
+                .username(effectiveUser)
+                .password(effectivePassword)
                 .roles("ADMIN")
                 .build();
 
