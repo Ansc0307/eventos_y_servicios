@@ -35,6 +35,7 @@ for %%d in (
     ms-ofertas
     ms-reservas
     ms-usuarios
+    config-server
 ) do (
     echo ------------------------------------------
     echo Compilando %%d ...
