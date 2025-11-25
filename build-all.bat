@@ -29,6 +29,7 @@ if "%WRAPPER_CMD%"=="" (
 )
 
 for %%d in (
+    config-server
     eureka-server
     ms-edge-server
     ms-notifications
