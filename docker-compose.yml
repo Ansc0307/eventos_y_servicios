@@ -68,8 +68,8 @@ services:
       POSTGRES_DB: usuarios_eventos_db
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: admin
-    ports:
-      - "5431:5432"
+    # ports:
+    #   - "5431:5432"
     volumes:
       - usuarios_pg_data:/var/lib/postgresql/data
     networks:
@@ -89,8 +89,8 @@ services:
       POSTGRES_DB: reservas_db
       POSTGRES_USER: reservas_user
       POSTGRES_PASSWORD: reservas_password
-    ports:
-      - "5432:5432"
+    # ports:
+    #   - "5432:5432"
     volumes:
       - reservas_pg_data:/var/lib/postgresql/data
     networks:
@@ -110,8 +110,8 @@ services:
       POSTGRES_DB: ms-ofertas
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: admin
-    ports:
-      - "5433:5432"
+    # ports:
+    #   - "5433:5432"
     volumes:
       - ofertas_pg_data:/var/lib/postgresql/data
     networks:
@@ -131,8 +131,8 @@ services:
       POSTGRES_DB: notifications_db
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: admin
-    ports:
-      - "5434:5432"
+    # ports:
+    #   - "5434:5432"
     volumes:
       - notifications_pg_data:/var/lib/postgresql/data
     networks:
@@ -159,8 +159,8 @@ services:
       DB_PASSWORD: admin
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/eventos/protocol/openid-connect/certs
-    ports:
-      - "8081:8081"
+    # ports:
+    #   - "8081:8081"
     networks:
       - eventos-net
 
@@ -180,8 +180,8 @@ services:
       SPRING_DATASOURCE_PASSWORD: reservas_password
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/eventos/protocol/openid-connect/certs
-    ports:
-      - "8082:8082"
+    # ports:
+    #   - "8082:8082"
     networks:
       - eventos-net
 
@@ -200,8 +200,8 @@ services:
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: admin
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
-    ports:
-      - "8083:8083"
+    # ports:
+    #   - "8083:8083"
     networks:
       - eventos-net
 
