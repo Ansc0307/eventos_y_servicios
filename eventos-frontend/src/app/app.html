@@ -13,10 +13,11 @@
     --glass: rgba(255,255,255,0.04);
   }
 
+  *, *::before, *::after { box-sizing: border-box; }
   html, body { height: 100%; margin: 0; }
-  body { font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; background: linear-gradient(135deg, var(--bg-start), var(--bg-end)); color: #0b1220; }
+  body { font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; background: linear-gradient(135deg, var(--bg-start), var(--bg-end)); color: #0b1220; overflow-x: hidden; }
 
-  .container { max-width: 1100px; margin: 2.5rem auto; padding: 1rem; }
+  .container { max-width: 1800px; margin: 2rem auto; padding: 1rem; }
 
   .brand {
     display: flex; align-items: center; gap: 12px; color: white; margin-bottom: 1rem;
@@ -27,15 +28,19 @@
   .title { font-size: 1.5rem; font-weight: 600; margin: 0; }
   .subtitle { color: rgba(255,255,255,0.85); margin: 0; font-size: 0.95rem; }
 
-  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-  .card { background: var(--card-bg); border-radius: 12px; padding: 1rem; box-shadow: 0 8px 30px rgba(2,6,23,0.25); }
+    /* Usar columnas responsivas para evitar overflow horizontal
+      minmax(300px, 1fr) asegura que cada columna pueda encoger sin provocar scroll */
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; align-items: start; }
+    .card { background: var(--card-bg); border-radius: 12px; padding: 0.75rem; box-shadow: 0 8px 30px rgba(2,6,23,0.25); min-width: 0; }
+    /* Contenido interno que pueda desbordar (tablas largas) tendrá scroll horizontal sólo ahí */
+    .card-content { width: 100%; overflow-x: auto; }
   .header-row { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom: 1rem; }
 
   .btn { background: var(--accent); color: white; padding: 8px 12px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600 }
   .btn.secondary { background: transparent; color: var(--muted); border: 1px solid #eef2ff; }
 
   .card ::ng-deep table { width: 100%; border-collapse: collapse; }
-  .card ::ng-deep th, .card ::ng-deep td { padding: 0.75rem 0.9rem; border-bottom: 1px solid #f3f4f6; text-align:left; }
+  .card ::ng-deep th, .card ::ng-deep td { padding: 0.6rem 0.7rem; border-bottom: 1px solid #f3f4f6; text-align:left; }
   .card ::ng-deep th { color: #374151; font-weight: 700; font-size: 0.9rem; }
 
   @media (max-width: 800px) {
@@ -58,19 +63,6 @@
   </div>
 
   <div class="grid">
-    <div class="card" role="region" aria-label="Reservas">
-      <div class="header-row">
-        <div>
-          <strong>Reservas</strong>
-          <div style="color:var(--muted); font-size:0.9rem">Listado desde el microservicio de reservas</div>
-        </div>
-        <div class="header-actions">
-          <button class="btn" title="Refrescar" (click)="null">Refrescar</button>
-        </div>
-      </div>
-      <app-reservas-list></app-reservas-list>
-    </div>
-
     <div class="card" role="region" aria-label="Solicitudes">
       <div class="header-row">
         <div>
@@ -81,7 +73,39 @@
           <button class="btn" title="Refrescar solicitudes" (click)="null">Refrescar</button>
         </div>
       </div>
-      <app-solicitudes-list></app-solicitudes-list>
+      <div class="card-content">
+        <app-solicitudes-list></app-solicitudes-list>
+      </div>
+    </div>
+
+    <div class="card" role="region" aria-label="Reservas">
+      <div class="header-row">
+        <div>
+          <strong>Reservas</strong>
+          <div style="color:var(--muted); font-size:0.9rem">Listado desde el microservicio de reservas</div>
+        </div>
+        <div class="header-actions">
+          <button class="btn" title="Refrescar" (click)="null">Refrescar</button>
+        </div>
+      </div>
+      <div class="card-content">
+        <app-reservas-list></app-reservas-list>
+      </div>
+    </div>
+
+    <div class="card" role="region" aria-label="No Disponibilidades">
+      <div class="header-row">
+        <div>
+          <strong>No Disponibilidades</strong>
+          <div style="color:var(--muted); font-size:0.9rem">Listado desde el microservicio de reservas</div>
+        </div>
+        <div class="header-actions">
+          <button class="btn" title="Refrescar no disponibilidades" (click)="null">Refrescar</button>
+        </div>
+      </div>
+      <div class="card-content">
+        <app-no-disponibilidades-list></app-no-disponibilidades-list>
+      </div>
     </div>
   </div>
 
