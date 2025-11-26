@@ -9,7 +9,7 @@ import { TipoNotificacion } from '../models/notifications/tipo-notificacion.mode
   providedIn: 'root'
 })
 export class NotificacionesService {
-  private baseUrl = 'http://localhost:8080/ms-notifications/v1';
+  private baseUrl = '/ms-notifications/v1';
 
   constructor(private http: HttpClient) {}
 
