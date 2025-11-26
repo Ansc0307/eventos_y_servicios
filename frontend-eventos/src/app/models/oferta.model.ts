@@ -1,5 +1,4 @@
 export interface Oferta {
-  id?: number;
   idOferta?: number;
   proveedorId?: number;
   titulo?: string;

@@ -21,9 +21,9 @@ import { Categoria } from '../models/categoria.model';
           <input name="proveedorId" [(ngModel)]="form.proveedorId" placeholder="ProveedorId (ej. 3)" type="number" required />
           <input name="titulo" [(ngModel)]="form.titulo" placeholder="Título" required />
           <select name="idCategoria" [(ngModel)]="form.idCategoria" required>
-            <option value="">-- Seleccione categoría --</option>
-            <option *ngFor="let c of categorias" [value]="c.id">
-            {{ c.detalle || ('ID ' + c.id) }}
+            <option [ngValue]="null">-- Seleccione categoría --</option>
+            <option *ngFor="let c of categorias" [ngValue]="getCategoriaId(c)">
+              {{ getCategoriaLabel(c) }}
             </option>
           </select>
           <input name="precioBase" [(ngModel)]="form.precioBase" placeholder="Precio" type="number" required />
@@ -68,7 +68,7 @@ import { Categoria } from '../models/categoria.model';
             <td>{{ getOfertaId(o) }}</td>
             <td>{{ o.titulo }}</td>
             <td>{{ o.precioBase | number:'1.2-2' }}</td>
-            <td>{{ getCategoriaDetalle(o) }}</td>
+            <td>{{ getCategoriaNombre(o) }}</td>
             <td>{{ o.activo ? 'Sí' : 'No' }}</td>
           </tr>
         </tbody>
@@ -95,7 +95,7 @@ export class OfertasListComponent implements OnInit {
   loading = false;
   error: string | null = null;
 
-  categorias: Categoria[] = [];
+  categorias: any[] = [];
   categoriaMap = new Map<number, string>();
 
   // estado del formulario
@@ -123,20 +123,70 @@ export class OfertasListComponent implements OnInit {
     this.loadCategoriasThenOfertas();
   }
 
+  // -----------------------
+  // helpers para template
+  // -----------------------
+  getCategoriaId(c: any): number | null {
+    if (!c) return null;
+    // Normalizamos varias posibles key names
+    const id = c.id ?? c.idCategoria ?? c.id_of_categoria ?? c.id_oferta ?? c.idOfCategoria ?? c.idOfertas ?? null;
+    return id != null ? Number(id) : null;
+  }
+
+  getCategoriaLabel(c: any): string {
+    if (!c) return '';
+    const label = c.detalle ?? c.nombre ?? c.descripcion ?? (c.id != null ? `ID ${c.id}` : null);
+    return label ?? String(this.getCategoriaId(c) ?? '');
+  }
+
+  getOfertaId(o: any): string {
+    const id = o.id ?? o.idOferta ?? o.idOfertas ?? o.id_oferta ?? o.id_ofertas ?? null;
+    return id != null ? String(id) : '';
+  }
+
+  getCategoriaNombre(o: any): string {
+    // Si la API devuelve objeto 'categoria' dentro de la oferta:
+    if (o?.categoria) {
+      const catObj = o.categoria as any;
+      return (catObj.detalle ?? catObj.nombre ?? catObj.id ?? '').toString();
+    }
+    // Si viene solo id de categoria:
+    const catId = o.idCategoria ?? o.categoriaId ?? o.id_categoria ?? null;
+    if (catId == null) return '';
+    return this.categoriaMap.get(Number(catId)) ?? String(catId);
+  }
+
+  // -----------------------
+  // carga de datos
+  // -----------------------
   loadCategoriasThenOfertas() {
     this.loading = true;
     this.error = null;
 
     this.categoriasService.obtenerCategorias().subscribe({
       next: (cats) => {
-        this.categorias = cats || [];
+        this.categorias = (cats || []) as any[];
+        console.log('[OfertasList] categorías recibidas:', this.categorias);
+
+        // construir mapa para lookup por id (si las categorias vienen con id)
         this.categoriaMap.clear();
         this.categorias.forEach(c => {
-          const id = (c as any).id;
-          const detalle = (c as any).detalle ?? (c as any).detalle ?? '';
-          if (id != null) this.categoriaMap.set(Number(id), detalle);
+          const id = this.getCategoriaId(c);
+          const nombre = this.getCategoriaLabel(c);
+          if (id != null) this.categoriaMap.set(Number(id), nombre);
         });
 
+        // opcional: auto-seleccionar la última categoría para pruebas
+        if (this.categorias.length > 0 && (this.form.idCategoria == null)) {
+          const last = this.categorias[this.categorias.length - 1];
+          const lastId = this.getCategoriaId(last);
+          if (lastId != null) {
+            this.form.idCategoria = lastId;
+            console.log('[OfertasList] set default idCategoria =>', this.form.idCategoria);
+          }
+        }
+
+        // ahora cargar ofertas
         this.service.obtenerOfertas().subscribe({
           next: (data) => {
             console.log('[OfertasList] GET /api/ofertas response sample:', data?.[0]);
@@ -154,6 +204,7 @@ export class OfertasListComponent implements OnInit {
       },
       error: (err) => {
         console.error('[OfertasList] cargar categorias error', err);
+        // aun así intentamos cargar ofertas aunque falte categorias
         this.service.obtenerOfertas().subscribe({
           next: (data) => {
             this.ofertas = data || [];
@@ -170,21 +221,40 @@ export class OfertasListComponent implements OnInit {
     });
   }
 
-  // Construir payload y llamar al servicio
+  // -----------------------
+  // crear oferta
+  // -----------------------
+  parseUrls(raw: string): string[] {
+    if (!raw) return [];
+    return raw.split(',').map(s => s.trim()).filter(s => s.length > 0);
+  }
+
   crearOferta() {
     this.createError = null;
     this.createSuccess = null;
 
     // validaciones simples
-    if (!this.form.proveedorId || !this.form.titulo || !this.form.idCategoria || !this.form.precioBase) {
-      this.createError = 'Completa proveedorId, título, categoría y precio.';
+    if (!this.form.proveedorId || !this.form.titulo || !this.form.precioBase) {
+      this.createError = 'Completa proveedorId, título y precio.';
+      return;
+    }
+
+    // Normalizar idCategoria (si el select devolvió objeto o número)
+    let idCat = this.form.idCategoria;
+    if (idCat && typeof idCat === 'object') {
+      idCat = (idCat as any).id ?? (idCat as any).idCategoria ?? null;
+    }
+    const idCategoriaNum = idCat != null ? Number(idCat) : NaN;
+
+    if (isNaN(idCategoriaNum)) {
+      this.createError = 'Selecciona una categoría válida.';
       return;
     }
 
     const payload: any = {
       proveedorId: Number(this.form.proveedorId),
       titulo: this.form.titulo,
-      idCategoria: Number(this.form.idCategoria), // backend usa idCategoria
+      idCategoria: idCategoriaNum,      // DTO espera idCategoria
       descripcion: this.form.descripcion || '',
       precioBase: Number(this.form.precioBase),
       estado: this.form.estado || 'publicado',
@@ -192,7 +262,7 @@ export class OfertasListComponent implements OnInit {
       urlsMedia: this.parseUrls(this.form.urlsMediaRaw)
     };
 
-    console.log('[OfertasList] crear payload:', payload);
+    console.log('[OfertasList] crear payload definitivo:', payload);
     this.creating = true;
     this.service.crearOferta(payload).subscribe({
       next: (created) => {
@@ -200,20 +270,16 @@ export class OfertasListComponent implements OnInit {
         this.createSuccess = 'Oferta creada correctamente';
         this.creating = false;
         this.limpiarForm();
-        // recargar lista (o insertar created en memoria)
         this.loadCategoriasThenOfertas();
       },
       error: (err) => {
         console.error('[OfertasList] crear error', err);
-        this.createError = err?.error?.message || err?.message || 'Error creando oferta';
+        this.createError = err?.error?.errors?.idCategoria 
+                           ? `Categoría: ${err.error.errors.idCategoria}` 
+                           : err?.error?.message || err?.message || 'Error creando oferta';
         this.creating = false;
       }
     });
-  }
-
-  parseUrls(raw: string): string[] {
-    if (!raw) return [];
-    return raw.split(',').map(s => s.trim()).filter(s => s.length > 0);
   }
 
   limpiarForm() {
@@ -229,16 +295,6 @@ export class OfertasListComponent implements OnInit {
     };
     this.createError = null;
     this.createSuccess = null;
-  }
-
-  getOfertaId(o: any): string {
-    return (o.id ?? o.idOferta ?? o.id_oferta ?? '').toString();
-  }
-
-  getCategoriaDetalle(o: any): string {
-    const catId = o.idCategoria ?? o.categoriaId ?? o.id_categoria ?? null;
-    if (!catId) return '';
-    return this.categoriaMap.get(Number(catId)) ?? String(catId);
   }
 
   retry() {
