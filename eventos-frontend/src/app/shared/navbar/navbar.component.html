@@ -1,0 +1,42 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+  <div class="container">
+    <a class="navbar-brand" routerLink="/dashboard">
+      🎪 Event Platform
+    </a>
+    
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/usuarios" routerLinkActive="active">
+            👥 Usuarios
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/reservas" routerLinkActive="active">
+            📅 Reservas
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/ofertas" routerLinkActive="active">
+            🏢 Ofertas
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/notificaciones" routerLinkActive="active">
+            🔔 Notificaciones
+          </a>
+        </li>
+      </ul>
+      
+      <div class="navbar-nav">
+        <a class="nav-link" (click)="logout()" style="cursor: pointer;">
+          🚪 Cerrar Sesión
+        </a>
+      </div>
+    </div>
+  </div>
+</nav>

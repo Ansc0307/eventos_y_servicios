@@ -13,7 +13,7 @@ import { ChangeDetectorRef } from '@angular/core';
       <h2>Microservicio Reservas</h2>
       <div *ngIf="loading">Cargando reservas...</div>
       <div *ngIf="error" class="error">Error cargando reservas: {{ error }}</div>
-      <table *ngIf="reservas?.length" class="tabla">
+      <table *ngIf="reservas.length" class="tabla">
         <thead>
           <tr>
             <th>ID</th>
