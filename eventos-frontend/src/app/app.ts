@@ -1,19 +1,15 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { ReservasListComponent } from './reservas/reservas-list.component';
-import { SolicitudesListComponent } from './solicitudes/solicitudes-list.component';
-import { NavbarComponent } from './shared/navbar/navbar.component'; // ← Agregar esto
-import { DashboardComponent } from './dashboard/dashboard.component'; // ← Agregar esto
+//import { ReservasListComponent } from './reservas/reservas-list.component';
+//import { SolicitudesListComponent } from './solicitudes/solicitudes-list.component';
+import { NavbarComponent } from './shared/navbar/navbar.component';
 
 @Component({
   selector: 'app-root',
-  standalone: true, // ← Asegúrate de que esto esté
+  standalone: true, // ← asegurarse que esto esté
   imports: [
     RouterOutlet, 
-    ReservasListComponent,
-    SolicitudesListComponent,
-    NavbarComponent,    // ← Agregar aquí
-    DashboardComponent  // ← Agregar aquí
+    NavbarComponent,    
   ],
   templateUrl: './app.html',
   styleUrls: ['./app.css']

@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { NavbarComponent } from './navbar.component';
+import { PrioridadesList } from './prioridades-list.component';
 
-describe('Navbar', () => {
-  let component: NavbarComponent;
-  let fixture: ComponentFixture<NavbarComponent>;
+describe('PrioridadesList', () => {
+  let component: PrioridadesList;
+  let fixture: ComponentFixture<PrioridadesList>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [NavbarComponent]
+      imports: [PrioridadesList]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(NavbarComponent);
+    fixture = TestBed.createComponent(PrioridadesList);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

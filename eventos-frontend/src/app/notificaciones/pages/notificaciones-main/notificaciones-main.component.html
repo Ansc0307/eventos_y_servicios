@@ -1,0 +1,68 @@
+<div class="container-fluid py-4">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+      <!-- Header -->
+      <div class="text-center mb-5">
+        <h1 class="display-5 fw-bold text-primary">🔔 Gestión de Notificaciones</h1>
+        <p class="lead text-muted">Administra notificaciones, prioridades y tipos</p>
+      </div>
+
+      <!-- Cards de Navegación -->
+      <div class="row g-4">
+        <!-- Notificaciones Card -->
+        <div class="col-md-4">
+          <div class="card h-100 border-0 shadow-sm hover-card text-center">
+            <div class="card-body p-4">
+              <div class="mb-3">
+                <span class="display-1">📨</span>
+              </div>
+              <h5 class="card-title fw-bold">Notificaciones</h5>
+              <p class="card-text text-muted small">
+                Ver, crear, editar y eliminar notificaciones
+              </p>
+              <a routerLink="/notificaciones/lista" class="btn btn-primary w-100">
+                Gestionar Notificaciones
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Prioridades Card -->
+        <div class="col-md-4">
+          <div class="card h-100 border-0 shadow-sm hover-card text-center">
+            <div class="card-body p-4">
+              <div class="mb-3">
+                <span class="display-1">⚡</span>
+              </div>
+              <h5 class="card-title fw-bold">Prioridades</h5>
+              <p class="card-text text-muted small">
+                Gestionar niveles de prioridad (Alta, Media, Baja)
+              </p>
+              <a routerLink="/notificaciones/prioridades" class="btn btn-warning w-100">
+                Gestionar Prioridades
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tipos Card -->
+        <div class="col-md-4">
+          <div class="card h-100 border-0 shadow-sm hover-card text-center">
+            <div class="card-body p-4">
+              <div class="mb-3">
+                <span class="display-1">🏷️</span>
+              </div>
+              <h5 class="card-title fw-bold">Tipos</h5>
+              <p class="card-text text-muted small">
+                Administrar tipos de notificación
+              </p>
+              <a routerLink="/notificaciones/tipos" class="btn btn-info w-100 text-white">
+                Gestionar Tipos
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
