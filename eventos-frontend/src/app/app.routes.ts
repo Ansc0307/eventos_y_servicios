@@ -1,10 +1,10 @@
 import { Routes } from '@angular/router';
 import { DashboardComponent } from './dashboard/dashboard.component';
 //para notificaciones
-import { NotificacionesMainComponent } from './notificaciones/pages/notificaciones-main/notificaciones-main.component';
-import { NotificacionesListComponent } from './notificaciones/components/notificaciones-list/notificaciones-list.component';
-import { PrioridadesListComponent } from './notificaciones/components/prioridades-list/prioridades-list.component';
-import { TiposListComponent } from './notificaciones/components/tipos-list/tipos-list.component';
+import { NotificacionesMainComponent } from './components/notifications/notificaciones-main/notificaciones-main.component';
+import { PrioridadesListComponent } from './components/notifications/prioridades-list/prioridades-list.component';
+import { TiposListComponent } from './components/notifications/tipos-list/tipos-list.component';
+import { NotificacionesListComponent } from './components/notifications/notificaciones-list/notificaciones-list.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
@@ -12,12 +12,11 @@ export const routes: Routes = [
 
   //rutas para notificaciones
   // Ruta principal de notificaciones
-  { path: 'notificaciones', component: NotificacionesMainComponent },
-  
-  // Sub-rutas de notificaciones
-  { path: 'notificaciones/lista', component: NotificacionesListComponent },
-  { path: 'notificaciones/prioridades', component: PrioridadesListComponent },
-  { path: 'notificaciones/tipos', component: TiposListComponent },
+  { path: 'ms-notificaciones', component: NotificacionesMainComponent },
+  { path: 'prioridades', component: PrioridadesListComponent },
+  { path: 'tipos-notificacion', component: TiposListComponent},
+  { path: 'notificaciones', component: NotificacionesListComponent },
+
 //   { 
 //     path: 'usuarios', 
 //     loadChildren: () => import('./usuarios/usuarios.module').then(m => m.UsuariosModule) 

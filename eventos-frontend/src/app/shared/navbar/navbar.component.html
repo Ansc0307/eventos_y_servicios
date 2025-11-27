@@ -1,42 +1,42 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-  <div class="container">
-    <a class="navbar-brand" routerLink="/dashboard">
-      Event Platform
-    </a>
-    
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav me-auto">
-        <li class="nav-item">
-          <a class="nav-link" routerLink="/usuarios" routerLinkActive="active">
-            👥 Usuarios
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" routerLink="/reservas" routerLinkActive="active">
-            📅 Reservas
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" routerLink="/ofertas" routerLinkActive="active">
-            🏢 Ofertas
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" routerLink="/notificaciones" routerLinkActive="active">
-            🔔 Notificaciones
-          </a>
-        </li>
-      </ul>
+<nav class="app-navbar">
+  <div class="nav-container">
+    <!-- Logo/Brand -->
+    <div class="nav-brand">
+      <a routerLink="/dashboard" class="brand-link">
+        <div class="brand-icon">🎭</div>
+        <span class="brand-text">Event Platform</span>
+      </a>
+    </div>
+
+    <!-- Navigation Links -->
+    <div class="nav-links">
+      <a class="nav-link" routerLink="/usuarios" routerLinkActive="active">
+        <i class="nav-icon">👥</i>
+        <span class="nav-text">Usuarios</span>
+      </a>
       
-      <div class="navbar-nav">
-        <a class="nav-link" (click)="logout()" style="cursor: pointer;">
-          🚪 Cerrar Sesión
-        </a>
-      </div>
+      <a class="nav-link" routerLink="/reservas" routerLinkActive="active">
+        <i class="nav-icon">📅</i>
+        <span class="nav-text">Reservas</span>
+      </a>
+      
+      <a class="nav-link" routerLink="/ofertas" routerLinkActive="active">
+        <i class="nav-icon">🏢</i>
+        <span class="nav-text">Ofertas</span>
+      </a>
+      
+      <a class="nav-link" routerLink="/ms-notificaciones" routerLinkActive="active">
+        <i class="nav-icon">🔔</i>
+        <span class="nav-text">Notificaciones</span>
+      </a>
+    </div>
+
+    <!-- User Actions -->
+    <div class="nav-actions">
+      <button class="logout-btn" (click)="logout()">
+        <i class="logout-icon">🚪</i>
+        <span class="logout-text">Cerrar Sesión</span>
+      </button>
     </div>
   </div>
 </nav>
