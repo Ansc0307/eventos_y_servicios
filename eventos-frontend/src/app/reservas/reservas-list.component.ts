@@ -1,10 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ReservasService } from '../services/reservas.service';
-import { SolicitudesService } from '../services/solicitudes.service';
 import { Reserva } from '../models/reserva.model';
-import { Solicitud } from '../models/solicitud.model';
 import { ChangeDetectorRef } from '@angular/core';
 
 @Component({
@@ -51,12 +49,8 @@ import { ChangeDetectorRef } from '@angular/core';
         <form (ngSubmit)="crearReserva()" class="form">
           <div class="form-group">
             <label for="idSolicitud">ID Solicitud:</label>
-            <select id="idSolicitud" [(ngModel)]="nuevaReserva.idSolicitud" name="idSolicitud" required>
-              <option value="">Seleccionar solicitud</option>
-              <option *ngFor="let sol of solicitudes" [value]="sol.idSolicitud">
-                ID {{ sol.idSolicitud }} — Org: {{ sol.idOrganizador }}
-              </option>
-            </select>
+            <input id="idSolicitud" type="number" min="1" [(ngModel)]="nuevaReserva.idSolicitud" name="idSolicitud" required />
+            <small class="hint">Introduce el ID numérico de la solicitud</small>
           </div>
 
           <div class="form-group">
@@ -133,7 +127,6 @@ import { ChangeDetectorRef } from '@angular/core';
  
 export class ReservasListComponent implements OnInit {
   reservas: Reserva[] = [];
-  solicitudes: Solicitud[] = [];
   loading = false;
   error: string | null = null;
 
@@ -150,13 +143,11 @@ export class ReservasListComponent implements OnInit {
 
   constructor(
     private service: ReservasService,
-    private solicitudesService: SolicitudesService,
     private cd: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
     this.fetch();
-    this.cargarSolicitudes();
   }
 
   fetch() {
@@ -179,21 +170,10 @@ export class ReservasListComponent implements OnInit {
     });
   }
 
-  cargarSolicitudes() {
-    console.log('[ReservasList] Cargando solicitudes disponibles');
-    this.solicitudesService.getAll().subscribe({
-      next: (data) => {
-        console.log('[ReservasList] Solicitudes cargadas:', data);
-        this.solicitudes = data || [];
-        try { this.cd.detectChanges(); } catch (e) { /* noop */ }
-      },
-      error: (err) => {
-        console.error('[ReservasList] Error cargando solicitudes:', err);
-        this.solicitudes = [];
-        try { this.cd.detectChanges(); } catch (e) { /* noop */ }
-      }
-    });
-  }
+  // Ya no se cargan automaticamente las solicitudes desde aquí. El campo
+  // `ID Solicitud` es un input numérico donde el usuario introduce un ID
+  // manualmente. Si se necesita refrescar desde otro componente, se puede
+  // usar `SolicitudesService.refresh()` (si se implementa).
 
   crearReserva() {
     if (!this.nuevaReserva.idSolicitud || !this.nuevaReserva.fechaReservaInicio || !this.nuevaReserva.fechaReservaFin || !this.nuevaReserva.estado) {
