@@ -219,6 +219,7 @@ services:
       #config-server para ms-notifications
       CONFIG_SERVER_USER: ${CONFIG_SERVER_USER}
       CONFIG_SERVER_PASSWORD: ${CONFIG_SERVER_PASSWORD}
+
       SPRING_PROFILES_ACTIVE: docker
       SPRING_R2DBC_URL: r2dbc:postgresql://notifications-db:5432/notifications_db
       SPRING_R2DBC_USERNAME: postgres
@@ -241,6 +242,11 @@ services:
     networks:
       - eventos-net
     environment:
+      #config-server para ms-notifications
+      CONFIG_SERVER_USER: ${CONFIG_SERVER_USER}
+      CONFIG_SERVER_PASSWORD: ${CONFIG_SERVER_PASSWORD}
+      #https
+      SSL_KEYSTORE_PASSWORD: ${SSL_KEYSTORE_PASSWORD}
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
     depends_on:
       eureka-server:
