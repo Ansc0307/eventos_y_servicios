@@ -9,4 +9,5 @@ export interface Oferta {
   categoriaId?: number;   // alias común
   idCategoria?: number;   // backend usa este campo en algunos endpoints
   urlsMedia?: string[];
+  medias?: { url: string }[];
 }

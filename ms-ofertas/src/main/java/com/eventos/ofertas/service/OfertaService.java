@@ -24,36 +24,39 @@ public class OfertaService {
     
     @Transactional
     public OfertaResponseDTO crearOferta(OfertaRequestDTO request) {
-        // Validar que exista la categoría
-        Categoria categoria = categoriaRepository.findById(request.getIdCategoria())
-            .orElseThrow(() -> new ResourceNotFoundException("Categoría no encontrada con ID: " + request.getIdCategoria()));
-        
+                
         // Crear la oferta
         Oferta oferta = new Oferta();
         oferta.setProveedorId(request.getProveedorId());
         oferta.setTitulo(request.getTitulo());
-        oferta.setCategoria(categoria);
+        //oferta.setCategoria(categoria);
         oferta.setDescripcion(request.getDescripcion());
         oferta.setPrecioBase(request.getPrecioBase());
         oferta.setEstado(request.getEstado() != null ? request.getEstado() : "borrador");
         oferta.setActivo(request.getActivo() != null ? request.getActivo() : true);
-        
-        // Guardar la oferta
-        Oferta ofertaGuardada = ofertaRepository.save(oferta);
-        
-        // Agregar medias si existen
-        if (request.getUrlsMedia() != null && !request.getUrlsMedia().isEmpty()) {
-            List<OfertaMedia> medias = new ArrayList<>();
-            for (String url : request.getUrlsMedia()) {
-                OfertaMedia media = new OfertaMedia();
-                media.setUrl(url);
-                media.setOferta(ofertaGuardada);
-                medias.add(ofertaMediaRepository.save(media));
-            }
-            ofertaGuardada.setMedias(medias);
+        // Validar que exista la categoría
+        Categoria categoria = categoriaRepository.findById(request.getIdCategoria())
+        .orElseThrow(() -> new RuntimeException("Categoría no encontrada"));
+        oferta.setCategoria(categoria);
+        List<OfertaMedia> medias = new ArrayList<>();
+
+        if (request.getUrlsMedia() != null) {
+        for (String url : request.getUrlsMedia()) {
+            OfertaMedia media = new OfertaMedia();
+            media.setUrl(url);
+            media.setOferta(oferta);     // MUY IMPORTANTE
+            medias.add(media);
         }
-        
-        return convertirAResponseDTO(ofertaGuardada);
+        }
+
+        oferta.setMedias(medias);
+
+        // -------------------------------
+        // Guardar oferta (CASCADE ALL guarda las medias)
+        // -------------------------------
+        oferta = ofertaRepository.save(oferta);
+
+        return convertirAResponseDTO(oferta);
     }
     
     @Transactional(readOnly = true)

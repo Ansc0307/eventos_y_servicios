@@ -61,6 +61,7 @@ import { Categoria } from '../models/categoria.model';
             <th>Precio</th>
             <th>Categoría</th>
             <th>Activo</th>
+            <th>Imagen</th>
           </tr>
         </thead>
         <tbody>
@@ -70,6 +71,22 @@ import { Categoria } from '../models/categoria.model';
             <td>{{ o.precioBase | number:'1.2-2' }}</td>
             <td>{{ getCategoriaNombre(o) }}</td>
             <td>{{ o.activo ? 'Sí' : 'No' }}</td>
+            <td>
+            <div *ngIf="o.medias && o.medias.length > 0" 
+                style="display:flex;gap:6px;flex-wrap:wrap">
+
+                <img 
+                *ngFor="let m of o.medias"
+                [src]="m.url"
+                style="width:80px;height:auto;border-radius:6px;border:1px solid #ddd"
+                />
+
+            </div>
+
+            <span *ngIf="!o.medias || o.medias.length === 0">
+                Sin imagen
+            </span>
+            </td>
           </tr>
         </tbody>
       </table>
