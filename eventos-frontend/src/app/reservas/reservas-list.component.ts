@@ -3,6 +3,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ReservasService } from '../services/reservas.service';
 import { SolicitudesService } from '../services/solicitudes.service';
+import { RefreshService } from '../services/refresh.service';
 import { Reserva } from '../models/reserva.model';
 import { Solicitud } from '../models/solicitud.model';
 import { ChangeDetectorRef } from '@angular/core';
@@ -151,12 +152,18 @@ export class ReservasListComponent implements OnInit {
   constructor(
     private service: ReservasService,
     private solicitudesService: SolicitudesService,
+    private refreshService: RefreshService,
     private cd: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
     this.fetch();
     this.cargarSolicitudes();
+    // Suscribirse a cambios de solicitudes desde otros componentes
+    this.refreshService.solicitudesRefresh$.subscribe(() => {
+      console.log('[ReservasList] Recibida notificación de cambio en solicitudes, recargando...');
+      this.cargarSolicitudes();
+    });
   }
 
   fetch() {
@@ -228,7 +235,9 @@ export class ReservasListComponent implements OnInit {
         this.successMessage = `✓ Reserva creada exitosamente (ID: ${data.idReserva})`;
         this.limpiarFormulario();
         this.loadingCreate = false;
-        this.fetch(); // Recargar lista
+        this.fetch(); // Recargar lista de reservas
+        this.cargarSolicitudes(); // Actualizar lista de solicitudes en el dropdown
+        this.refreshService.notificaReservasChanged(); // Notificar a otros componentes
         try { this.cd.detectChanges(); } catch (e) { /* noop */ }
         setTimeout(() => {
           this.successMessage = null;
