@@ -1,0 +1,9 @@
+/* Estilos específicos para notificaciones */
+.mensaje-preview {
+  max-width: 250px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.9rem;
+  color: #7f8c8d;
+}

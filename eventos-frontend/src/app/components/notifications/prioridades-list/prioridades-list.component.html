@@ -1,0 +1,81 @@
+<div class="list-container">
+  <!-- Header -->
+  <div class="page-header">
+    <h1>Gestión de Prioridades</h1>
+    <p class="page-subtitle">Administra los niveles de prioridad del sistema</p>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <button class="btn-primary" (click)="abrirModalCrear()">
+      <i class="icon-plus"></i>
+      Nueva Prioridad
+    </button>
+    <button class="btn-secondary" (click)="cargarPrioridades()" [disabled]="loading">
+      <i class="icon-refresh"></i>
+      Actualizar
+    </button>
+  </div>
+
+  <ng-container *ngIf="prioridades$ | async as prioridades">
+    <!-- Loading -->
+    <div *ngIf="loading" class="loading-state">
+      <div class="spinner"></div>
+      <p>Cargando prioridades...</p>
+    </div>
+
+    <!-- Lista -->
+    <div *ngIf="!loading" class="table-section">
+      <div class="section-header">
+        <h2>Lista de Prioridades</h2>
+        <span class="badge count-badge">{{ prioridades.length }}</span>
+      </div>
+
+      <!-- Empty state -->
+      <div *ngIf="prioridades.length === 0" class="empty-state">
+        <i class="icon-empty"></i>
+        <h3>No hay prioridades</h3>
+        <p>Comienza creando tu primera prioridad</p>
+        <button class="btn-primary" (click)="abrirModalCrear()">
+          Crear Prioridad
+        </button>
+      </div>
+
+      <!-- Table -->
+      <div *ngIf="prioridades.length > 0" class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nombre</th>
+              <th>Descripción</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let prioridad of prioridades">
+              <td class="id-cell">{{ prioridad.id }}</td>
+              <td class="nombre-cell">
+                <span class="badge" [ngClass]="getPrioridadClass(prioridad.nombre)">
+                  {{ prioridad.nombre }}
+                </span>
+              </td>
+              <td class="descripcion-cell">
+                {{ prioridad.descripcion || 'Sin descripción' }}
+              </td>
+              <td class="actions-cell">
+                <button class="btn-icon" (click)="editarPrioridad(prioridad)">
+                  <i class="icon-edit"></i>
+                </button>
+                <button class="btn-icon btn-danger" (click)="eliminarPrioridad(prioridad.id)">
+                  <i class="icon-delete"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </ng-container>
+</div>

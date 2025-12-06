@@ -1,0 +1,33 @@
+server:
+  port: 8888
+
+spring:
+  application:
+    name: config-server
+  profiles:
+    active: git
+  cloud:
+    config:
+      server:
+        git:
+          uri: ${CONFIG_GIT_URI}
+          clone-on-start: true
+          default-label: main
+        bootstrap: false
+
+logging:
+  level:
+    org.springframework.cloud.config.server: DEBUG
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://eureka-server:8761/eureka/}
+    registerWithEureka: true
+    fetchRegistry: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,env

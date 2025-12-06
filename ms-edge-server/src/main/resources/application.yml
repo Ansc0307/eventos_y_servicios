@@ -1,159 +1,22 @@
-server.port: 8080
+spring:
+  config.import: "configserver:"
+  application:
+    name: edge-server
+  cloud:
+    config:
+      failFast: true
+      uri: http://config-server:8888
+      username: ${CONFIG_SERVER_USER}
+      password: ${CONFIG_SERVER_PASSWORD}
+  profiles:
+    active: docker
 
-spring.application.name: edge-server
-
-app.eureka-server: eureka-server
-
-eureka:
-  client:
-    serviceUrl:
-      defaultZone: http://${app.eureka-server}:8761/eureka/
-    registerWithEureka: true
-    fetchRegistry: true
-  instance:
-    leaseRenewalIntervalInSeconds: 5
-    leaseExpirationDurationInSeconds: 5
-
-spring.cloud.gateway.discovery.locator.enabled: true
-spring.cloud.gateway.discovery.locator.lower-case-service-id: true
-
-spring.cloud.gateway.routes:
-- id: ms-notifications
-  uri: lb://ms-notifications
-  predicates:
-    - Path=/notifications/**
-  filters:
-    - StripPrefix=1
-
-# === SWAGGER DEL MS-OFERTAS ===
-- id: ms-ofertas-swagger
-  uri: lb://ms-ofertas
-  predicates:
-    - Path=/ofertas/openapi/**
-  filters:
-    - name: RewritePath
-      args:
-        regexp: "/ofertas/(?<segment>.*)"
-        replacement: "/${segment}"
-        
-- id: ms-ofertas-swagger-ui
-  uri: lb://ms-ofertas
-  predicates:
-    - Path=/ofertas/openapi/swagger-ui/**
-  filters:
-    - name: RewritePath
-      args:
-        regexp: "/ofertas/openapi/(?<segment>.*)"
-        replacement: "/openapi/${segment}"
-
-- id: ms-ofertas-swagger-docs
-  uri: lb://ms-ofertas
-  predicates:
-    - Path=/ofertas/openapi/v3/api-docs/**
-  filters:
-    - name: RewritePath
-      args:
-        regexp: "/ofertas/openapi/v3/api-docs/(?<segment>.*)"
-        replacement: "/openapi/v3/api-docs/${segment}"
-
-- id: ms-ofertas-swagger-config
-  uri: lb://ms-ofertas
-  predicates:
-    - Path=/ofertas/openapi/v3/api-docs/swagger-config
-  filters:
-    - name: RewritePath
-      args:
-        regexp: "/ofertas/openapi/v3/api-docs/swagger-config"
-        replacement: "/openapi/v3/api-docs/swagger-config"
-
-#ms-ofertas API
-- id: ms-ofertas
-  uri: lb://ms-ofertas
-  predicates:
-    - Path=/ofertas/**
-  filters:
-    - StripPrefix=1
-
-- id: ms-reservas
-  uri: lb://ms-reservas
-  predicates:
-    - Path=/reservas/**
-  filters:
-    - StripPrefix=1
-
-- id: ms-usuarios
-  uri: lb://ms-usuarios
-  predicates:
-    - Path=/usuarios/**
-  filters:
-    - StripPrefix=1
-
-# === SWAGGER DEL MS-USUARIOS ===
-- id: ms-usuarios-swagger-ui
-  uri: lb://ms-usuarios
-  predicates:
-    - Path=/ms-usuarios/openapi/swagger-ui/**
-  filters:
-    - name: RewritePath
-      args:
-        regexp: "/ms-usuarios/openapi/(?<segment>.*)"
-        replacement: "/openapi/${segment}"
-
-- id: ms-usuarios-swagger-docs
-  uri: lb://ms-usuarios
-  predicates:
-    - Path=/ms-usuarios/openapi/v3/api-docs/**
-  filters:
-    - name: RewritePath
-      args:
-        regexp: "/ms-usuarios/openapi/v3/api-docs/(?<segment>.*)"
-        replacement: "/openapi/v3/api-docs/${segment}"
-
-- id: ms-usuarios-swagger-config
-  uri: lb://ms-usuarios
-  predicates:
-    - Path=/ms-usuarios/openapi/v3/api-docs/swagger-config
-  filters:
-    - name: RewritePath
-      args:
-        regexp: "/ms-usuarios/openapi/v3/api-docs/swagger-config"
-        replacement: "/openapi/v3/api-docs/swagger-config"
-
-# == SWAGGER MS-NOTIFICATIONS ==
-# 1ro ui principal (interfaz grafica de swager)
-- id: ms-notifications-swagger-ui
-  uri: lb://ms-notifications
-  predicates:
-    - Path=/ms-notifications/openapi/swagger-ui/**
-  filters:
-    - name: RewritePath
-      args:
-        regexp: "/ms-notifications/openapi/(?<segment>.*)"
-        replacement: "/openapi/${segment}"
-
-# 2do DOcumentación JSON (API docs)
-- id: ms-notifications-swagger-docs
-  uri: lb://ms-notifications
-  predicates:
-    - Path=/ms-notifications/openapi/v3/api-docs/**
-  filters:
-    - name: RewritePath
-      args:
-        regexp: "/ms-notifications/openapi/v3/api-docs/(?<segment>.*)"
-        replacement: "/openapi/v3/api-docs/${segment}"
-
-# 3ro configuracion del swagger
-- id: ms-notifications-swagger-config
-  uri: lb://ms-notifications
-  predicates:
-    - Path=/ms-notifications/openapi/v3/api-docs/swagger-config
-  filters:
-    - name: RewritePath
-      args:
-        regexp: "/ms-notifications/openapi/v3/api-docs/swagger-config"
-        replacement: "/openapi/v3/api-docs/swagger-config"
-
-logging:
-  level:
-    org.springframework.cloud.gateway: TRACE
-    org.springframework.cloud.loadbalancer: TRACE
+server:
+  port: 8080  # fallback si config-server no estuviera disponible
+  #para https (deshabilitado para desarrollo)
+  ssl:
+    enabled: false
+    # key-store: classpath:gateway.p12
+    # key-store-password: ${SSL_KEYSTORE_PASSWORD}
+    # key-store-type: PKCS12
+    # key-alias: gateway-cert

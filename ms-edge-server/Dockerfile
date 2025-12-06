@@ -1,14 +1,26 @@
-# Usamos una imagen base oficial de Java con JDK 17 (o la versión que uses)
-FROM eclipse-temurin:17-jdk-jammy
+# Fase de construcción
+FROM eclipse-temurin:21-jre-alpine AS builder
+WORKDIR /extracted
 
-# Directorio de trabajo dentro del contenedor
-WORKDIR /app
+ARG JAR_FILE=target/*.jar
+COPY ${JAR_FILE} app.jar
 
-# Copiamos el jar construido al contenedor
-COPY target/ms-edge-server-0.0.1-SNAPSHOT.jar edge-server.jar
+RUN java -Djarmode=layertools -jar app.jar extract
 
-# Exponemos el puerto 8080 (igual que en application.yml)
+# Fase final
+FROM eclipse-temurin:21-jre-alpine
+WORKDIR /application
+
+# Crear usuario seguro
+RUN addgroup -S spring && adduser -S spring -G spring
+USER spring:spring
+
+# Copiar capas extraídas
+COPY --from=builder extracted/dependencies/ ./ 
+COPY --from=builder extracted/spring-boot-loader/ ./ 
+COPY --from=builder extracted/snapshot-dependencies/ ./ 
+COPY --from=builder extracted/application/ ./ 
+
 EXPOSE 8080
 
-# Comando para ejecutar la app Spring Boot
-ENTRYPOINT ["java", "-jar", "edge-server.jar"]
+ENTRYPOINT ["java", "-cp","/application","org.springframework.boot.loader.launch.JarLauncher"]

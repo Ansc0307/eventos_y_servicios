@@ -36,6 +36,28 @@ services:
       retries: 6
     networks:
       - eventos-net
+  config-server:
+    build:
+      context: ./config-server
+      dockerfile: Dockerfile
+    container_name: config-server
+    restart: unless-stopped
+    ports:
+      - "8888:8888"
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      CONFIG_SERVER_USER: ${CONFIG_SERVER_USER}
+      CONFIG_SERVER_PASSWORD: ${CONFIG_SERVER_PASSWORD}
+      CONFIG_GIT_URI: ${CONFIG_GIT_URI}
+      ENCRYPT_KEY: ${ENCRYPT_KEY}
+    networks:
+      - eventos-net
+    # Ya no montamos config-repo local, el backend ahora es Git
+    # volumes:
+    #   - ./config-repo:/config-repo:ro
   # Base de datos para usuarios
   usuarios-db:
     image: postgres:16
@@ -46,8 +68,8 @@ services:
       POSTGRES_DB: usuarios_eventos_db
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: admin
-    ports:
-      - "5431:5432"
+    # ports:
+    #   - "5431:5432"
     volumes:
       - usuarios_pg_data:/var/lib/postgresql/data
     networks:
@@ -67,8 +89,8 @@ services:
       POSTGRES_DB: reservas_db
       POSTGRES_USER: reservas_user
       POSTGRES_PASSWORD: reservas_password
-    ports:
-      - "5432:5432"
+    # ports:
+    #   - "5432:5432"
     volumes:
       - reservas_pg_data:/var/lib/postgresql/data
     networks:
@@ -88,8 +110,8 @@ services:
       POSTGRES_DB: ms-ofertas
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: admin
-    ports:
-      - "5433:5432"
+    # ports:
+    #   - "5433:5432"
     volumes:
       - ofertas_pg_data:/var/lib/postgresql/data
     networks:
@@ -109,8 +131,8 @@ services:
       POSTGRES_DB: notifications_db
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: admin
-    ports:
-      - "5434:5432"
+    # ports:
+    #   - "5434:5432"
     volumes:
       - notifications_pg_data:/var/lib/postgresql/data
     networks:
@@ -137,8 +159,8 @@ services:
       DB_PASSWORD: admin
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/eventos/protocol/openid-connect/certs
-    ports:
-      - "8081:8081"
+    # ports:
+    #   - "8081:8081"
     networks:
       - eventos-net
 
@@ -158,8 +180,8 @@ services:
       SPRING_DATASOURCE_PASSWORD: reservas_password
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/eventos/protocol/openid-connect/certs
-    ports:
-      - "8082:8082"
+    # ports:
+    #   - "8082:8082"
     networks:
       - eventos-net
 
@@ -178,8 +200,8 @@ services:
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: admin
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
-    ports:
-      - "8083:8083"
+    # ports:
+    #   - "8083:8083"
     networks:
       - eventos-net
 
@@ -194,16 +216,22 @@ services:
       eureka-server:
         condition: service_healthy
     environment:
+      #config-server para ms-notifications
+      CONFIG_SERVER_USER: ${CONFIG_SERVER_USER}
+      CONFIG_SERVER_PASSWORD: ${CONFIG_SERVER_PASSWORD}
+
+      SPRING_PROFILES_ACTIVE: docker
       SPRING_R2DBC_URL: r2dbc:postgresql://notifications-db:5432/notifications_db
       SPRING_R2DBC_USERNAME: postgres
       SPRING_R2DBC_PASSWORD: admin
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8080/realms/eventos
+      #SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8080/realms/eventos
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/eventos/protocol/openid-connect/certs
     # ports: #quitar esto, no debe exponerse los ms
     #   - "8087:8087"
     networks:
       - eventos-net
+
   # Microservicio de gateway (edge server)
   ms-edge-server:
     build: ./ms-edge-server
@@ -214,6 +242,11 @@ services:
     networks:
       - eventos-net
     environment:
+      #config-server para ms-notifications
+      CONFIG_SERVER_USER: ${CONFIG_SERVER_USER}
+      CONFIG_SERVER_PASSWORD: ${CONFIG_SERVER_PASSWORD}
+      #https
+      SSL_KEYSTORE_PASSWORD: ${SSL_KEYSTORE_PASSWORD}
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
     depends_on:
       eureka-server:

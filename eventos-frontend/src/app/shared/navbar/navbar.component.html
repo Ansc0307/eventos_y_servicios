@@ -1,0 +1,42 @@
+<nav class="app-navbar">
+  <div class="nav-container">
+    <!-- Logo/Brand -->
+    <div class="nav-brand">
+      <a routerLink="/dashboard" class="brand-link">
+        <div class="brand-icon">🎭</div>
+        <span class="brand-text">Event Platform</span>
+      </a>
+    </div>
+
+    <!-- Navigation Links -->
+    <div class="nav-links">
+      <a class="nav-link" routerLink="/usuarios" routerLinkActive="active">
+        <i class="nav-icon">👥</i>
+        <span class="nav-text">Usuarios</span>
+      </a>
+      
+      <a class="nav-link" routerLink="/reservas" routerLinkActive="active">
+        <i class="nav-icon">📅</i>
+        <span class="nav-text">Reservas</span>
+      </a>
+      
+      <a class="nav-link" routerLink="/ofertas" routerLinkActive="active">
+        <i class="nav-icon">🏢</i>
+        <span class="nav-text">Ofertas</span>
+      </a>
+      
+      <a class="nav-link" routerLink="/ms-notificaciones" routerLinkActive="active">
+        <i class="nav-icon">🔔</i>
+        <span class="nav-text">Notificaciones</span>
+      </a>
+    </div>
+
+    <!-- User Actions -->
+    <div class="nav-actions">
+      <button class="logout-btn" (click)="logout()">
+        <i class="logout-icon">🚪</i>
+        <span class="logout-text">Cerrar Sesión</span>
+      </button>
+    </div>
+  </div>
+</nav>
