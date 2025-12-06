@@ -1,9 +1,15 @@
 {
-  "/api": {
-    "target": "http://localhost:8080",
+  "/ms-notifications": {
+    "target": "https://localhost:8080",
     "secure": false,
     "changeOrigin": true,
-    "logLevel": "info",
-    "pathRewrite": { "^/api": "/ms-reservas" }
+    "logLevel": "debug"
+  },
+  "/ms-reservas": {
+    "target": "https://localhost:8080",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug",
+    "pathRewrite": { "^/ms-reservas": "/api" }
   }
 }

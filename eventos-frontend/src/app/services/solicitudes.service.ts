@@ -6,7 +6,7 @@ import { Solicitud } from '../models/solicitud.model';
 @Injectable({ providedIn: 'root' })
 export class SolicitudesService {
   // frontend proxy: /api -> http://localhost:8080/ms-reservas
-  private readonly base = '/api/solicitudes';
+  private readonly base = '/ms-reservas/api/solicitudes';
 
   constructor(private http: HttpClient) {}
 

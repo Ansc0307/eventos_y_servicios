@@ -1,0 +1,103 @@
+<div class="list-container">
+  <!-- Header -->
+  <div class="page-header">
+    <h1>Gestión de Notificaciones</h1>
+    <p class="page-subtitle">Administra todas las notificaciones del sistema</p>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <button class="btn-primary" (click)="abrirModalCrear()">
+      <i class="icon-plus"></i>
+      Nueva Notificación
+    </button>
+    <button class="btn-secondary" (click)="cargarNotificaciones()" [disabled]="loading">
+      <i class="icon-refresh"></i>
+      Actualizar
+    </button>
+  </div>
+
+  <ng-container *ngIf="notificaciones$ | async as notificaciones">
+    <!-- Loading -->
+    <div *ngIf="loading" class="loading-state">
+      <div class="spinner"></div>
+      <p>Cargando notificaciones...</p>
+    </div>
+
+    <!-- Lista -->
+    <div *ngIf="!loading" class="table-section">
+      <div class="section-header">
+        <h2>Lista de Notificaciones</h2>
+        <span class="badge count-badge">{{ notificaciones.length }}</span>
+      </div>
+
+      <!-- Empty state -->
+      <div *ngIf="notificaciones.length === 0" class="empty-state">
+        <i class="icon-empty"></i>
+        <h3>No hay notificaciones</h3>
+        <p>Comienza creando tu primera notificación</p>
+        <button class="btn-primary" (click)="abrirModalCrear()">
+          Crear Notificación
+        </button>
+      </div>
+
+      <!-- Table -->
+      <div *ngIf="notificaciones.length > 0" class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Asunto</th>
+              <th>Mensaje</th>
+              <th>Usuario</th>
+              <th>Prioridad</th>
+              <th>Tipo</th>
+              <th>Leído</th>
+              <th>Fecha</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let notificacion of notificaciones">
+              <td class="id-cell">{{ notificacion.id }}</td>
+              <td class="nombre-cell">
+                <strong>{{ notificacion.asunto }}</strong>
+              </td>
+              <td class="descripcion-cell">
+                <div class="mensaje-preview">{{ notificacion.mensaje }}</div>
+              </td>
+              <td class="id-cell">User {{ notificacion.userId }}</td>
+              <td class="nombre-cell">
+                <span [ngClass]="getPrioridadClass(getNombrePrioridad(notificacion.prioridad.id))">
+                  {{ getNombrePrioridad(notificacion.prioridad.id) }}
+                </span>
+              </td>
+              <td class="nombre-cell">
+                <span class="badge badge-info">
+                  {{ getNombreTipo(notificacion.tipoNotificacion.id) }}
+                </span>
+              </td>
+              <td class="nombre-cell">
+                <span [ngClass]="notificacion.leido ? 'badge badge-success' : 'badge badge-warning'">
+                  {{ notificacion.leido ? 'Sí' : 'No' }}
+                </span>
+              </td>
+              <td class="descripcion-cell">
+                {{ formatFecha(notificacion.fechaCreacion) }}
+              </td>
+              <td class="actions-cell">
+                <button class="btn-icon" (click)="editarNotificacion(notificacion)">
+                  <i class="icon-edit"></i>
+                </button>
+                <button class="btn-icon btn-danger" (click)="eliminarNotificacion(notificacion.id)">
+                  <i class="icon-delete"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </ng-container>
+</div>

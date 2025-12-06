@@ -1,0 +1,5 @@
+/* Estilos específicos para prioridades */
+.prioridad-alta { background: #e74c3c; }
+.prioridad-media { background: #f39c12; }
+.prioridad-baja { background: #27ae60; }
+.prioridad-default { background: #3498db; }
