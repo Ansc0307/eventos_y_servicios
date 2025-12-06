@@ -46,7 +46,8 @@ public class NotificacionMapper {
         entity.setId(dto.getId());
         entity.setAsunto(dto.getAsunto());
         entity.setMensaje(dto.getMensaje());
-        entity.setFechaCreacion(dto.getFechaCreacion());
+        // Si fechaCreacion es null, usar LocalDateTime.now()
+        entity.setFechaCreacion(dto.getFechaCreacion() != null ? dto.getFechaCreacion() : java.time.LocalDateTime.now());
         entity.setLeido(dto.getLeido());
         entity.setUserId(dto.getUserId());
 

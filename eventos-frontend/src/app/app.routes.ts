@@ -5,6 +5,7 @@ import { NotificacionesMainComponent } from './components/notifications/notifica
 import { PrioridadesListComponent } from './components/notifications/prioridades-list/prioridades-list.component';
 import { TiposListComponent } from './components/notifications/tipos-list/tipos-list.component';
 import { NotificacionesListComponent } from './components/notifications/notificaciones-list/notificaciones-list.component';
+import { ReservasListComponent } from './reservas/reservas-list.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
@@ -21,10 +22,10 @@ export const routes: Routes = [
 //     path: 'usuarios', 
 //     loadChildren: () => import('./usuarios/usuarios.module').then(m => m.UsuariosModule) 
 //   },
-//   { 
-//     path: 'reservas', 
-//     loadChildren: () => import('./reservas/reservas.module').then(m => m.ReservasModule) 
-//   },
+  { 
+    path: 'reservas', 
+    component: ReservasListComponent 
+  },
 //   { 
 //     path: 'ofertas', 
 //     loadChildren: () => import('./ofertas/ofertas.module').then(m => m.OfertasModule) 

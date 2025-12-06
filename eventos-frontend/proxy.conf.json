@@ -1,15 +1,14 @@
 {
   "/ms-notifications": {
-    "target": "https://localhost:8080",
+    "target": "http://localhost:8080",
     "secure": false,
     "changeOrigin": true,
     "logLevel": "debug"
   },
   "/ms-reservas": {
-    "target": "https://localhost:8080",
+    "target": "http://localhost:8080",
     "secure": false,
     "changeOrigin": true,
-    "logLevel": "debug",
-    "pathRewrite": { "^/ms-reservas": "/api" }
+    "logLevel": "debug"
   }
 }

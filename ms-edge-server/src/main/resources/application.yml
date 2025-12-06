@@ -13,10 +13,10 @@ spring:
 
 server:
   port: 8080  # fallback si config-server no estuviera disponible
-  #para https
+  #para https (deshabilitado para desarrollo)
   ssl:
-    enabled: true
-    key-store: classpath:gateway.p12
-    key-store-password: ${SSL_KEYSTORE_PASSWORD}
-    key-store-type: PKCS12
-    key-alias: gateway-cert
+    enabled: false
+    # key-store: classpath:gateway.p12
+    # key-store-password: ${SSL_KEYSTORE_PASSWORD}
+    # key-store-type: PKCS12
+    # key-alias: gateway-cert
