@@ -4,5 +4,5 @@ export const environment = {
   realm: 'eventos',
   clientId: 'angular-app',
   clientSecret: '',
-  baseApiUrl: 'http://localhost:8082', // backend base URL (ajusta por servicio)
+  baseApiUrl: 'http://localhost:8080',
 };
