@@ -1,0 +1,81 @@
+<div class="list-container">
+  <!-- Header -->
+  <div class="page-header">
+    <h1>Gestión de Tipos de Notificación</h1>
+    <p class="page-subtitle">Administra las categorías de notificación del sistema</p>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <button class="btn-primary" (click)="abrirModalCrear()">
+      <i class="icon-plus"></i>
+      Nuevo Tipo
+    </button>
+    <button class="btn-secondary" (click)="cargarTipos()" [disabled]="loading">
+      <i class="icon-refresh"></i>
+      Actualizar
+    </button>
+  </div>
+
+  <ng-container *ngIf="tipos$ | async as tipos">
+    <!-- Loading -->
+    <div *ngIf="loading" class="loading-state">
+      <div class="spinner"></div>
+      <p>Cargando tipos...</p>
+    </div>
+
+    <!-- Lista -->
+    <div *ngIf="!loading" class="table-section">
+      <div class="section-header">
+        <h2>Lista de Tipos</h2>
+        <span class="badge count-badge">{{ tipos.length }}</span>
+      </div>
+
+      <!-- Empty state -->
+      <div *ngIf="tipos.length === 0" class="empty-state">
+        <i class="icon-empty"></i>
+        <h3>No hay tipos de notificación</h3>
+        <p>Comienza creando tu primer tipo</p>
+        <button class="btn-primary" (click)="abrirModalCrear()">
+          Crear Tipo
+        </button>
+      </div>
+
+      <!-- Table -->
+      <div *ngIf="tipos.length > 0" class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nombre</th>
+              <th>Descripción</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let tipo of tipos">
+              <td class="id-cell">{{ tipo.id }}</td>
+              <td class="nombre-cell">
+                <span class="badge badge-orange">
+                  {{ tipo.nombre }}
+                </span>
+              </td>
+              <td class="descripcion-cell">
+                {{ tipo.descripcion || 'Sin descripción' }}
+              </td>
+              <td class="actions-cell">
+                <button class="btn-icon" (click)="editarTipo(tipo)">
+                  <i class="icon-edit"></i>
+                </button>
+                <button class="btn-icon btn-danger" (click)="eliminarTipo(tipo.id)">
+                  <i class="icon-delete"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </ng-container>
+</div>

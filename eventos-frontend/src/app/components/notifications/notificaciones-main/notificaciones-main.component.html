@@ -1,0 +1,68 @@
+<!-- notificaciones-main.component.html -->
+<div class="notifications-container">
+  <!-- Header -->
+  <div class="page-header">
+    <h1>Gestión de Notificaciones</h1>
+    <p class="page-subtitle">Administra notificaciones, prioridades y tipos de notificación del sistema</p>
+  </div>
+
+  <!-- Cards Grid -->
+  <div class="cards-grid">
+    <!-- Notificaciones Card -->
+    <div class="management-card">
+      <div class="card-header">
+        <div class="card-icon">
+          <i class="icon-bell"></i>
+        </div>
+        <h2>Notificaciones</h2>
+      </div>
+      <p class="card-description">
+        Ver, crear, editar y eliminar notificaciones del sistema
+      </p>
+      <div class="card-actions">
+        <button class="btn-primary" routerLink="/notificaciones">
+          <i class="icon-list"></i>
+          Ver Lista
+        </button>
+      </div>
+    </div>
+
+    <!-- Prioridades Card -->
+    <div class="management-card">
+      <div class="card-header">
+        <div class="card-icon">
+          <i class="icon-priority"></i>
+        </div>
+        <h2>Prioridades</h2>
+      </div>
+      <p class="card-description">
+        Gestionar niveles de prioridad (Alta, Media, Baja)
+      </p>
+      <div class="card-actions">
+        <button class="btn-primary" routerLink="/prioridades">
+          <i class="icon-settings"></i>
+          Gestionar Prioridades
+        </button>
+      </div>
+    </div>
+
+    <!-- Tipos Card -->
+    <div class="management-card">
+      <div class="card-header">
+        <div class="card-icon">
+          <i class="icon-category"></i>
+        </div>
+        <h2>Tipos de Notificación</h2>
+      </div>
+      <p class="card-description">
+        Administrar categorías y tipos de notificación
+      </p>
+      <div class="card-actions">
+        <button class="btn-primary" routerLink="/tipos-notificacion">
+          <i class="icon-settings"></i>
+          Gestionar Tipos
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
