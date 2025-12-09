@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Gestión de Solicitudes de Reserva</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#13c8ec",
+              "background-light": "#f6f8f8",
+              "background-dark": "#101f22",
+            },
+            fontFamily: {
+              "display": ["Manrope", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark text-gray-800 dark:text-gray-200">
+<div class="relative flex h-auto min-h-screen w-full flex-col group/design-root overflow-x-hidden">
+<!-- TopNavBar -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-gray-200 dark:border-gray-800 px-6 sm:px-10 py-3 bg-white dark:bg-background-dark/80 backdrop-blur-sm sticky top-0 z-10">
+<div class="flex items-center gap-4 text-[#0d191b] dark:text-gray-100">
+<div class="size-6 text-primary">
+<svg fill="currentColor" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_6_319)">
+<path d="M8.57829 8.57829C5.52816 11.6284 3.451 15.5145 2.60947 19.7452C1.76794 23.9758 2.19984 28.361 3.85056 32.3462C5.50128 36.3314 8.29667 39.7376 11.8832 42.134C15.4698 44.5305 19.6865 45.8096 24 45.8096C28.3135 45.8096 32.5302 44.5305 36.1168 42.134C39.7033 39.7375 42.4987 36.3314 44.1494 32.3462C45.8002 28.361 46.2321 23.9758 45.3905 19.7452C44.549 15.5145 42.4718 11.6284 39.4217 8.57829L24 24L8.57829 8.57829Z"></path>
+</g>
+<defs><clippath id="clip0_6_319"><rect fill="white" height="48" width="48"></rect></clippath></defs>
+</svg>
+</div>
+<h2 class="text-[#0d191b] dark:text-gray-100 text-lg font-bold leading-tight tracking-[-0.015em]">Plataforma de Eventos</h2>
+</div>
+<div class="hidden md:flex flex-1 justify-center items-center gap-9">
+<a class="text-[#0d191b] dark:text-gray-300 text-sm font-medium leading-normal hover:text-primary dark:hover:text-primary" href="#">Dashboard</a>
+<a class="text-primary dark:text-primary text-sm font-bold leading-normal" href="#">Solicitudes</a>
+<a class="text-[#0d191b] dark:text-gray-300 text-sm font-medium leading-normal hover:text-primary dark:hover:text-primary" href="#">Calendario</a>
+<a class="text-[#0d191b] dark:text-gray-300 text-sm font-medium leading-normal hover:text-primary dark:hover:text-primary" href="#">Mis Espacios</a>
+<a class="text-[#0d191b] dark:text-gray-300 text-sm font-medium leading-normal hover:text-primary dark:hover:text-primary" href="#">Mensajes</a>
+</div>
+<div class="flex items-center gap-4">
+<button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-black text-sm font-bold leading-normal tracking-[0.015em] hidden sm:flex">
+<span class="truncate">Crear Reserva</span>
+</button>
+<button class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 bg-primary/20 text-primary dark:bg-primary/20 dark:text-primary gap-2 text-sm font-bold leading-normal tracking-[0.015em] min-w-0 px-2.5 relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-white text-xs font-bold">3</span>
+</button>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" data-alt="User profile picture" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuD7xXlqMz3CdPFAdPA7hyGBkv2Eo7wYLrnV8DEO01fakKniXIsYtkU9CLYizWQIwJjVcIP_Fo4omyyVjsmoXFLuEXoWK6L8jVohJNw7cH5exBubQy1CqAuzvLp49sRE4Y6rXKEIykHitWKrC1nWvONl02Zkb2IcQIngTwrtadXUCzf1Lo0CaGouXHXqW8bGAajJMV2nlSErVp1n9QtbI9re0hU1fb7pTZyywwf97s1BHx2P7HsRNdH2M72m9alhLPs5UijYdLUCgl87");'></div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<!-- PageHeading -->
+<div class="flex flex-wrap justify-between gap-3 p-4">
+<div class="flex min-w-72 flex-col gap-3">
+<p class="text-[#0d191b] dark:text-white text-4xl font-black leading-tight tracking-[-0.033em]">Gestión de Solicitudes de Reserva</p>
+<p class="text-gray-500 dark:text-gray-400 text-base font-normal leading-normal">Revisa, acepta o rechaza las solicitudes pendientes.</p>
+</div>
+</div>
+<!-- Two-column layout -->
+<div class="flex flex-col lg:flex-row gap-8 mt-6">
+<!-- Left Column: Requests List -->
+<div class="lg:w-2/5 xl:w-1/3 flex flex-col gap-4">
+<!-- SearchBar & Filters -->
+<div class="px-4 py-3 bg-white dark:bg-background-dark rounded-xl border border-gray-200 dark:border-gray-800">
+<label class="flex flex-col min-w-40 h-12 w-full">
+<div class="flex w-full flex-1 items-stretch rounded-lg h-full">
+<div class="text-gray-500 dark:text-gray-400 flex bg-background-light dark:bg-gray-800 items-center justify-center pl-4 rounded-l-lg border-r-0">
+<span class="material-symbols-outlined">search</span>
+</div>
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-r-lg text-[#0d191b] dark:text-gray-200 focus:outline-0 focus:ring-2 focus:ring-primary/50 border-none bg-background-light dark:bg-gray-800 h-full placeholder:text-gray-500 dark:placeholder:text-gray-400 px-4 pl-2 text-base font-normal leading-normal" placeholder="Buscar por organizador o evento" value=""/>
+</div>
+</label>
+<div class="flex gap-2 p-1 overflow-x-auto mt-3">
+<button class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-primary/20 dark:bg-primary/30 text-primary dark:text-primary px-4">
+<p class="text-sm font-medium leading-normal">Todo (12)</p>
+</button>
+<button class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-gray-200 dark:bg-gray-700 px-4">
+<p class="text-gray-700 dark:text-gray-300 text-sm font-medium leading-normal">Pendiente (3)</p>
+</button>
+<button class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-gray-200 dark:bg-gray-700 px-4">
+<p class="text-gray-700 dark:text-gray-300 text-sm font-medium leading-normal">Aceptada</p>
+</button>
+<button class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-gray-200 dark:bg-gray-700 px-4">
+<p class="text-gray-700 dark:text-gray-300 text-sm font-medium leading-normal">Rechazada</p>
+</button>
+</div>
+</div>
+<!-- Requests List Container -->
+<div class="flex flex-col gap-3 h-[calc(100vh-20rem)] overflow-y-auto pr-2">
+<!-- Request Card (Active) -->
+<div class="p-4 rounded-xl border-2 border-primary bg-primary/10 dark:bg-primary/20 cursor-pointer">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-3">
+<img class="size-10 rounded-full object-cover" data-alt="Profile picture of Elena Rodriguez" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDcH5-P-XRpaXHN6d973t0X0J7mHNEFqNZGAneUwhJS8A9eQ18eHIM9XUIeuCztmrScEGvcc3LsESC3fM23mKY6GxCsZ3FR68DqfKCoJPMcgWBhjku0eBYW1I-SNcnOwL8OiM7D7vrnaJPjvTvZ7vJZsbK9GcRs1o5dNdQ-uTyw03R75wEVw5JDOjWdlGwqC_L-txQK581MVHAYTyRL7xpCoT_-UKOyNpzrJ1M3R2UL4pouQWWIE44AzIVDksaq9C9d0UGCImHwdkmG"/>
+<div>
+<p class="font-bold text-[#0d191b] dark:text-white">Elena Rodríguez</p>
+<p class="text-sm text-gray-600 dark:text-gray-300">Salón Principal</p>
+</div>
+</div>
+<span class="text-xs font-semibold px-2 py-1 rounded-full bg-orange-400/20 text-orange-600 dark:bg-orange-400/30 dark:text-orange-300">Pendiente</span>
+</div>
+<p class="text-sm text-gray-500 dark:text-gray-400 mt-3">25 de Octubre, 2024</p>
+</div>
+<!-- Request Card -->
+<div class="p-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-background-dark hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-3">
+<img class="size-10 rounded-full object-cover" data-alt="Profile picture of Carlos Gomez" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6kUgJDnJvpuAX_CU2S-mSdqr08mo3ICK49t2LXZdMWrMSCDi50pOXCH9u-4Se6ahfoShXItkeDzYN_SKTgmMTzJSSPrzwbSmy8aXh8wCVzj5cWy-OmG9yPhLFOKUSJPmpb2rp6-fVG4B-AoQAUWfRZSBMWmPZJQ9dP9C7zFtss1NhcFFd_a2oYPh8BGBLRuKiMXAPQaRFoIpx8ZBg_SzEg5vDPTglQgc0WAzCfHkIxxLfMebag7AkmYQxPsbpbTEkirq6qT12wy7m"/>
+<div>
+<p class="font-bold text-[#0d191b] dark:text-white">Carlos Gómez</p>
+<p class="text-sm text-gray-600 dark:text-gray-300">Servicio de Catering</p>
+</div>
+</div>
+<span class="text-xs font-semibold px-2 py-1 rounded-full bg-orange-400/20 text-orange-600 dark:bg-orange-400/30 dark:text-orange-300">Pendiente</span>
+</div>
+<p class="text-sm text-gray-500 dark:text-gray-400 mt-3">22 de Octubre, 2024</p>
+</div>
+<!-- Request Card -->
+<div class="p-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-background-dark hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-3">
+<img class="size-10 rounded-full object-cover" data-alt="Profile picture of Sofia Perez" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAWVg4yjrpV-aBfU_ICvk9UewJVWILHnM8xIZxeC6LMMl1c9GyVYINR3X0mAlG56GlfGt2V_TF3fn-e3wgxFxckQV0Rflw5RvWReFg_kG64dwRzEmB-8n4gkCEOfBSZNqy39MWQj-LNmA0wf2Te4Zf-VbdmspBnS3SQOf8xMAYw0cxtY7tsrCMvQxZheGtmRV8x3_U_kdQtdcd27Q8Zyj8UvByxWkv8yw32owogzZyAUtbvxFIZL0aI3B7mayHxvumHLvIoEXIzv5-W"/>
+<div>
+<p class="font-bold text-[#0d191b] dark:text-white">Sofía Pérez</p>
+<p class="text-sm text-gray-600 dark:text-gray-300">Terraza Jardín</p>
+</div>
+</div>
+<span class="text-xs font-semibold px-2 py-1 rounded-full bg-orange-400/20 text-orange-600 dark:bg-orange-400/30 dark:text-orange-300">Pendiente</span>
+</div>
+<p class="text-sm text-gray-500 dark:text-gray-400 mt-3">18 de Octubre, 2024</p>
+</div>
+<!-- Request Card (Accepted) -->
+<div class="p-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-background-dark hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer opacity-70">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-3">
+<img class="size-10 rounded-full object-cover" data-alt="Profile picture of Javier Martinez" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAM_c7utAEV5ExhX_utWvlsoEzyVj0AXtId9_xyQdh6eSvne3qfz5WKuUeCu_LpiphAygbF9ck_y9wHZmk2-aXWanc0tyie4K1hFHHmeTqaRvvCfOsXuFO4YYcM5irXU0lBj9CgpOQ6Kt7neFmiKjAHhG7qQDM857mEPPmC2o_IqDMeIuERKDYXqPlDC8tlbyGALBohDqeBJ1MQAi9qeAFCEU6QtkB2LmgErGNM48O1PSpC2PZl00JO6wc9WkIBBWNwO3IUKJ-onkrm"/>
+<div>
+<p class="font-bold text-[#0d191b] dark:text-white">Javier Martínez</p>
+<p class="text-sm text-gray-600 dark:text-gray-300">Salón Principal</p>
+</div>
+</div>
+<span class="text-xs font-semibold px-2 py-1 rounded-full bg-green-500/20 text-green-700 dark:bg-green-400/30 dark:text-green-300">Aceptada</span>
+</div>
+<p class="text-sm text-gray-500 dark:text-gray-400 mt-3">15 de Octubre, 2024</p>
+</div>
+</div>
+</div>
+<!-- Right Column: Request Details -->
+<div class="lg:w-3/5 xl:w-2/3">
+<div class="bg-white dark:bg-background-dark p-6 sm:p-8 rounded-xl border border-gray-200 dark:border-gray-800 sticky top-24">
+<div class="flex flex-col sm:flex-row justify-between items-start gap-4">
+<div>
+<h3 class="text-2xl font-bold text-[#0d191b] dark:text-white">Boda de Elena y Marcos</h3>
+<p class="text-gray-500 dark:text-gray-400 mt-1">Solicitud para Salón Principal</p>
+</div>
+<span class="text-sm font-semibold px-3 py-1.5 rounded-full bg-orange-400/20 text-orange-600 dark:bg-orange-400/30 dark:text-orange-300">Pendiente de Aprobación</span>
+</div>
+<div class="border-t border-gray-200 dark:border-gray-800 my-6"></div>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+<div class="flex items-start gap-3">
+<div class="flex-shrink-0 size-10 flex items-center justify-center rounded-lg bg-primary/20 text-primary">
+<span class="material-symbols-outlined">calendar_month</span>
+</div>
+<div>
+<p class="text-sm text-gray-500 dark:text-gray-400">Fecha</p>
+<p class="font-semibold text-[#0d191b] dark:text-white">Viernes, 25 de Octubre, 2024</p>
+</div>
+</div>
+<div class="flex items-start gap-3">
+<div class="flex-shrink-0 size-10 flex items-center justify-center rounded-lg bg-primary/20 text-primary">
+<span class="material-symbols-outlined">schedule</span>
+</div>
+<div>
+<p class="text-sm text-gray-500 dark:text-gray-400">Hora</p>
+<p class="font-semibold text-[#0d191b] dark:text-white">18:00 - 23:00</p>
+</div>
+</div>
+<div class="flex items-start gap-3">
+<div class="flex-shrink-0 size-10 flex items-center justify-center rounded-lg bg-primary/20 text-primary">
+<span class="material-symbols-outlined">group</span>
+</div>
+<div>
+<p class="text-sm text-gray-500 dark:text-gray-400">Invitados</p>
+<p class="font-semibold text-[#0d191b] dark:text-white">120 personas</p>
+</div>
+</div>
+</div>
+<div class="border-t border-gray-200 dark:border-gray-800 my-6"></div>
+<div>
+<h4 class="font-bold text-lg text-[#0d191b] dark:text-white">Detalles del Organizador</h4>
+<div class="mt-4 flex items-center gap-4">
+<img class="size-14 rounded-full object-cover" data-alt="Profile picture of Elena Rodriguez" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB1bYfSNQRfdAWdDRWZslVZG647x0KkL3xylGO7ojJNWSfGs9eSSe8IVrxqBTCwYRTveIJnvXlhHXxSeetYANkvAeYS6xOqXovyflR9fgvQiqMg0ktFh82FYuB1N7mrG-0zjinZif-uplZAV43HZJYvEvjWo-AV9rVJ9BOchZcisbHHceIbTQNLEyx2Ba47YX1llFPLI-KzHYrDYhWz6Vi7gosfLHAGHnnoFB50lF5WEH2RuMQkD0iEv7JMIt8jQt8L33V1CC5HAGWP"/>
+<div>
+<p class="font-semibold text-lg text-[#0d191b] dark:text-white">Elena Rodríguez</p>
+<a class="text-sm text-primary hover:underline" href="mailto:elena.r@email.com">elena.r@email.com</a>
+</div>
+</div>
+</div>
+<div class="mt-6">
+<h4 class="font-bold text-lg text-[#0d191b] dark:text-white">Mensaje del Organizador</h4>
+<div class="mt-3 p-4 bg-background-light dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+<p class="text-sm text-gray-700 dark:text-gray-300">"Hola, estamos muy emocionados por nuestro evento. Nos gustaría saber si es posible tener acceso al salón dos horas antes para la decoración. También, ¿ofrecen algún paquete de bebidas premium? ¡Gracias!"</p>
+</div>
+</div>
+<div class="border-t border-gray-200 dark:border-gray-800 my-6"></div>
+<div class="flex flex-col sm:flex-row gap-3">
+<button class="flex-1 flex min-w-[84px] max-w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-6 bg-primary text-black text-base font-bold leading-normal tracking-[0.015em]">
+<span class="material-symbols-outlined mr-2">check_circle</span>
+<span class="truncate">Aceptar Solicitud</span>
+</button>
+<button class="flex-1 flex min-w-[84px] max-w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-6 bg-gray-200 dark:bg-gray-700 text-[#0d191b] dark:text-gray-200 text-base font-bold leading-normal tracking-[0.015em]">
+<span class="material-symbols-outlined mr-2">cancel</span>
+<span class="truncate">Rechazar</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>
