@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Búsqueda de Ofertas de Eventos</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#13c8ec",
+            "background-light": "#f6f8f8",
+            "background-dark": "#101f22",
+            "text-light": "#0d191b",
+            "text-dark": "#e7f1f3",
+            "text-muted-light": "#4c8d9a",
+            "text-muted-dark": "#a2b4b7",
+            "surface-light": "#ffffff",
+            "surface-dark": "#1a2c30",
+            "border-light": "#e7f1f3",
+            "border-dark": "#2c3e41",
+          },
+          fontFamily: {
+            "display": ["Manrope", "sans-serif"]
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      font-size: 20px;
+    }
+  </style>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark">
+<div class="relative flex h-auto min-h-screen w-full flex-col">
+<!-- TopNavBar -->
+<header class="sticky top-0 z-10 flex h-16 items-center justify-between whitespace-nowrap border-b border-solid border-border-light dark:border-border-dark bg-background-light/80 dark:bg-background-dark/80 px-4 sm:px-6 md:px-8 backdrop-blur-sm">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-3 text-text-light dark:text-text-dark">
+<span class="material-symbols-outlined text-primary text-2xl">celebration</span>
+<h2 class="text-xl font-bold leading-tight tracking-tight">EventosPro</h2>
+</div>
+</div>
+<div class="hidden md:flex flex-1 justify-center px-8">
+<label class="flex flex-col w-full !h-10 max-w-lg">
+<div class="flex w-full flex-1 items-stretch rounded-lg h-full">
+<div class="text-text-muted-light dark:text-text-muted-dark flex border-none bg-border-light dark:bg-border-dark items-center justify-center pl-4 rounded-l-lg border-r-0">
+<span class="material-symbols-outlined">search</span>
+</div>
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-light dark:text-text-dark focus:outline-0 focus:ring-2 focus:ring-primary/50 border-none bg-border-light dark:bg-border-dark h-full placeholder:text-text-muted-light placeholder:dark:text-text-muted-dark px-4 rounded-l-none border-l-0 pl-2 text-base font-normal leading-normal" placeholder="terraza con vista, DJ de bodas..." value=""/>
+</div>
+</label>
+</div>
+<div class="flex flex-1 justify-end gap-4">
+<div class="hidden lg:flex items-center gap-6">
+<a class="text-sm font-medium leading-normal hover:text-primary" href="#">Explorar</a>
+<a class="text-sm font-medium leading-normal hover:text-primary" href="#">Mis Eventos</a>
+<a class="text-sm font-medium leading-normal hover:text-primary" href="#">Proveedores</a>
+</div>
+<div class="flex items-center gap-2">
+<button class="hidden sm:flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-background-dark text-sm font-bold leading-normal tracking-[0.015em] hover:opacity-90 transition-opacity">
+<span class="truncate">Publicar Oferta</span>
+</button>
+<button class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 bg-border-light dark:bg-border-dark text-text-light dark:text-text-dark gap-2 text-sm font-bold leading-normal tracking-[0.015em] min-w-0 px-2.5 hover:bg-primary/20 transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" data-alt="User avatar image" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAHGUTAa6Ncwo_856bjzrF_JB6ZOE_3-Xu38yTUOMEGHMo9oeM_q2V-ZSqYZ8T6_RjYOytoZ0VsJ6FY4-uVKs-wyI-zfL7LC5AZweN1NpWtfaN6g1-BeHd2yrUxWMB9dsPVYKa_3nfsxKUEIHtfjZK8DOA3fWyW61YYMOvOzth9saJoaKfYZasEBoKhi_NpbwwhlJQ4fbiJOeQbSXR26wh0_t0ZEXa6karvesuPTkPvQPpNjI3I8Rnez461bBkE1fTtJoPOsRzGVoc9");'></div>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="flex flex-1 px-4 sm:px-6 md:px-8 py-8">
+<div class="flex w-full max-w-screen-xl mx-auto gap-8">
+<!-- Filter Sidebar -->
+<aside class="hidden lg:flex flex-col w-72 xl:w-80 shrink-0 sticky top-24 h-fit bg-surface-light dark:bg-surface-dark p-6 rounded-xl border border-border-light dark:border-border-dark">
+<h3 class="text-lg font-bold mb-6">Filtra tu búsqueda</h3>
+<div class="flex flex-col gap-6">
+<!-- Filter: Offer Type -->
+<div>
+<label class="text-sm font-semibold mb-3 block">Tipo de Oferta</label>
+<div class="flex flex-col gap-2">
+<button class="flex items-center justify-between w-full p-3 rounded-lg text-left bg-primary/20 dark:bg-primary/30 text-text-light dark:text-text-dark">
+<span class="font-medium">Espacio</span>
+<span class="material-symbols-outlined">check_circle</span>
+</button>
+<button class="flex items-center justify-between w-full p-3 rounded-lg text-left bg-border-light dark:bg-border-dark hover:bg-primary/20 dark:hover:bg-primary/30 transition-colors">
+<span class="font-medium">Catering</span>
+</button>
+<button class="flex items-center justify-between w-full p-3 rounded-lg text-left bg-border-light dark:bg-border-dark hover:bg-primary/20 dark:hover:bg-primary/30 transition-colors">
+<span class="font-medium">Música</span>
+</button>
+<button class="flex items-center justify-between w-full p-3 rounded-lg text-left bg-border-light dark:bg-border-dark hover:bg-primary/20 dark:hover:bg-primary/30 transition-colors">
+<span class="font-medium">Fotografía</span>
+</button>
+</div>
+</div>
+<!-- Filter: Date Range -->
+<div>
+<label class="text-sm font-semibold mb-3 block">Fecha del Evento</label>
+<div class="relative">
+<input class="form-input w-full rounded-lg border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark focus:ring-2 focus:ring-primary/50 focus:border-primary/50" placeholder="Selecciona un rango de fechas" type="text"/>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-text-muted-light dark:text-text-muted-dark pointer-events-none">calendar_today</span>
+</div>
+</div>
+<!-- Filter: Price Range -->
+<div>
+<label class="text-sm font-semibold mb-3 block">Rango de Precio</label>
+<div class="flex flex-col gap-4">
+<div class="relative h-1 bg-border-light dark:bg-border-dark rounded-full">
+<div class="absolute h-1 bg-primary rounded-full" style="left: 10%; width: 60%;"></div>
+<div class="absolute -top-1.5 size-4 bg-surface-light dark:bg-surface-dark border-2 border-primary rounded-full cursor-pointer" style="left: 10%;"></div>
+<div class="absolute -top-1.5 size-4 bg-surface-light dark:bg-surface-dark border-2 border-primary rounded-full cursor-pointer" style="left: 70%;"></div>
+</div>
+<div class="flex justify-between text-sm text-text-muted-light dark:text-text-muted-dark">
+<span>100€</span>
+<span>5.000€</span>
+</div>
+</div>
+</div>
+</div>
+<div class="border-t border-border-light dark:border-border-dark mt-6 pt-6 flex flex-col gap-3">
+<button class="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-background-dark text-sm font-bold leading-normal tracking-[0.015em] hover:opacity-90 transition-opacity">
+<span class="truncate">Aplicar Filtros</span>
+</button>
+<button class="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-transparent text-text-muted-light dark:text-text-muted-dark text-sm font-bold leading-normal tracking-[0.015em] hover:bg-border-light dark:hover:bg-border-dark transition-colors">
+<span class="truncate">Limpiar Filtros</span>
+</button>
+</div>
+</aside>
+<!-- Search Results -->
+<div class="flex-1">
+<!-- PageHeading -->
+<div class="flex flex-wrap justify-between items-center gap-4 mb-4">
+<div class="flex flex-col gap-1">
+<p class="text-3xl lg:text-4xl font-black leading-tight tracking-tighter">Encuentra la oferta perfecta para tu evento</p>
+<p class="text-text-muted-light dark:text-text-muted-dark text-base font-normal leading-normal">Mostrando 72 ofertas</p>
+</div>
+</div>
+<!-- Chips -->
+<div class="flex gap-2 p-1 flex-wrap mb-6 border-b border-border-light dark:border-border-dark pb-4">
+<button class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-border-light dark:bg-border-dark px-4">
+<p class="text-sm font-medium leading-normal">Ordenar por: Relevancia</p>
+<span class="material-symbols-outlined text-base">expand_more</span>
+</button>
+<div class="flex-1"></div>
+<button class="flex h-9 w-9 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-primary/20 dark:bg-primary/30 text-primary">
+<span class="material-symbols-outlined">grid_view</span>
+</button>
+<button class="flex h-9 w-9 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-border-light dark:bg-border-dark hover:bg-primary/20 dark:hover:bg-primary/30 transition-colors">
+<span class="material-symbols-outlined">view_list</span>
+</button>
+</div>
+<!-- ImageGrid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+<div class="flex flex-col gap-3 pb-3 group">
+<div class="w-full bg-center bg-no-repeat aspect-video bg-cover rounded-xl overflow-hidden" data-alt="Bright and airy event hall with large windows" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuA4Ueuk1cMO7-EbcMn-F8SlSjH8A39p7GqK4fH7zGYBzHVtZYFl9MGOCgvvrtscBOwPaq07ooJ4FurZbDpcZgNC2Ui-3bDL9bic5UJ41beGUAagbq_TVGtta5xa0sH-0_EseOCuS6dA2caURusjmdpHxrJ0r3xymrja6kn6yoiaBHDfS4zSENxWj7KoEVw3tZ1FzQgrrRiiFu0ZyNN7oo5bp2C1D2ShUisU5jlMfpczAMDvhCOjFlnvj49kP65M6BEA1cTOH33QrQMI");'></div>
+<div>
+<p class="text-lg font-bold leading-normal group-hover:text-primary transition-colors">Salón Vistalegre</p>
+<p class="text-text-muted-light dark:text-text-muted-dark text-sm font-normal leading-normal">Espacio - Capacidad: 150</p>
+<p class="text-text-muted-light dark:text-text-muted-dark text-sm font-normal leading-normal">Desde 1.200€ / día</p>
+</div>
+</div>
+<div class="flex flex-col gap-3 pb-3 group">
+<div class="w-full bg-center bg-no-repeat aspect-video bg-cover rounded-xl overflow-hidden" data-alt="Platter of gourmet appetizers on a wooden board" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuD8IzKxU2mKsSHlXe91fCI0q8CztF6nhSAVQWc0lvEPatpS9Nvy7ouHYzl3joh5LZzdz3nTcXtlaGV5_VPNTYIepDKDtqC3-9JBUkv28h-bG7uhj0L2CuKGNTscgdVXFEhEIkGUD74viaz5ZFOuYtCqfRy98CeVVFhBqb3A9R3_hCKde7hyXvIdwa1Sh-T6cix7ejFeDyIgQkzT33lSv215xBLu4icaXa9oEa_057ObHAGcv-3Xzwr0KY8GekFlCB9KtLOitUaLORsZ");'></div>
+<div>
+<p class="text-lg font-bold leading-normal group-hover:text-primary transition-colors">Catering Gourmet Delicias</p>
+<p class="text-text-muted-light dark:text-text-muted-dark text-sm font-normal leading-normal">Catering - Cocina de autor</p>
+<p class="text-text-muted-light dark:text-text-muted-dark text-sm font-normal leading-normal">Desde 80€ / persona</p>
+</div>
+</div>
+<div class="flex flex-col gap-3 pb-3 group">
+<div class="w-full bg-center bg-no-repeat aspect-video bg-cover rounded-xl overflow-hidden" data-alt="DJ mixing music on a turntable at a party" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCqmL95ByplBfcOSf9pP8xTCw4y-awK6NARo8v6qVk1BGoUuE0wbklHqvCHeYAInPjBiS2tRqIWVExL_ldq9HJgdf29G66IG-6xT-TGZSMpchAAQb8zAFX9Dt7iAQp2fT3Yc4PXy72tG7r_L_OhIPtnfXX089KN9zGbzKekHpJUO1MxWQ2UfVBqb3C4UHQmT7beoHYKOFrHsafyP4ZkGkkKoLgl9TFjfgkbDwMWugdA-MA2Hsb9VdYqBf9o7L2ZwuRUng3SMWzp9VfI");'></div>
+<div>
+<p class="text-lg font-bold leading-normal group-hover:text-primary transition-colors">DJ Sonic Beats</p>
+<p class="text-text-muted-light dark:text-text-muted-dark text-sm font-normal leading-normal">Música - DJ para bodas</p>
+<p class="text-text-muted-light dark:text-text-muted-dark text-sm font-normal leading-normal">Desde 500€</p>
+</div>
+</div>
+<div class="flex flex-col gap-3 pb-3 group">
+<div class="w-full bg-center bg-no-repeat aspect-video bg-cover rounded-xl overflow-hidden" data-alt="Professional photographer taking a picture at an event" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCq4UuW7Xh_SgctmvEdZ6zjMLq6d9V8ZNuOeMlWeGscyWrD75m2Cow9_njvBQCPcWXCHdbsIqdOnduS-hdJBAlXvQGAOO54Ro-kiwsJNcJpBt9E_ber1eaYMCk4ZgGcgskJVPVDOjoZ-HHG6VrGg1ORkrYhj_2M8aT-2Xvs6P7ftTZRoBEw74_mjgAr_Bl0n6EXyfRlcANK5Q9XOTACQW8jKkt3ACfsjLBTF3phZXDMaCiq1TG-OUm1M4yr1hSrMoex-YhRPh1Gd45x");'></div>
+<div>
+<p class="text-lg font-bold leading-normal group-hover:text-primary transition-colors">Fotografía Esencial</p>
+<p class="text-text-muted-light dark:text-text-muted-dark text-sm font-normal leading-normal">Fotografía - Sesiones completas</p>
+<p class="text-text-muted-light dark:text-text-muted-dark text-sm font-normal leading-normal">Desde 950€</p>
+</div>
+</div>
+<div class="flex flex-col gap-3 pb-3 group">
+<div class="w-full bg-center bg-no-repeat aspect-video bg-cover rounded-xl overflow-hidden" data-alt="Rooftop terrace with panoramic city views at sunset" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCzv35lYe1Nw6g6pJ6s1AH-8TGwTc23wnC-WBAmeEISGmzZK6oKIf-0AVq1mepcAopOj79kSIzNvO1vIw4f2p8j_jpiWlzPy2OkTituawcOPlcrMfI4S2AM2rGRLyIpWEDpjueApvB11-DvIa2zc86lX-og7BkHTcUANhx9oNvOxUCx1W4N9wyy9FUTpZrvqkgiDJaQU4ka6JFBQGFql3Ddo_Ukm_nwWewOJ4CMZOo00XoqcbWBMNG4dn0tsI-kXVB-n4T6WGISV1U6");'></div>
+<div>
+<p class="text-lg font-bold leading-normal group-hover:text-primary transition-colors">Terraza Cielo Abierto</p>
+<p class="text-text-muted-light dark:text-text-muted-dark text-sm font-normal leading-normal">Espacio - Vistas panorámicas</p>
+<p class="text-text-muted-light dark:text-text-muted-dark text-sm font-normal leading-normal">Desde 1.500€ / día</p>
+</div>
+</div>
+<div class="flex flex-col gap-3 pb-3 group">
+<div class="w-full bg-center bg-no-repeat aspect-video bg-cover rounded-xl overflow-hidden" data-alt="Elegant dining table set for a formal banquet" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAajC68OJePI8tyZJRpc2cUdDDIadmOKWMSl92a0KovkJ4LlbUb26laLwD-D8EA1E3eR9bkt60Ju2A4BQP5JXCXc4eagmKQLXZq_cqpmw8lKpOXrnB0PNYYPu4ya02bdX4GFvoUXOOXMwT65JdqfUAjacchY4n1ANeg9jL23__watBJqkS3nDACCB_iWKRYpTb6b70roNBbjIBMA5p1uoFLamF_eTOP1Pk5fWrgU3P9o0SUnQucvh3aqEqIENJF_dRx1Wg4xb8BNqUE");'></div>
+<div>
+<p class="text-lg font-bold leading-normal group-hover:text-primary transition-colors">Banquete Imperial</p>
+<p class="text-text-muted-light dark:text-text-muted-dark text-sm font-normal leading-normal">Catering - Menú 5 tiempos</p>
+<p class="text-text-muted-light dark:text-text-muted-dark text-sm font-normal leading-normal">Desde 120€ / persona</p>
+</div>
+</div>
+<div class="flex flex-col gap-3 pb-3 group">
+<div class="w-full bg-center bg-no-repeat aspect-video bg-cover rounded-xl overflow-hidden" data-alt="Two musicians playing acoustic guitars on a stage" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCokzEUb7HQVxuuPgFBjkIlzjCPJZ_z_hP8I8zDeQ90ROfXWGGhgbsmAFJNsiTYCB_eqtjB1f6JDCMPTmSnDNhBqKCzjFudYWlmMgnGoxO_xWicZNWh7HUloLnhAA9WzeKy96QyfCsVEOzSU7TObtu7xOrM4gxT4JPnkJY8lZQC_OddCIBo5yoPZKsnYFODeRSncTWDhPCXnLlLIpLy5Zc7gAZMfvHHKhH-50sY4-Q6owVWmMAuCktf8rkUwnlo8pvnpbvIEsWF-L_V");'></div>
+<div>
+<p class="text-lg font-bold leading-normal group-hover:text-primary transition-colors">Música en Vivo Acústica</p>
+<p class="text-text-muted-light dark:text-text-muted-dark text-sm font-normal leading-normal">Música - Dúo acústico</p>
+<p class="text-text-muted-light dark:text-text-muted-dark text-sm font-normal leading-normal">Desde 400€</p>
+</div>
+</div>
+<div class="flex flex-col gap-3 pb-3 group">
+<div class="w-full bg-center bg-no-repeat aspect-video bg-cover rounded-xl overflow-hidden" data-alt="Videographer filming with a professional video camera" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDpLQLdCHZpizAw4viIvCSHTfAgy5__LLPInPXASpagsclV8enhTzd2gBOXekwSAzkdNZ3byuyNQZ_CurVPgZtkKi8hdfKVhayJX6jZhkoIifhxBKMVodsuLuUGlQC6Z51JSigwECH-WjjDLBTgmfjlfzVM7ZMkrbzwpo9RefO6WEDddeBFjbNxu8A9nxydt2_VINW3v1o88LzC1reB4gglcCEHg7eGkmAKOGwNIXNFxvhCQ6ikSj549JlX3zR7hiHcUkHHTHPuA0Xw");'></div>
+<div>
+<p class="text-lg font-bold leading-normal group-hover:text-primary transition-colors">VideoMomentos HD</p>
+<p class="text-text-muted-light dark:text-text-muted-dark text-sm font-normal leading-normal">Fotografía - Video profesional</p>
+<p class="text-text-muted-light dark:text-text-muted-dark text-sm font-normal leading-normal">Desde 1.100€</p>
+</div>
+</div>
+<div class="flex flex-col gap-3 pb-3 group">
+<div class="w-full bg-center bg-no-repeat aspect-video bg-cover rounded-xl overflow-hidden" data-alt="Modern industrial loft space with brick walls" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBgFDfl_XlV69S4qgr00n-ooqWToLzVCVZ1DN79G9uJX8-QZ6gTqbNsV6KqcT3wRtpqKzEKRQW5NccAkNIC9baCstTaobxJIRIcfzqklhgdmbYmhXVqQTmHnzVUa915wkmPZB4XKg_AKDHzzjl_unsJQsMawPNfZUp-qwHwNU6n_aMogC8HouenDFEw5oi859hhJYGlW3lDCoRLbC4aIgSRjyQSjLhWAlKMGmPh5YUiatfZiTMcJ1-KuCPKQ4mUkKeQt1rBQepQxChW");'></div>
+<div>
+<p class="text-lg font-bold leading-normal group-hover:text-primary transition-colors">Espacio Loft Moderno</p>
+<p class="text-text-muted-light dark:text-text-muted-dark text-sm font-normal leading-normal">Espacio - Estilo industrial</p>
+<p class="text-text-muted-light dark:text-text-muted-dark text-sm font-normal leading-normal">Desde 900€ / día</p>
+</div>
+</div>
+</div>
+<!-- Pagination -->
+<div class="flex items-center justify-center p-4 mt-8">
+<a class="flex size-10 items-center justify-center rounded-lg hover:bg-border-light dark:hover:bg-border-dark transition-colors" href="#">
+<span class="material-symbols-outlined text-base">chevron_left</span>
+</a>
+<a class="text-sm font-bold leading-normal tracking-[0.015em] flex size-10 items-center justify-center text-background-dark dark:text-background-dark rounded-full bg-primary" href="#">1</a>
+<a class="text-sm font-normal leading-normal flex size-10 items-center justify-center rounded-full hover:bg-border-light dark:hover:bg-border-dark transition-colors" href="#">2</a>
+<a class="text-sm font-normal leading-normal flex size-10 items-center justify-center rounded-full hover:bg-border-light dark:hover:bg-border-dark transition-colors" href="#">3</a>
+<span class="text-sm font-normal leading-normal flex size-10 items-center justify-center rounded-full">...</span>
+<a class="text-sm font-normal leading-normal flex size-10 items-center justify-center rounded-full hover:bg-border-light dark:hover:bg-border-dark transition-colors" href="#">8</a>
+<a class="flex size-10 items-center justify-center rounded-lg hover:bg-border-light dark:hover:bg-border-dark transition-colors" href="#">
+<span class="material-symbols-outlined text-base">chevron_right</span>
+</a>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>
