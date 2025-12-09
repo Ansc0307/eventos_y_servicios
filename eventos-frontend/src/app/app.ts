@@ -1,13 +1,20 @@
-import { Component, signal } from '@angular/core';
+import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { UsuariosDashboardComponent } from './usuarios/usuarios-dashboard.component';
+//import { ReservasListComponent } from './reservas/reservas-list.component';
+//import { SolicitudesListComponent } from './solicitudes/solicitudes-list.component';
+//import { UsuariosDashboardComponent } from './usuarios/usuarios-dashboard.component';
+import { NavbarComponent } from './shared/navbar/navbar.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, UsuariosDashboardComponent],
+  standalone: true, // ← asegurarse que esto esté
+  imports: [
+    RouterOutlet, 
+    NavbarComponent,    
+  ],
   templateUrl: './app.html',
-  styleUrl: './app.css'
+  styleUrls: ['./app.css']
 })
 export class App {
-  protected readonly title = signal('Eventos y Servicios');
+  title = 'eventos-frontend';
 }

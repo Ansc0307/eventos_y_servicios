@@ -75,8 +75,6 @@ public class SolicitudController {
     }
 
     // --- Listar todas ---
-
-    /* 
     @Operation(summary = "Listar solicitudes", description = "Lista todas las solicitudes de reserva")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Operación exitosa"),
@@ -86,9 +84,8 @@ public class SolicitudController {
     @PreAuthorize("isAuthenticated()")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<List<SolicitudDTO>> listar() {
-        return ResponseEntity.ok(solicitudService.listarTodas());
+        return ResponseEntity.ok(solicitudService.obtenerTodas());
     }
-    */
 
     // --- Buscar por estado ---
     @Operation(summary = "Obtener solicitudes por estado")

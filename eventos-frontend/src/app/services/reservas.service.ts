@@ -5,8 +5,8 @@ import { Reserva } from '../models/reserva.model';
 
 @Injectable({ providedIn: 'root' })
 export class ReservasService {
-  // use the frontend proxy: /api -> http://localhost:8080/ms-reservas
-  private readonly base = '/api/v1/reservas';
+  // use the frontend proxy: /ms-reservas -> http://localhost:8080/ms-reservas (gateway)
+  private readonly base = '/ms-reservas/v1/reservas';
 
   constructor(private http: HttpClient) {}
 

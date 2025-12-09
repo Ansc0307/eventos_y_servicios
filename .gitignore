@@ -71,13 +71,6 @@ desktop.ini
 **/application-local.properties
 
 # =========================================
-# Proyectos Node / Angular
-# =========================================
-**/node_modules/
-**/.angular/
-**/dist/
-
-# =========================================
 # Archivos del sistema o de herramientas CI/CD
 # =========================================
 **/test-output/
