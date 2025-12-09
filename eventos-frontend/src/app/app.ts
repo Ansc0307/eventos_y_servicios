@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 //import { ReservasListComponent } from './reservas/reservas-list.component';
 //import { SolicitudesListComponent } from './solicitudes/solicitudes-list.component';
+//import { UsuariosDashboardComponent } from './usuarios/usuarios-dashboard.component';
 import { NavbarComponent } from './shared/navbar/navbar.component';
 
 @Component({
