@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, timeout, catchError, throwError } from 'rxjs';
 import { Reserva } from '../models/reserva.model';
+import { Solicitud } from '../models/solicitud.model';
 
 @Injectable({ providedIn: 'root' })
 export class ReservasService {
@@ -36,5 +37,15 @@ export class ReservasService {
 
   getByIdSolicitud(idSolicitud: number): Observable<Reserva[]> {
     return this.http.get<Reserva[]>(`${this.base}/solicitud/${idSolicitud}`);
+  }
+
+  getSolicitudByReservaId(idReserva: number): Observable<Solicitud> {
+    return this.http.get<Solicitud>(`${this.base}/${idReserva}/solicitud`).pipe(
+      timeout(10000),
+      catchError(err => {
+        console.error('Error obteniendo solicitud por reserva:', err);
+        return throwError(() => err);
+      })
+    );
   }
 }

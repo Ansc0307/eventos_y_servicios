@@ -9,12 +9,14 @@ import { PrioridadesListComponent } from './components/notifications/prioridades
 import { TiposListComponent } from './components/notifications/tipos-list/tipos-list.component';
 import { NotificacionesListComponent } from './components/notifications/notificaciones-list/notificaciones-list.component';
 import { ReservasListComponent } from './reservas/reservas-list.component';
+import { ProveedorReservasListComponent } from './reservas/proveedor-reservas-list.component';
 
 export const routes: Routes = [
   { path: '', component: RoleDashboardComponent },
   { path: 'dashboard', component: RoleDashboardComponent },
   { path: 'dashboard/organizador', component: OrganizadorDashboardComponent },
   { path: 'dashboard/proveedor', component: ProveedorDashboardComponent },
+  { path: 'proveedor/reservas', component: ProveedorReservasListComponent },
   // Ruta legacy previa
   { path: 'dashboard/legacy', component: DashboardComponent },
 
