@@ -1,5 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { KeycloakService } from 'keycloak-angular';
+import { SolicitudesService } from '../services/solicitudes.service';
+import { ReservasService } from '../services/reservas.service';
+import { Solicitud } from '../models/solicitud.model';
+import { Reserva } from '../models/reserva.model';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-proveedor-dashboard',
@@ -41,7 +47,7 @@ import { CommonModule } from '@angular/common';
               <div class="flex gap-3 items-center">
                 <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAYQ3Xv_YuY339LzWOL4jYfKwpp_Xk9EQPeGlaPTZUaCbWibigjj_YB-aGxvhwg8F6DZMvP78IzouOQH3-QD04rKwZu0qAV4ksMNwLhpVskYFEt4FmVucm_mFLxLxPTX8hDHUjR_Z9oMgFc_G87oiDiH7JpnVMSiQivqyiCyL3FHFneBsNk31-5d9q8uvRmqI_l6FgX35MdysNRvagVfmucr0CWN1v_HLjU_aiWNcTSeh51R5rwoZnxazDlwLlmCDHhNO9UufJdhm1M');"></div>
                 <div class="flex flex-col">
-                  <h1 class="text-slate-900 dark:text-white text-base font-medium leading-normal">Andrés García</h1>
+                  <h1 class="text-slate-900 dark:text-white text-base font-medium leading-normal">{{ userName }}</h1>
                   <p class="text-primary/80 dark:text-primary/70 text-sm font-normal leading-normal">Proveedor Verificado</p>
                 </div>
               </div>
@@ -69,32 +75,47 @@ import { CommonModule } from '@angular/common';
           </header>
 
           <div class="p-10">
-            <div class="flex flex-wrap justify-between gap-3 items-center">
-              <p class="text-slate-900 dark:text-white text-4xl font-black leading-tight tracking-[-0.033em] min-w-72">Dashboard</p>
-              <button class="bg-primary text-white font-bold py-2.5 px-6 rounded-lg flex items-center gap-2">
-                <span class="material-symbols-outlined">add_circle</span>
-                Crear Nueva Oferta
-              </button>
+            <!-- Loading -->
+            <div *ngIf="loading" class="flex items-center justify-center py-12">
+              <div class="text-center">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+                <p class="mt-4 text-gray-600 dark:text-gray-400">Cargando datos...</p>
+              </div>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-8">
-              <div class="flex flex-col gap-2 rounded-xl p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-                <p class="text-slate-600 dark:text-slate-300 text-base font-medium leading-normal">Solicitudes Pendientes</p>
-                <p class="text-slate-900 dark:text-white tracking-light text-3xl font-bold leading-tight">12</p>
-              </div>
-              <div class="flex flex-col gap-2 rounded-xl p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-                <p class="text-slate-600 dark:text-slate-300 text-base font-medium leading-normal">Reservas Confirmadas</p>
-                <p class="text-slate-900 dark:text-white tracking-light text-3xl font-bold leading-tight">8</p>
-              </div>
-              <div class="flex flex-col gap-2 rounded-xl p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-                <p class="text-slate-600 dark:text-slate-300 text-base font-medium leading-normal">Mensajes Sin Leer</p>
-                <p class="text-slate-900 dark:text-white tracking-light text-3xl font-bold leading-tight">5</p>
-              </div>
-              <div class="flex flex-col gap-2 rounded-xl p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-                <p class="text-slate-600 dark:text-slate-300 text-base font-medium leading-normal">Ingresos del Mes</p>
-                <p class="text-slate-900 dark:text-white tracking-light text-3xl font-bold leading-tight">$8,500</p>
-              </div>
+            <!-- Error -->
+            <div *ngIf="error && !loading" class="bg-red-100 dark:bg-red-900/50 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-400 px-4 py-3 rounded mb-4">
+              {{ error }}
             </div>
+
+            <!-- Content -->
+            <div *ngIf="!loading && !error">
+              <div class="flex flex-wrap justify-between gap-3 items-center">
+                <p class="text-slate-900 dark:text-white text-4xl font-black leading-tight tracking-[-0.033em] min-w-72">Dashboard</p>
+                <button class="bg-primary text-white font-bold py-2.5 px-6 rounded-lg flex items-center gap-2">
+                  <span class="material-symbols-outlined">add_circle</span>
+                  Crear Nueva Oferta
+                </button>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-8">
+                <div class="flex flex-col gap-2 rounded-xl p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                  <p class="text-slate-600 dark:text-slate-300 text-base font-medium leading-normal">Solicitudes Pendientes</p>
+                  <p class="text-slate-900 dark:text-white tracking-light text-3xl font-bold leading-tight">{{ solicitudesPendientes }}</p>
+                </div>
+                <div class="flex flex-col gap-2 rounded-xl p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                  <p class="text-slate-600 dark:text-slate-300 text-base font-medium leading-normal">Reservas Activas</p>
+                  <p class="text-slate-900 dark:text-white tracking-light text-3xl font-bold leading-tight">{{ reservasConfirmadas }}</p>
+                </div>
+                <div class="flex flex-col gap-2 rounded-xl p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                  <p class="text-slate-600 dark:text-slate-300 text-base font-medium leading-normal">Mensajes Sin Leer</p>
+                  <p class="text-slate-900 dark:text-white tracking-light text-3xl font-bold leading-tight">{{ mensajesSinLeer }}</p>
+                </div>
+                <div class="flex flex-col gap-2 rounded-xl p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                  <p class="text-slate-600 dark:text-slate-300 text-base font-medium leading-normal">Ingresos del Mes</p>
+                  <p class="text-slate-900 dark:text-white tracking-light text-3xl font-bold leading-tight">{{ ingresosDelMes === 0 ? '$0' : '$' + ingresosDelMes.toLocaleString() }}</p>
+                </div>
+              </div>
 
             <div class="mt-8 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
               <div class="pb-3 pt-2">
@@ -112,47 +133,31 @@ import { CommonModule } from '@angular/common';
               </div>
 
               <div class="overflow-x-auto">
-                <table class="w-full text-left">
+                <!-- Sin solicitudes -->
+                <div *ngIf="nuevasSolicitudes.length === 0" class="text-center py-12">
+                  <span class="material-symbols-outlined text-6xl text-slate-300 dark:text-slate-600">inbox</span>
+                  <p class="mt-4 text-slate-500 dark:text-slate-400">No tienes solicitudes nuevas</p>
+                </div>
+
+                <!-- Con solicitudes -->
+                <table *ngIf="nuevasSolicitudes.length > 0" class="w-full text-left">
                   <thead class="border-b border-slate-200 dark:border-slate-800">
                     <tr>
-                      <th class="p-6 text-sm font-semibold text-slate-500 dark:text-slate-400">Cliente</th>
-                      <th class="p-6 text-sm font-semibold text-slate-500 dark:text-slate-400">Tipo de Evento</th>
-                      <th class="p-6 text-sm font-semibold text-slate-500 dark:text-slate-400">Fecha</th>
+                      <th class="p-6 text-sm font-semibold text-slate-500 dark:text-slate-400">ID Solicitud</th>
+                      <th class="p-6 text-sm font-semibold text-slate-500 dark:text-slate-400">Fecha Solicitud</th>
                       <th class="p-6 text-sm font-semibold text-slate-500 dark:text-slate-400">Estado</th>
                       <th class="p-6 text-sm font-semibold text-slate-500 dark:text-slate-400 text-right">Acciones</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr class="border-b border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                      <td class="p-6 text-sm font-medium text-slate-800 dark:text-slate-100">Laura Martinez</td>
-                      <td class="p-6 text-sm text-slate-600 dark:text-slate-300">Boda</td>
-                      <td class="p-6 text-sm text-slate-600 dark:text-slate-300">25/12/2024</td>
+                    <tr *ngFor="let solicitud of nuevasSolicitudes" 
+                        class="border-b border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                      <td class="p-6 text-sm font-medium text-slate-800 dark:text-slate-100">#{{ solicitud.idSolicitud }}</td>
+                      <td class="p-6 text-sm text-slate-600 dark:text-slate-300">{{ formatDate(solicitud.fechaSolicitud) }}</td>
                       <td class="p-6 text-sm">
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">Pendiente</span>
-                      </td>
-                      <td class="p-6 text-right space-x-2">
-                        <button class="text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary text-sm font-bold py-2 px-4 rounded-lg border border-slate-300 dark:border-slate-700">Ver Detalle</button>
-                        <button class="bg-primary/90 hover:bg-primary text-white text-sm font-bold py-2 px-4 rounded-lg">Responder</button>
-                      </td>
-                    </tr>
-                    <tr class="border-b border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                      <td class="p-6 text-sm font-medium text-slate-800 dark:text-slate-100">Carlos Rivera</td>
-                      <td class="p-6 text-sm text-slate-600 dark:text-slate-300">Conferencia Corporativa</td>
-                      <td class="p-6 text-sm text-slate-600 dark:text-slate-300">15/01/2025</td>
-                      <td class="p-6 text-sm">
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">Pendiente</span>
-                      </td>
-                      <td class="p-6 text-right space-x-2">
-                        <button class="text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary text-sm font-bold py-2 px-4 rounded-lg border border-slate-300 dark:border-slate-700">Ver Detalle</button>
-                        <button class="bg-primary/90 hover:bg-primary text-white text-sm font-bold py-2 px-4 rounded-lg">Responder</button>
-                      </td>
-                    </tr>
-                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                      <td class="p-6 text-sm font-medium text-slate-800 dark:text-slate-100">Sofía Gómez</td>
-                      <td class="p-6 text-sm text-slate-600 dark:text-slate-300">Cumpleaños</td>
-                      <td class="p-6 text-sm text-slate-600 dark:text-slate-300">10/02/2025</td>
-                      <td class="p-6 text-sm">
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">En Negociación</span>
+                        <span [class]="'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ' + getEstadoClass(solicitud.estadoSolicitud)">
+                          {{ getEstadoLabel(solicitud.estadoSolicitud) }}
+                        </span>
                       </td>
                       <td class="p-6 text-right space-x-2">
                         <button class="text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary text-sm font-bold py-2 px-4 rounded-lg border border-slate-300 dark:border-slate-700">Ver Detalle</button>
@@ -163,6 +168,7 @@ import { CommonModule } from '@angular/common';
                 </table>
               </div>
             </div>
+            </div>
           </div>
         </main>
       </div>
@@ -170,4 +176,146 @@ import { CommonModule } from '@angular/common';
   </div>
   `
 })
-export class ProveedorDashboardComponent {}
+export class ProveedorDashboardComponent implements OnInit {
+  solicitudes: Solicitud[] = [];
+  reservas: Reserva[] = [];
+  loading = true;
+  error: string | null = null;
+  userName = '';
+  idProveedor = 1; // Por defecto
+
+  // Estadísticas
+  get solicitudesPendientes(): number {
+    return this.solicitudes.filter(s => s.estadoSolicitud?.toUpperCase() === 'PENDIENTE').length;
+  }
+
+  get reservasConfirmadas(): number {
+    return this.reservas.filter(r => 
+      r.estado?.toUpperCase() === 'CONFIRMADA' || r.estado?.toUpperCase() === 'PENDIENTE'
+    ).length;
+  }
+
+  get mensajesSinLeer(): number {
+    // TODO: Implementar cuando se tenga el servicio de mensajes
+    return 0;
+  }
+
+  get ingresosDelMes(): number {
+    // TODO: Calcular desde las reservas confirmadas
+    return 0;
+  }
+
+  // Últimas 3 solicitudes
+  get nuevasSolicitudes(): Solicitud[] {
+    return this.solicitudes
+      .filter(s => s.estadoSolicitud?.toUpperCase() === 'PENDIENTE')
+      .slice(0, 3);
+  }
+
+  constructor(
+    private keycloak: KeycloakService,
+    private solicitudesService: SolicitudesService,
+    private reservasService: ReservasService,
+    private cdr: ChangeDetectorRef
+  ) {}
+
+  ngOnInit(): void {
+    try {
+      // Obtener nombre de usuario desde Keycloak
+      const tokenParsed = this.keycloak.getKeycloakInstance().tokenParsed;
+      this.userName = tokenParsed?.['preferred_username'] || tokenParsed?.['name'] || 'Proveedor';
+      
+      this.idProveedor = 1;
+
+      // Cargar solicitudes del proveedor
+      console.log('Cargando solicitudes para proveedor:', this.idProveedor);
+      this.solicitudesService.getByProveedor(this.idProveedor).subscribe({
+        next: (solicitudes) => {
+          console.log('Solicitudes recibidas:', solicitudes);
+          this.solicitudes = solicitudes;
+          
+          // Cargar reservas para cada solicitud
+          if (solicitudes.length > 0) {
+            const reservaRequests = solicitudes.map(s => 
+              this.reservasService.getByIdSolicitud(s.idSolicitud)
+            );
+            
+            forkJoin(reservaRequests).subscribe({
+              next: (reservasArrays) => {
+                this.reservas = reservasArrays.flat();
+                this.loading = false;
+                this.cdr.detectChanges();
+              },
+              error: (err) => {
+                console.error('Error cargando reservas:', err);
+                this.loading = false;
+                this.cdr.detectChanges();
+              }
+            });
+          } else {
+            this.loading = false;
+            this.cdr.detectChanges();
+          }
+        },
+        error: (err) => {
+          console.error('Error cargando solicitudes:', err);
+          this.error = 'Error al cargar las solicitudes: ' + (err.message || err.statusText || 'Error desconocido');
+          this.loading = false;
+          this.cdr.detectChanges();
+        }
+      });
+    } catch (err) {
+      console.error('Error en ngOnInit:', err);
+      this.error = 'Error al inicializar el dashboard';
+      this.loading = false;
+      this.cdr.detectChanges();
+    }
+  }
+
+  getEstadoClass(estado: string): string {
+    const estadoUpper = estado?.toUpperCase() || '';
+    switch (estadoUpper) {
+      case 'PENDIENTE':
+        return 'bg-orange-100 text-orange-800';
+      case 'EN_NEGOCIACION':
+        return 'bg-blue-100 text-blue-800';
+      case 'APROBADA':
+      case 'CONFIRMADA':
+        return 'bg-green-100 text-green-800';
+      case 'RECHAZADA':
+      case 'CANCELADA':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  }
+
+  getEstadoLabel(estado: string): string {
+    const estadoUpper = estado?.toUpperCase() || '';
+    switch (estadoUpper) {
+      case 'PENDIENTE':
+        return 'Pendiente';
+      case 'EN_NEGOCIACION':
+        return 'En Negociación';
+      case 'APROBADA':
+        return 'Aprobada';
+      case 'CONFIRMADA':
+        return 'Confirmada';
+      case 'RECHAZADA':
+        return 'Rechazada';
+      case 'CANCELADA':
+        return 'Cancelada';
+      default:
+        return estado || 'Desconocido';
+    }
+  }
+
+  formatDate(dateString: string): string {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('es-ES', { 
+      day: '2-digit', 
+      month: '2-digit',
+      year: 'numeric'
+    });
+  }
+}
