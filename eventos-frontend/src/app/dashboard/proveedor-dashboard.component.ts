@@ -120,19 +120,23 @@ import { forkJoin } from 'rxjs';
             <div class="mt-8 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
               <div class="pb-3 pt-2">
                 <div class="flex border-b border-slate-200 dark:border-slate-800 px-6 gap-8">
-                  <a class="flex flex-col items-center justify-center border-b-[3px] border-b-primary text-slate-900 dark:text-white pb-[13px] pt-4" href="#">
+                  <button (click)="setActiveTab('solicitudes')" 
+                          [class]="'flex flex-col items-center justify-center border-b-[3px] pb-[13px] pt-4 ' + (activeTab === 'solicitudes' ? 'border-b-primary text-slate-900 dark:text-white' : 'border-b-transparent text-slate-500 dark:text-slate-400')">
                     <p class="text-sm font-bold leading-normal tracking-[0.015em]">Nuevas Solicitudes</p>
-                  </a>
-                  <a class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-slate-500 dark:text-slate-400 pb-[13px] pt-4" href="#">
-                    <p class="text-sm font-bold leading-normal tracking-[0.015em]">En Negociación</p>
-                  </a>
-                  <a class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-slate-500 dark:text-slate-400 pb-[13px] pt-4" href="#">
+                  </button>
+                  <button (click)="setActiveTab('reservas')" 
+                          [class]="'flex flex-col items-center justify-center border-b-[3px] pb-[13px] pt-4 ' + (activeTab === 'reservas' ? 'border-b-primary text-slate-900 dark:text-white' : 'border-b-transparent text-slate-500 dark:text-slate-400')">
+                    <p class="text-sm font-bold leading-normal tracking-[0.015em]">Proximas Reservas</p>
+                  </button>
+                  <button (click)="setActiveTab('historial')" 
+                          [class]="'flex flex-col items-center justify-center border-b-[3px] pb-[13px] pt-4 ' + (activeTab === 'historial' ? 'border-b-primary text-slate-900 dark:text-white' : 'border-b-transparent text-slate-500 dark:text-slate-400')">
                     <p class="text-sm font-bold leading-normal tracking-[0.015em]">Historial</p>
-                  </a>
+                  </button>
                 </div>
               </div>
 
-              <div class="overflow-x-auto">
+              <!-- Tab Nuevas Solicitudes -->
+              <div *ngIf="activeTab === 'solicitudes'" class="overflow-x-auto">
                 <!-- Sin solicitudes -->
                 <div *ngIf="nuevasSolicitudes.length === 0" class="text-center py-12">
                   <span class="material-symbols-outlined text-6xl text-slate-300 dark:text-slate-600">inbox</span>
@@ -166,6 +170,52 @@ import { forkJoin } from 'rxjs';
                     </tr>
                   </tbody>
                 </table>
+              </div>
+
+              <!-- Tab Reservas -->
+              <div *ngIf="activeTab === 'reservas'" class="overflow-x-auto">
+                <!-- Sin reservas -->
+                <div *ngIf="proximasReservas.length === 0" class="text-center py-12">
+                  <span class="material-symbols-outlined text-6xl text-slate-300 dark:text-slate-600">event_busy</span>
+                  <p class="mt-4 text-slate-500 dark:text-slate-400">No tienes reservas próximas</p>
+                </div>
+
+                <!-- Con reservas -->
+                <table *ngIf="proximasReservas.length > 0" class="w-full text-left">
+                  <thead class="border-b border-slate-200 dark:border-slate-800">
+                    <tr>
+                      <th class="p-6 text-sm font-semibold text-slate-500 dark:text-slate-400">ID Reserva</th>
+                      <th class="p-6 text-sm font-semibold text-slate-500 dark:text-slate-400">Fecha Inicio</th>
+                      <th class="p-6 text-sm font-semibold text-slate-500 dark:text-slate-400">Fecha Fin</th>
+                      <th class="p-6 text-sm font-semibold text-slate-500 dark:text-slate-400">Estado</th>
+                      <th class="p-6 text-sm font-semibold text-slate-500 dark:text-slate-400 text-right">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let reserva of proximasReservas" 
+                        class="border-b border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                      <td class="p-6 text-sm font-medium text-slate-800 dark:text-slate-100">#{{ reserva.idReserva }}</td>
+                      <td class="p-6 text-sm text-slate-600 dark:text-slate-300">{{ formatDate(reserva.fechaReservaInicio) }}</td>
+                      <td class="p-6 text-sm text-slate-600 dark:text-slate-300">{{ formatDate(reserva.fechaReservaFin) }}</td>
+                      <td class="p-6 text-sm">
+                        <span [class]="'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ' + getEstadoClass(reserva.estado)">
+                          {{ getEstadoLabel(reserva.estado) }}
+                        </span>
+                      </td>
+                      <td class="p-6 text-right space-x-2">
+                        <button class="text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary text-sm font-bold py-2 px-4 rounded-lg border border-slate-300 dark:border-slate-700">Ver Detalle</button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Tab Historial -->
+              <div *ngIf="activeTab === 'historial'" class="overflow-x-auto">
+                <div class="text-center py-12">
+                  <span class="material-symbols-outlined text-6xl text-slate-300 dark:text-slate-600">history</span>
+                  <p class="mt-4 text-slate-500 dark:text-slate-400">Historial en desarrollo</p>
+                </div>
               </div>
             </div>
             </div>
@@ -210,6 +260,24 @@ export class ProveedorDashboardComponent implements OnInit {
     return this.solicitudes
       .filter(s => s.estadoSolicitud?.toUpperCase() === 'PENDIENTE')
       .slice(0, 3);
+  }
+
+  // Próximas 3 reservas ordenadas por fecha
+  get proximasReservas(): Reserva[] {
+    return this.reservas
+      .filter(r => {
+        const estadoUpper = r.estado?.toUpperCase() || '';
+        return estadoUpper === 'CONFIRMADA' || estadoUpper === 'PENDIENTE';
+      })
+      .sort((a, b) => new Date(a.fechaReservaInicio).getTime() - new Date(b.fechaReservaInicio).getTime())
+      .slice(0, 3);
+  }
+
+  // Estado de la pestaña activa
+  activeTab: 'solicitudes' | 'reservas' | 'historial' = 'solicitudes';
+
+  setActiveTab(tab: 'solicitudes' | 'reservas' | 'historial'): void {
+    this.activeTab = tab;
   }
 
   constructor(
