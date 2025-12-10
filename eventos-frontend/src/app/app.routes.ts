@@ -1,5 +1,8 @@
 import { Routes } from '@angular/router';
 import { DashboardComponent } from './dashboard/dashboard.component';
+import { RoleDashboardComponent } from './dashboard/role-dashboard.component';
+import { OrganizadorDashboardComponent } from './dashboard/organizador-dashboard.component';
+import { ProveedorDashboardComponent } from './dashboard/proveedor-dashboard.component';
 //para notificaciones
 import { NotificacionesMainComponent } from './components/notifications/notificaciones-main/notificaciones-main.component';
 import { PrioridadesListComponent } from './components/notifications/prioridades-list/prioridades-list.component';
@@ -8,8 +11,12 @@ import { NotificacionesListComponent } from './components/notifications/notifica
 import { ReservasListComponent } from './reservas/reservas-list.component';
 
 export const routes: Routes = [
-  { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
-  { path: 'dashboard', component: DashboardComponent },
+  { path: '', component: RoleDashboardComponent },
+  { path: 'dashboard', component: RoleDashboardComponent },
+  { path: 'dashboard/organizador', component: OrganizadorDashboardComponent },
+  { path: 'dashboard/proveedor', component: ProveedorDashboardComponent },
+  // Ruta legacy previa
+  { path: 'dashboard/legacy', component: DashboardComponent },
 
   //rutas para notificaciones
   // Ruta principal de notificaciones
