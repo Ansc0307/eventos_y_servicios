@@ -240,9 +240,12 @@ export class ProveedorDashboardComponent implements OnInit {
   }
 
   get reservasConfirmadas(): number {
-    return this.reservas.filter(r => 
-      r.estado?.toUpperCase() === 'CONFIRMADA' || r.estado?.toUpperCase() === 'PENDIENTE'
-    ).length;
+    const ahora = new Date();
+    return this.reservas.filter(r => {
+      const estadoUpper = r.estado?.toUpperCase() || '';
+      const esFutura = new Date(r.fechaReservaInicio) >= ahora;
+      return (estadoUpper === 'CONFIRMADA' || estadoUpper === 'PENDIENTE') && esFutura;
+    }).length;
   }
 
   get mensajesSinLeer(): number {
@@ -255,19 +258,22 @@ export class ProveedorDashboardComponent implements OnInit {
     return 0;
   }
 
-  // Últimas 3 solicitudes
+  // Las 3 solicitudes pendientes más antiguas (ordenadas por fecha ascendente)
   get nuevasSolicitudes(): Solicitud[] {
     return this.solicitudes
       .filter(s => s.estadoSolicitud?.toUpperCase() === 'PENDIENTE')
+      .sort((a, b) => new Date(a.fechaSolicitud).getTime() - new Date(b.fechaSolicitud).getTime())
       .slice(0, 3);
   }
 
-  // Próximas 3 reservas ordenadas por fecha
+  // Próximas reservas desde la fecha actual (solo futuras, hasta 3)
   get proximasReservas(): Reserva[] {
+    const ahora = new Date();
     return this.reservas
       .filter(r => {
         const estadoUpper = r.estado?.toUpperCase() || '';
-        return estadoUpper === 'CONFIRMADA' || estadoUpper === 'PENDIENTE';
+        const esFutura = new Date(r.fechaReservaInicio) >= ahora;
+        return (estadoUpper === 'CONFIRMADA' || estadoUpper === 'PENDIENTE') && esFutura;
       })
       .sort((a, b) => new Date(a.fechaReservaInicio).getTime() - new Date(b.fechaReservaInicio).getTime())
       .slice(0, 3);
