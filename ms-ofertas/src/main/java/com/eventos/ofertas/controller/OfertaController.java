@@ -16,6 +16,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -44,9 +45,12 @@ public class OfertaController {
         @ApiResponse(
             responseCode = "400",
             description = "Datos inválidos o categoría no encontrada"
-        )
+        ),
+        @ApiResponse(responseCode = "401", description = "No autorizado"),
+        @ApiResponse(responseCode = "403", description = "Acceso denegado")
     })
     @PostMapping
+    @PreAuthorize("hasAnyRole('USER','PROVEEDOR')")
     public ResponseEntity<OfertaResponseDTO> crearOferta(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                 description = "Datos de la oferta a crear",
@@ -74,6 +78,9 @@ public class OfertaController {
         return ResponseEntity.ok(ofertas);
     }
     
+    // --------------------------
+    // Obtener Ofertas por categoría (público)
+    // --------------------------
     /**
      * GET /ofertas/categoria/{idCategoria} - Obtener ofertas filtradas por categoría
      */
@@ -99,6 +106,9 @@ public class OfertaController {
         return ResponseEntity.ok(ofertas);
     }
     
+    // --------------------------
+    // Actualizar Oferta
+    // --------------------------
     /**
      * PUT /ofertas/{id} - Editar una oferta (total o parcialmente)
      */
@@ -119,9 +129,12 @@ public class OfertaController {
         @ApiResponse(
             responseCode = "400",
             description = "Datos inválidos"
-        )
+        ),
+        @ApiResponse(responseCode = "401", description = "No autorizado"),
+        @ApiResponse(responseCode = "403", description = "Acceso denegado")
     })
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('USER','PROVEEDOR')")
     public ResponseEntity<OfertaResponseDTO> actualizarOferta(
             @Parameter(description = "ID de la oferta", required = true)
             @PathVariable Long id,
@@ -133,7 +146,9 @@ public class OfertaController {
         OfertaResponseDTO oferta = ofertaService.actualizarOferta(id, request);
         return ResponseEntity.ok(oferta);
     }
-    
+    // --------------------------
+    // Eliminar Oferta (borrado lógico)
+    // --------------------------
     /**
      * DELETE /ofertas/{id} - Borrado lógico (activo=false, estado='archivado')
      */
@@ -149,9 +164,12 @@ public class OfertaController {
         @ApiResponse(
             responseCode = "404",
             description = "Oferta no encontrada"
-        )
+        ),
+        @ApiResponse(responseCode = "401", description = "No autorizado"),
+        @ApiResponse(responseCode = "403", description = "Acceso denegado")
     })
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('USER','PROVEEDOR')")
     public ResponseEntity<Void> eliminarOferta(
             @Parameter(description = "ID de la oferta", required = true)
             @PathVariable Long id) {
@@ -159,6 +177,9 @@ public class OfertaController {
         return ResponseEntity.noContent().build();
     }
     
+    // --------------------------
+    // Agregar Descuento
+    // --------------------------
     /**
      * POST /ofertas/{id}/descuentos - Añadir descuento a una oferta
      */
@@ -179,9 +200,12 @@ public class OfertaController {
         @ApiResponse(
             responseCode = "400",
             description = "Datos inválidos o fechas incorrectas"
-        )
+        ),
+         @ApiResponse(responseCode = "401", description = "No autorizado"),
+        @ApiResponse(responseCode = "403", description = "Acceso denegado")
     })
     @PostMapping("/{id}/descuentos")
+    @PreAuthorize("hasAnyRole('USER','PROVEEDOR')")
     public ResponseEntity<PrecioDescuentoDTO> agregarDescuento(
             @Parameter(description = "ID de la oferta", required = true)
             @PathVariable Long id,
@@ -193,7 +217,10 @@ public class OfertaController {
         PrecioDescuentoDTO descuento = ofertaService.agregarDescuento(id, request);
         return new ResponseEntity<>(descuento, HttpStatus.CREATED);
     }
-    
+
+    // --------------------------
+    // Eliminar Descuento
+    // --------------------------
     /**
      * DELETE /ofertas/{id}/descuentos/{idDescuento} - Eliminar descuento de una oferta
      */
@@ -213,9 +240,12 @@ public class OfertaController {
         @ApiResponse(
             responseCode = "400",
             description = "El descuento no pertenece a la oferta especificada"
-        )
+        ),
+        @ApiResponse(responseCode = "401", description = "No autorizado"),
+        @ApiResponse(responseCode = "403", description = "Acceso denegado")
     })
     @DeleteMapping("/{id}/descuentos/{idDescuento}")
+    @PreAuthorize("hasAnyRole('USER','PROVEEDOR')")
     public ResponseEntity<Void> eliminarDescuento(
             @Parameter(description = "ID de la oferta", required = true)
             @PathVariable Long id,

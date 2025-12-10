@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Calendario Detallado del Proveedor</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#13c8ec",
+              "background-light": "#f8fbfc",
+              "background-dark": "#101f22",
+            },
+            fontFamily: {
+              "display": ["Manrope", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.5rem", "lg": "0.75rem", "xl": "1rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+    </style>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark">
+<div class="relative flex h-auto min-h-screen w-full flex-col group/design-root overflow-x-hidden">
+<div class="layout-container flex h-full grow flex-col">
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#e7f1f3] dark:border-b-white/10 px-6 sm:px-10 lg:px-20 py-3 bg-white dark:bg-background-dark sticky top-0 z-10">
+<div class="flex items-center gap-4 text-[#0d191b] dark:text-white">
+<div class="size-6 text-primary">
+<svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_6_319)">
+<path d="M8.57829 8.57829C5.52816 11.6284 3.451 15.5145 2.60947 19.7452C1.76794 23.9758 2.19984 28.361 3.85056 32.3462C5.50128 36.3314 8.29667 39.7376 11.8832 42.134C15.4698 44.5305 19.6865 45.8096 24 45.8096C28.3135 45.8096 32.5302 44.5305 36.1168 42.134C39.7033 39.7375 42.4987 36.3314 44.1494 32.3462C45.8002 28.361 46.2321 23.9758 45.3905 19.7452C44.549 15.5145 42.4718 11.6284 39.4217 8.57829L24 24L8.57829 8.57829Z" fill="currentColor"></path>
+</g>
+<defs>
+<clipPath id="clip0_6_319"><rect fill="white" height="48" width="48"></rect></clipPath>
+</defs>
+</svg>
+</div>
+<h2 class="text-[#0d191b] dark:text-white text-lg font-bold leading-tight tracking-[-0.015em]">Plataforma de Eventos</h2>
+</div>
+<div class="hidden md:flex flex-1 justify-end gap-8">
+<div class="flex items-center gap-9">
+<a class="text-[#0d191b] dark:text-white/80 hover:text-primary dark:hover:text-primary text-sm font-medium leading-normal" href="#">Dashboard</a>
+<a class="text-[#0d191b] dark:text-white/80 hover:text-primary dark:hover:text-primary text-sm font-medium leading-normal" href="#">Mis Espacios</a>
+<a class="text-primary dark:text-primary text-sm font-bold leading-normal" href="#">Disponibilidad</a>
+<a class="text-[#0d191b] dark:text-white/80 hover:text-primary dark:hover:text-primary text-sm font-medium leading-normal" href="#">Mensajes</a>
+</div>
+<div class="flex items-center gap-4">
+<button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-black text-sm font-bold leading-normal tracking-[0.015em]">
+<span class="truncate">Mi Cuenta</span>
+</button>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" data-alt="User avatar image" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBsEjcyFwT2XKJ4bXOKQwlGzz9GLLGOMdvQtDxZNALe6S1GLzze4TurzowiutCZg1BznHA0X4cTeKalGqVDOO5rApEheITQfi0Xu8rP3hEfwPpeu_UL2qUh-vunG7ZybyXowpKQfyHiYBqWPX0oksETndHJnolBBnQXyDQWixUcr4kSEXTxIOGgFwKFY8B8QhjULFDQgJwVvkvinRfmdsUtPy_kN63SAJPUYFlR20hVfoV2C1-HR-bYbnaHFaEEaK-Rv9TfQ0NAcz7m");'></div>
+</div>
+</div>
+<button class="md:hidden text-[#0d191b] dark:text-white">
+<span class="material-symbols-outlined">menu</span>
+</button>
+</header>
+<main class="px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+<div class="max-w-7xl mx-auto flex flex-col gap-8">
+<div class="flex flex-wrap justify-between items-start gap-4">
+<div class="flex flex-col gap-2">
+<p class="text-[#0d191b] dark:text-white text-4xl font-black leading-tight tracking-[-0.033em]">Calendario Detallado del Proveedor</p>
+<p class="text-[#4c8d9a] dark:text-white/60 text-base font-normal leading-normal max-w-2xl">Define y gestiona tus fechas disponibles y bloqueadas. Selecciona fechas, añade notas y revisa tus rangos de disponibilidad definidos.</p>
+</div>
+<div class="flex items-center gap-4">
+<button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-11 px-5 bg-[#e7f1f3] dark:bg-white/10 text-[#0d191b] dark:text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-opacity-80 dark:hover:bg-opacity-20 gap-2">
+<span class="material-symbols-outlined text-xl">arrow_back</span>
+<span class="truncate">Volver al Dashboard</span>
+</button>
+<button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-11 px-5 bg-primary text-black text-sm font-bold leading-normal tracking-[0.015em] hover:bg-opacity-90 gap-2">
+<span class="material-symbols-outlined text-xl">save</span>
+<span class="truncate">Guardar Cambios</span>
+</button>
+</div>
+</div>
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-8 items-start">
+<div class="xl:col-span-2 bg-white dark:bg-[#1A2C2F] rounded-xl shadow-sm border border-[#e7f1f3] dark:border-white/10 p-4 sm:p-6">
+<div class="flex flex-col">
+<div class="flex items-center justify-between pb-4 border-b border-[#e7f1f3] dark:border-white/10 mb-4">
+<p class="text-[#0d191b] dark:text-white text-xl font-bold leading-tight">Octubre 2024</p>
+<div class="flex items-center gap-2">
+<button class="text-[#0d191b] dark:text-white rounded-full hover:bg-primary/20 dark:hover:bg-primary/20 p-2">
+<span class="material-symbols-outlined text-xl">chevron_left</span>
+</button>
+<button class="text-[#0d191b] dark:text-white rounded-full hover:bg-primary/20 dark:hover:bg-primary/20 p-2">
+<span class="material-symbols-outlined text-xl">chevron_right</span>
+</button>
+</div>
+</div>
+<div class="grid grid-cols-7 gap-1">
+<p class="text-[#4c8d9a] dark:text-white/60 text-sm font-bold leading-normal tracking-[0.015em] flex h-10 w-full items-center justify-center">DOM</p>
+<p class="text-[#4c8d9a] dark:text-white/60 text-sm font-bold leading-normal tracking-[0.015em] flex h-10 w-full items-center justify-center">LUN</p>
+<p class="text-[#4c8d9a] dark:text-white/60 text-sm font-bold leading-normal tracking-[0.015em] flex h-10 w-full items-center justify-center">MAR</p>
+<p class="text-[#4c8d9a] dark:text-white/60 text-sm font-bold leading-normal tracking-[0.015em] flex h-10 w-full items-center justify-center">MIE</p>
+<p class="text-[#4c8d9a] dark:text-white/60 text-sm font-bold leading-normal tracking-[0.015em] flex h-10 w-full items-center justify-center">JUE</p>
+<p class="text-[#4c8d9a] dark:text-white/60 text-sm font-bold leading-normal tracking-[0.015em] flex h-10 w-full items-center justify-center">VIE</p>
+<p class="text-[#4c8d9a] dark:text-white/60 text-sm font-bold leading-normal tracking-[0.015em] flex h-10 w-full items-center justify-center">SAB</p>
+<div class="h-28 text-gray-400 dark:text-white/30 col-start-3 p-2 text-sm font-medium leading-normal border border-transparent"></div>
+<div class="h-28 text-gray-400 dark:text-white/30 p-2 text-sm font-medium leading-normal border border-transparent"></div>
+<div class="h-28 text-[#0d191b] dark:text-white text-sm font-medium leading-normal rounded-lg hover:bg-primary/10 dark:hover:bg-primary/20 border border-transparent hover:border-primary/50 flex flex-col p-2">3</div>
+<div class="h-28 text-[#0d191b] dark:text-white text-sm font-medium leading-normal rounded-lg hover:bg-primary/10 dark:hover:bg-primary/20 border border-transparent hover:border-primary/50 flex flex-col p-2">4</div>
+<div class="h-28 text-[#0d191b] dark:text-white text-sm font-medium leading-normal rounded-lg hover:bg-primary/10 dark:hover:bg-primary/20 border border-transparent hover:border-primary/50 flex flex-col p-2 bg-primary/20 dark:bg-primary/30">5</div>
+<div class="h-28 text-[#0d191b] dark:text-white text-sm font-medium leading-normal rounded-lg hover:bg-primary/10 dark:hover:bg-primary/20 border border-transparent hover:border-primary/50 flex flex-col p-2">6</div>
+<div class="h-28 text-[#0d191b] dark:text-white text-sm font-medium leading-normal rounded-lg hover:bg-primary/10 dark:hover:bg-primary/20 border border-transparent hover:border-primary/50 flex flex-col p-2">7</div>
+<div class="h-28 text-[#0d191b] dark:text-white text-sm font-medium leading-normal rounded-lg hover:bg-primary/10 dark:hover:bg-primary/20 border border-transparent hover:border-primary/50 flex flex-col p-2">8</div>
+<div class="h-28 text-[#0d191b] dark:text-white text-sm font-medium leading-normal rounded-lg hover:bg-primary/10 dark:hover:bg-primary/20 border border-transparent hover:border-primary/50 flex flex-col p-2">9</div>
+<div class="h-28 text-black dark:text-black text-sm font-medium leading-normal rounded-lg flex flex-col p-2 bg-primary">10 <span class="text-xs mt-1 font-normal line-clamp-3">Día seleccionado para editar. Añade una nota aquí.</span></div>
+<div class="h-28 text-[#0d191b] dark:text-white text-sm font-medium leading-normal rounded-lg hover:bg-primary/10 dark:hover:bg-primary/20 border border-transparent hover:border-primary/50 flex flex-col p-2">11</div>
+<div class="h-28 text-white dark:text-black text-sm font-medium leading-normal rounded-lg flex flex-col p-2 bg-rose-500/20 dark:bg-rose-400/30 text-rose-800 dark:text-rose-100">12 <span class="text-xs mt-1 font-normal line-clamp-3">Evento Privado. No disponible.</span></div>
+<div class="h-28 text-white dark:text-black text-sm font-medium leading-normal rounded-lg flex flex-col p-2 bg-rose-500/20 dark:bg-rose-400/30 text-rose-800 dark:text-rose-100">13 <span class="text-xs mt-1 font-normal line-clamp-3">Bloqueado</span></div>
+<div class="h-28 text-[#0d191b] dark:text-white text-sm font-medium leading-normal rounded-lg flex flex-col p-2 bg-teal-500/10 dark:bg-teal-400/20 text-teal-800 dark:text-teal-100">14</div>
+<div class="h-28 text-[#0d191b] dark:text-white text-sm font-medium leading-normal rounded-lg flex flex-col p-2 bg-teal-500/10 dark:bg-teal-400/20 text-teal-800 dark:text-teal-100">15 <span class="text-xs mt-1 font-normal line-clamp-3">Totalmente disponible</span></div>
+<div class="h-28 text-[#0d191b] dark:text-white text-sm font-medium leading-normal rounded-lg hover:bg-primary/10 dark:hover:bg-primary/20 border border-transparent hover:border-primary/50 flex flex-col p-2">16</div>
+<div class="h-28 text-[#0d191b] dark:text-white text-sm font-medium leading-normal rounded-lg hover:bg-primary/10 dark:hover:bg-primary/20 border border-transparent hover:border-primary/50 flex flex-col p-2">17</div>
+<div class="h-28 text-[#0d191b] dark:text-white text-sm font-medium leading-normal rounded-lg hover:bg-primary/10 dark:hover:bg-primary/20 border border-transparent hover:border-primary/50 flex flex-col p-2">18</div>
+<div class="h-28 text-[#0d191b] dark:text-white text-sm font-medium leading-normal rounded-lg hover:bg-primary/10 dark:hover:bg-primary/20 border border-transparent hover:border-primary/50 flex flex-col p-2">19</div>
+<div class="h-28 text-[#0d191b] dark:text-white text-sm font-medium leading-normal rounded-lg hover:bg-primary/10 dark:hover:bg-primary/20 border border-transparent hover:border-primary/50 flex flex-col p-2">20</div>
+<div class="h-28 text-[#0d191b] dark:text-white text-sm font-medium leading-normal rounded-lg hover:bg-primary/10 dark:hover:bg-primary/20 border border-transparent hover:border-primary/50 flex flex-col p-2">21</div>
+<div class="h-28 text-[#0d191b] dark:text-white text-sm font-medium leading-normal rounded-lg hover:bg-primary/10 dark:hover:bg-primary/20 border border-transparent hover:border-primary/50 flex flex-col p-2">22</div>
+<div class="h-28 text-[#0d191b] dark:text-white text-sm font-medium leading-normal rounded-lg hover:bg-primary/10 dark:hover:bg-primary/20 border border-transparent hover:border-primary/50 flex flex-col p-2">23</div>
+<div class="h-28 text-[#0d191b] dark:text-white text-sm font-medium leading-normal rounded-lg hover:bg-primary/10 dark:hover:bg-primary/20 border border-transparent hover:border-primary/50 flex flex-col p-2">24</div>
+<div class="h-28 text-[#0d191b] dark:text-white text-sm font-medium leading-normal rounded-lg hover:bg-primary/10 dark:hover:bg-primary/20 border border-transparent hover:border-primary/50 flex flex-col p-2">25</div>
+<div class="h-28 text-[#0d191b] dark:text-white text-sm font-medium leading-normal rounded-lg hover:bg-primary/10 dark:hover:bg-primary/20 border border-transparent hover:border-primary/50 flex flex-col p-2">26</div>
+<div class="h-28 text-[#0d191b] dark:text-white text-sm font-medium leading-normal rounded-lg hover:bg-primary/10 dark:hover:bg-primary/20 border border-transparent hover:border-primary/50 flex flex-col p-2">27</div>
+<div class="h-28 text-[#0d191b] dark:text-white text-sm font-medium leading-normal rounded-lg hover:bg-primary/10 dark:hover:bg-primary/20 border border-transparent hover:border-primary/50 flex flex-col p-2">28</div>
+<div class="h-28 text-[#0d191b] dark:text-white text-sm font-medium leading-normal rounded-lg hover:bg-primary/10 dark:hover:bg-primary/20 border border-transparent hover:border-primary/50 flex flex-col p-2">29</div>
+<div class="h-28 text-[#0d191b] dark:text-white text-sm font-medium leading-normal rounded-lg hover:bg-primary/10 dark:hover:bg-primary/20 border border-transparent hover:border-primary/50 flex flex-col p-2">30</div>
+<div class="h-28 text-[#0d191b] dark:text-white text-sm font-medium leading-normal rounded-lg hover:bg-primary/10 dark:hover:bg-primary/20 border border-transparent hover:border-primary/50 flex flex-col p-2">31</div>
+</div>
+</div>
+</div>
+<div class="xl:col-span-1 bg-white dark:bg-[#1A2C2F] rounded-xl shadow-sm border border-[#e7f1f3] dark:border-white/10 p-6 space-y-6 sticky top-24">
+<div class="flex flex-col gap-4">
+<p class="text-base font-bold text-[#0d191b] dark:text-white">Editar Día: 10 de Octubre</p>
+<div class="flex flex-col gap-2">
+<label class="text-sm font-medium text-[#0d191b] dark:text-white" for="status">Estado de disponibilidad</label>
+<div class="flex h-11 items-center justify-center rounded-lg bg-[#e7f1f3] dark:bg-black/20 p-1">
+<label class="flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-md px-2 has-[:checked]:bg-white dark:has-[:checked]:bg-[#101f22] has-[:checked]:shadow-sm has-[:checked]:text-[#0d191b] dark:has-[:checked]:text-white text-[#4c8d9a] dark:text-white/60 text-sm font-medium leading-normal">
+<span class="truncate">Disponible</span>
+<input class="invisible w-0" id="status" name="status" type="radio" value="Disponible"/>
+</label>
+<label class="flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-md px-2 has-[:checked]:bg-white dark:has-[:checked]:bg-[#101f22] has-[:checked]:shadow-sm has-[:checked]:text-[#0d191b] dark:has-[:checked]:text-white text-[#4c8d9a] dark:text-white/60 text-sm font-medium leading-normal">
+<span class="truncate">No Disponible</span>
+<input checked="" class="invisible w-0" name="status" type="radio" value="No Disponible"/>
+</label>
+</div>
+</div>
+<div class="flex flex-col gap-2">
+<label class="text-sm font-medium text-[#0d191b] dark:text-white" for="notes">Añadir una nota (opcional)</label>
+<textarea class="h-28 w-full rounded-lg border border-[#e7f1f3] dark:border-white/10 bg-transparent p-3 text-sm text-[#0d191b] dark:text-white placeholder:text-[#4c8d9a] dark:placeholder:text-white/40 focus:border-primary focus:ring-primary" id="notes" placeholder="Ej: Mantenimiento, evento privado, etc."></textarea>
+</div>
+<div class="flex gap-2">
+<button class="flex min-w-[84px] w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-11 px-5 bg-primary text-black text-sm font-bold leading-normal tracking-[0.015em] hover:bg-opacity-90">
+<span class="truncate">Actualizar Día</span>
+</button>
+<button class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-11 px-5 text-[#4c8d9a] dark:text-white/60 text-sm font-medium leading-normal tracking-[0.015em] hover:text-primary dark:hover:text-primary">
+<span class="truncate">Limpiar</span>
+</button>
+</div>
+</div>
+<div class="border-t border-[#e7f1f3] dark:border-white/10 pt-6 space-y-4">
+<p class="text-base font-bold text-[#0d191b] dark:text-white">Resumen de Disponibilidad</p>
+<div class="space-y-3">
+<div class="flex justify-between items-center bg-teal-500/10 dark:bg-teal-400/20 text-teal-800 dark:text-teal-100 p-3 rounded-lg">
+<div class="flex flex-col">
+<p class="text-sm font-bold">Disponible</p>
+<p class="text-xs font-normal">14 Oct - 25 Nov</p>
+</div>
+<button class="text-teal-800 dark:text-teal-100 hover:text-teal-600 dark:hover:text-teal-300">
+<span class="material-symbols-outlined text-xl">delete</span>
+</button>
+</div>
+<div class="flex justify-between items-center bg-rose-500/10 dark:bg-rose-400/20 text-rose-800 dark:text-rose-100 p-3 rounded-lg">
+<div class="flex flex-col">
+<p class="text-sm font-bold">No Disponible</p>
+<p class="text-xs font-normal">26 Nov - 30 Nov</p>
+</div>
+<button class="text-rose-800 dark:text-rose-100 hover:text-rose-600 dark:hover:text-rose-300">
+<span class="material-symbols-outlined text-xl">delete</span>
+</button>
+</div>
+<div class="flex justify-between items-center bg-teal-500/10 dark:bg-teal-400/20 text-teal-800 dark:text-teal-100 p-3 rounded-lg">
+<div class="flex flex-col">
+<p class="text-sm font-bold">Disponible</p>
+<p class="text-xs font-normal">01 Dic - 20 Dic</p>
+</div>
+<button class="text-teal-800 dark:text-teal-100 hover:text-teal-600 dark:hover:text-teal-300">
+<span class="material-symbols-outlined text-xl">delete</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</div>
+</body></html>

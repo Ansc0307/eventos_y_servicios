@@ -18,7 +18,7 @@ public class SecurityConfig {
     @Bean
     public JwtAuthenticationConverter jwtAuthenticationConverter(@Value("${keycloak.client-id:api-ms}") String clientId) {
         JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
-        converter.setJwtGrantedAuthoritiesConverter(new JwtRoleConverter(clientId));
+        converter.setJwtGrantedAuthoritiesConverter(new JwtRoleConverter());
         return converter;
     }
 
