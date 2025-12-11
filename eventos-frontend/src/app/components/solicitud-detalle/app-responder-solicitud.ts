@@ -106,10 +106,10 @@ export class ResponderSolicitudComponent {
               estado: 'PENDIENTE'
             } as any;
 
-            console.log('[ResponderSolicitud] 🚀 Creando reserva con payload:', JSON.stringify(nuevaReserva, null, 2));
+            console.log('[ResponderSolicitud]  Creando reserva con payload:', JSON.stringify(nuevaReserva, null, 2));
             this.reservasService.create(nuevaReserva).subscribe({
               next: (reservaCreada) => {
-                console.log('[ResponderSolicitud] ✅ Reserva creada exitosamente:', reservaCreada);
+                console.log('[ResponderSolicitud]  Reserva creada exitosamente:', reservaCreada);
                 // Usar el idReserva devuelto por la BD para registrar no disponibilidad
                 const payloadNoDisp: Omit<NoDisponibilidad, 'idNoDisponibilidad'> = {
                   idOferta: this.solicitud!.idOferta,
@@ -119,10 +119,10 @@ export class ResponderSolicitudComponent {
                   idReserva: reservaCreada.idReserva
                 };
 
-                console.log('[ResponderSolicitud] 🚀 Registrando no disponibilidad con payload:', JSON.stringify(payloadNoDisp, null, 2));
+                console.log('[ResponderSolicitud]  Registrando no disponibilidad con payload:', JSON.stringify(payloadNoDisp, null, 2));
                 this.noDispService.create(payloadNoDisp).subscribe({
                   next: () => {
-                    console.log('[ResponderSolicitud] ✅ No disponibilidad registrada correctamente');
+                    console.log('[ResponderSolicitud]  No disponibilidad registrada correctamente');
                     this.success = 'Solicitud aprobada, reserva creada y no disponibilidad registrada';
                     this.updated.emit(solicitudActualizada);
                     this.loading = false;

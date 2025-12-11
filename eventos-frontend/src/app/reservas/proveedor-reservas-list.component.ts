@@ -106,12 +106,12 @@ import { forkJoin } from 'rxjs';
                         {{ getEstadoLabel(reserva.estado) }}
                       </span>
                     </td>
-                    <td class="p-6 text-right space-x-2">
+                    <td class="p-6 text-right space-x-2 flex items-center justify-end">
+                      <button *ngIf="isEditable(reserva.estado)" (click)="abrirEditar(reserva)" class="inline-flex items-center justify-center text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 h-10 w-10 rounded-lg border border-blue-300 dark:border-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
+                        <span class="material-symbols-outlined">edit</span>
+                      </button>
                       <button (click)="verDetalle(reserva)" class="text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary text-sm font-bold py-2 px-4 rounded-lg border border-slate-300 dark:border-slate-700">
                         Ver Detalle
-                      </button>
-                      <button (click)="abrirEditar(reserva)" class="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 text-sm font-bold py-2 px-4 rounded-lg border border-slate-300 dark:border-slate-700">
-                        Editar
                       </button>
                     </td>
                   </tr>
@@ -256,11 +256,11 @@ import { forkJoin } from 'rxjs';
           <div>
             <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Nuevo Estado</label>
             <div class="flex gap-3">
-              <button (click)="nuevoEstado = 'CONFIRMADA'"
+              <button *ngIf="canConfirm(reservaSeleccionada?.estado || '')" (click)="nuevoEstado = 'CONFIRMADA'"
                       [class]="'px-4 py-2 rounded-lg border text-sm font-semibold ' + (nuevoEstado === 'CONFIRMADA' ? 'bg-green-100 border-green-300 text-green-800' : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200')">
                 Confirmada
               </button>
-              <button (click)="nuevoEstado = 'CANCELADA'"
+              <button *ngIf="canCancel(reservaSeleccionada?.estado || '')" (click)="nuevoEstado = 'CANCELADA'"
                       [class]="'px-4 py-2 rounded-lg border text-sm font-semibold ' + (nuevoEstado === 'CANCELADA' ? 'bg-red-100 border-red-300 text-red-800' : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200')">
                 Cancelada
               </button>
@@ -468,8 +468,7 @@ export class ProveedorReservasListComponent implements OnInit {
 
   abrirEditar(reserva: Reserva): void {
     this.reservaSeleccionada = reserva;
-    const upper = (reserva.estado || '').toUpperCase();
-    this.nuevoEstado = upper === 'CONFIRMADA' ? 'CONFIRMADA' : upper === 'CANCELADA' ? 'CANCELADA' : '';
+    this.nuevoEstado = '';
     this.mostrarEditar = true;
   }
 
@@ -477,6 +476,23 @@ export class ProveedorReservasListComponent implements OnInit {
     this.mostrarEditar = false;
     this.nuevoEstado = '';
     this.reservaSeleccionada = null;
+  }
+
+  // Mostrar botón Editar solo para estados PENDIENTE o CONFIRMADA
+  isEditable(estado: string): boolean {
+    const e = (estado || '').toUpperCase();
+    return e === 'PENDIENTE' || e === 'CONFIRMADA';
+  }
+
+  // Permitir confirmar solo cuando está PENDIENTE
+  canConfirm(estado: string): boolean {
+    return (estado || '').toUpperCase() === 'PENDIENTE';
+  }
+
+  // Permitir cancelar cuando está PENDIENTE o CONFIRMADA
+  canCancel(estado: string): boolean {
+    const e = (estado || '').toUpperCase();
+    return e === 'PENDIENTE' || e === 'CONFIRMADA';
   }
 
   guardarEstado(): void {
