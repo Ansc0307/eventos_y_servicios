@@ -19,148 +19,177 @@ interface CalendarDay {
   standalone: true,
   imports: [CommonModule, FormsModule],
   template:  `
-  <div class="max-w-7xl mx-auto flex flex-col gap-8 px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+  <div class="font-display bg-background-light dark:bg-background-dark text-[#18181B] dark:text-gray-200 min-h-screen">
+  <div class="relative flex min-h-screen w-full">
 
-    <!-- ENCABEZADO -->
-    <div class="flex flex-wrap justify-between items-start gap-4">
-
-
-
-    
-      <div class="flex flex-col gap-2">
-        <p class="text-[#0d191b] dark:text-white text-4xl font-black leading-tight tracking-[-0.033em]">Calendario Detallado del Proveedor</p>
-       
-      </div>
-    </div>
-
-    <!-- GRID PRINCIPAL -->
-    <div class="grid grid-cols-1 xl:grid-cols-3 gap-8 items-start">
-
-      <!-- CALENDARIO -->
-      <div class="xl:col-span-2 bg-white dark:bg-[#1A2C2F] rounded-xl shadow-sm border border-[#e7f1f3] p-4 sm:p-6">
-        <div class="flex flex-col">
-
-          <!-- TITULO MES -->
-<div class="flex items-center justify-between pb-4 border-b border-[#e7f1f3] mb-4">
-
-  <!-- Flecha anterior -->
-  <button
-    (click)="prevMonth()"
-    class="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition"
-  >
-    <span class="material-symbols-outlined text-xl">chevron_left</span>
-  </button>
-
-  <!-- Nombre del mes -->
-  <p class="text-[#0d191b] dark:text-white text-xl font-bold">
-    {{ currentMonth | date:'MMMM yyyy' }}
-  </p>
-
-  <!-- Flecha siguiente -->
-  <button
-    (click)="nextMonth()"
-    class="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition"
-  >
-    <span class="material-symbols-outlined text-xl">chevron_right</span>
-  </button>
-
-</div>
-
-
-          <!-- DIAS SEMANA -->
-          <div class="grid grid-cols-7 gap-1">
-            <p *ngFor="let d of weekDays" class="text-[#4c8d9a] text-sm font-bold flex h-10 items-center justify-center">
-              {{ d }}
-            </p>
+    <!-- ✅ ASIDE REUTILIZADO -->
+    <aside class="flex h-screen w-64 flex-col border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 sticky top-0">
+      <div class="flex h-full flex-col justify-between p-4">
+        <div class="flex flex-col gap-4">
+          <div class="flex items-center gap-4 text-slate-900 dark:text-white px-3 py-2">
+            <span class="material-symbols-outlined text-3xl text-primary">hub</span>
+            <h2 class="text-lg font-bold tracking-[-0.015em]">EvenPro</h2>
           </div>
 
-          <!-- DIAS DEL MES -->
-          <div class="grid grid-cols-7 gap-1">
-            <div *ngFor="let day of calendarDays"
-                 (click)="toggleDay(day)"
-                 class="h-28 text-sm font-medium rounded-lg flex flex-col p-2 border border-transparent cursor-pointer"
-                 [ngClass]="{
-                    'bg-primary text-black': day.selected,
-                    'bg-rose-500/20 text-rose-800': day.status==='no-disponible',
-                    'hover:bg-primary/10': day.status==='disponible',
-                    'text-[#0d191b] dark:text-white': day.status!=='no-disponible'
-                 }">
-              {{ day.date.getDate() }}
+          <!-- NAV -->
+          <nav class="flex flex-col gap-2 mt-4">
+            <a (click)="volverDashboard()" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-primary/10 cursor-pointer text-slate-600 dark:text-slate-300">
+                <span class="material-symbols-outlined">dashboard</span>
+                <p class="text-sm font-medium">Dashboard</p>
+              </a>
 
-              <span *ngIf="day.note" class="text-xs mt-1 line-clamp-3">
-                {{ day.note }}
-              </span>
+            <!-- Opción activa -->
+            <div class="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/20">
+              <span class="material-symbols-outlined text-slate-900 dark:text-white">calendar_month</span>
+              <p class="text-slate-900 dark:text-white text-sm font-medium">Calendario</p>
             </div>
-          </div>
-
-        </div>
-      </div>
-
-      <!-- PANEL LATERAL -->
-      <div class="xl:col-span-1 bg-white dark:bg-[#1A2C2F] rounded-xl shadow-sm border border-[#e7f1f3] p-6 space-y-6 sticky top-24">
-
-        <p class="text-base font-bold text-[#0d191b] dark:text-white">Agregar No Disponibilidad</p>
-
-         
-
-        <div class="flex flex-col gap-2">
-          <label class="text-sm font-medium">Motivo de no disponibilidad</label>
-          <textarea [(ngModel)]="noteText" class="h-28 w-full rounded-lg border p-3 text-sm"></textarea>
+          </nav>
         </div>
 
-        <div class="flex gap-2">
-         <button 
-  (click)="guardarSeleccion()" 
-  class="flex min-w-[84px] items-center justify-center overflow-hidden rounded-lg h-10 px-5 bg-primary text-white text-sm font-bold shadow-sm hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-background-dark"
->
-  Actualizar Día
-</button>
-
-
-          <button (click)="limpiar()" class="rounded-lg h-11 px-5 text-[#4c8d9a] hover:text-primary">
-            Limpiar
-          </button>
-        </div>
-
-        <!-- LISTADO DE NO DISPONIBILIDADES -->
-        <div class="pt-4 border-t border-[#e7f1f3]">
-          <p class="text-base font-bold text-[#0d191b] dark:text-white mb-3">
-            No Disponibilidades
-          </p>
-
-          <div *ngIf="noDisponibilidades.length === 0" class="text-sm text-gray-500">
-            No existen días bloqueados.
-          </div>
-
-          <div *ngFor="let nd of noDisponibilidades"
-               class="flex justify-between items-center p-3 rounded-lg mb-2"
-               [ngClass]="{
-                 'bg-rose-500/10 text-rose-800': true
-               }">
+        <!-- PERFIL -->
+        <div class="flex flex-col gap-4">
+          <div class="flex gap-3 items-center">
+            <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10"
+              style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAYQ3Xv_YuY339LzWOL4jYfKwpp_Xk9EQPeGlaPTZUaCbWibigjj_YB-aGxvhwg8F6DZMvP78IzouOQH3-QD04rKwZu0qAV4ksMNwLhpVskYFEt4FmVucm_mFLxLxPTX8hDHUjR_Z9oMgFc_G87oiDiH7JpnVMSiQivqyiCyL3FHFneBsNk31-5d9q8uvRmqI_l6FgX35MdysNRvagVfmucr0CWN1v_HLjU_aiWNcTSeh51R5rwoZnxazDlwLlmCDHhNO9UufJdhm1M');">
+            </div>
 
             <div class="flex flex-col">
-              <p class="text-sm font-bold">No Disponible</p>
-              <p class="text-xs">
-                {{ nd.fechaInicio | date:'dd MMM yyyy' }} - {{ nd.fechaFin | date:'dd MMM yyyy' }}
+              <h1 class="text-slate-900 dark:text-white text-base font-medium">{{ userName }}</h1>
+              <p class="text-primary/80 dark:text-primary/70 text-sm">Proveedor Verificado</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 p-10">
+
+      <!-- HEADER -->
+      <header class="flex items-center justify-between mb-10">
+        <div>
+          <h1 class="text-3xl font-black text-slate-900 dark:text-white">Calendario del Proveedor</h1>
+          <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">Gestiona tus días disponibles</p>
+        </div>
+      </header>
+
+      <!-- EL CALENDARIO ORIGINAL AQUÍ 🔽 -->
+      <div class="max-w-7xl mx-auto flex flex-col gap-8">
+        
+        <!-- CALENDARIO COMPLETO (tu código original) -->
+        <!-- LO PEGO COMPLETO AQUÍ SIN MODIFICAR NADA EXCEPTO EL LAYOUT -->
+
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-8 items-start">
+
+          <!-- CALENDARIO -->
+          <div class="xl:col-span-2 bg-white dark:bg-[#1A2C2F] rounded-xl shadow-sm border border-[#e7f1f3] p-6">
+            
+            <div class="flex items-center justify-between pb-4 border-b border-[#e7f1f3] mb-4">
+
+              <button (click)="prevMonth()" class="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700">
+                <span class="material-symbols-outlined text-xl">chevron_left</span>
+              </button>
+
+              <p class="text-[#0d191b] dark:text-white text-xl font-bold">
+                {{ currentMonth | date:'MMMM yyyy' }}
               </p>
-              <p class="text-xs italic" *ngIf="nd.motivo">{{ nd.motivo }}</p>
+
+              <button (click)="nextMonth()" class="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700">
+                <span class="material-symbols-outlined text-xl">chevron_right</span>
+              </button>
             </div>
 
-            <button (click)="eliminarNoDisponibilidad(nd.idNoDisponibilidad)"
-                    class="hover:text-red-500">
-              <span class="material-symbols-outlined text-xl">delete</span>
-            </button>
+            <!-- DIAS SEMANA -->
+            <div class="grid grid-cols-7 gap-1">
+              <p *ngFor="let d of weekDays"
+                 class="text-[#4c8d9a] text-sm font-bold flex h-10 items-center justify-center">
+                {{ d }}
+              </p>
+            </div>
+
+            <!-- DIAS MES -->
+            <div class="grid grid-cols-7 gap-1">
+              <div *ngFor="let day of calendarDays"
+                   (click)="toggleDay(day)"
+                   class="h-28 text-sm font-medium rounded-lg p-2 cursor-pointer"
+                   [ngClass]="{
+                     'bg-primary text-black': day.selected,
+                     'bg-rose-500/20 text-rose-800': day.status==='no-disponible',
+                     'hover:bg-primary/10': day.status==='disponible',
+                     'text-[#0d191b] dark:text-white': day.status!=='no-disponible'
+                   }">
+                {{ day.date.getDate() }}
+
+                <span *ngIf="day.note" class="text-xs mt-1 block">{{ day.note }}</span>
+              </div>
+            </div>
 
           </div>
+
+          <!-- PANEL LATERAL -->
+          <div class="xl:col-span-1 bg-white dark:bg-[#1A2C2F] rounded-xl shadow-sm border border-[#e7f1f3] p-6 space-y-6 sticky top-24">
+
+            <p class="text-base font-bold">Agregar No Disponibilidad</p>
+
+            <div class="flex flex-col gap-2">
+              <label class="text-sm font-medium">Motivo</label>
+              <textarea [(ngModel)]="noteText"
+                        class="h-28 w-full rounded-lg border p-3 text-sm"></textarea>
+            </div>
+
+            <div class="flex gap-2">
+              <button (click)="guardarSeleccion()"
+                class="h-10 px-5 rounded-lg bg-primary text-white font-bold">
+                Actualizar Día
+              </button>
+
+              <button (click)="limpiar()" class="h-10 px-5 rounded-lg text-primary font-medium">
+                Limpiar
+              </button>
+            </div>
+
+            <div class="pt-4 border-t border-[#e7f1f3]">
+              <p class="font-bold mb-3">No Disponibilidades</p>
+
+              <div *ngIf="noDisponibilidades.length === 0"
+                   class="text-sm text-gray-500">No existen días bloqueados.</div>
+
+              <div *ngFor="let nd of noDisponibilidades"
+                   class="p-3 rounded-lg mb-2 bg-rose-500/10 text-rose-800 flex justify-between">
+
+                <div class="flex flex-col">
+                  <p class="font-bold text-sm">No Disponible</p>
+                  <p class="text-xs">
+                    {{ nd.fechaInicio | date:'dd MMM yyyy' }} -
+                    {{ nd.fechaFin | date:'dd MMM yyyy' }}
+                  </p>
+                  <p class="text-xs italic" *ngIf="nd.motivo">{{ nd.motivo }}</p>
+                </div>
+
+                <button (click)="eliminarNoDisponibilidad(nd.idNoDisponibilidad)">
+                  <span class="material-symbols-outlined text-xl">delete</span>
+                </button>
+
+              </div>
+            </div>
+
+          </div>
+
         </div>
 
       </div>
+    </main>
 
-    </div>
   </div>
+</div>
+
   `,
 })
 export class CalendarioDetalladoComponent implements OnInit {
+  userName: string = '';
+idProveedor = 1;
+  //userName: string = 'Proveedor';
+
 
   noDisponibilidades: NoDisponibilidad[] = [];
   currentMonth: Date = new Date();
@@ -169,15 +198,38 @@ export class CalendarioDetalladoComponent implements OnInit {
   noteText: string = '';
   weekDays = ['DOM','LUN','MAR','MIE','JUE','VIE','SAB'];
 
-  constructor(
+
+constructor(
+    private router: Router,
+    private keycloak: KeycloakService,
     private service: NoDisponibilidadesService,
     private cd: ChangeDetectorRef
   ) {}
+ngOnInit() {
+  try {
+    const tokenParsed = this.keycloak.getKeycloakInstance().tokenParsed;
+    this.userName = tokenParsed?.['preferred_username'] || tokenParsed?.['name'] || 'Proveedor';
 
-  ngOnInit() {
+    // ID fijo o dinámico según tu caso
+    this.idProveedor = 1; 
+
+    // Carga inicial
     this.fetchNoDisponibilidades();
     this.buildCalendar();
+  } catch (err) {
+    console.error('Error al inicializar calendario:', err);
+    this.userName = 'Proveedor';
+    this.noDisponibilidades = [];
+    this.calendarDays = [];
+    this.cd.detectChanges();
   }
+}
+
+
+volverDashboard() {
+  // Más seguro que navigate() con rutas absolutas
+  this.router.navigateByUrl('/dashboard/proveedor');
+}
 
   /** ============================================
    *      CARGAR LISTA Y ORDENAR POR CREACIÓN
