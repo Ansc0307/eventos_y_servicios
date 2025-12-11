@@ -38,8 +38,19 @@ export const routes: Routes = [
     path: 'reservas', 
     component: ReservasListComponent 
   },
-{ path: 'ofertas', component: OfertasPageComponent },
-{ path: 'ofertas/:id', component: OfertaDetalleComponent }
+{
+  path: 'ofertas',
+  children: [
+    { path: '', component: OfertasPageComponent },
+    {
+      path: ':id',
+      loadComponent: () =>
+        import('./pages/oferta-detalle.component').then(m => m.OfertaDetalleComponent)
+    }
+  ]
+}
+
+
 //{ path: 'ofertas/:id', component: OfertaDetailComponent },
 //   { 
 //     path: 'ofertas', 

@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CommonModule, NgIf, NgFor, CurrencyPipe } from '@angular/common';
 import { OfertasService } from '../services/ofertas.service';
+import { ChangeDetectorRef } from '@angular/core';
 
 @Component({
   selector: 'app-oferta-detalle',
@@ -12,7 +13,7 @@ import { OfertasService } from '../services/ofertas.service';
     NgFor,
     CurrencyPipe
   ],
-  templateUrl: 'oferta-detalle.component.html'
+  templateUrl: './oferta-detalle.component.html'
 })
 export class OfertaDetalleComponent implements OnInit {
 
@@ -20,9 +21,10 @@ export class OfertaDetalleComponent implements OnInit {
   images: string[] = [];
 
   constructor(
-    private route: ActivatedRoute,
-    private ofertaService: OfertasService
-  ) {}
+  private route: ActivatedRoute,
+  private ofertaService: OfertasService,
+  private cdr: ChangeDetectorRef
+) {}
 
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
@@ -41,6 +43,7 @@ export class OfertaDetalleComponent implements OnInit {
         else if (data.urlsMedia?.length > 0) {
           this.images = data.urlsMedia;
         }
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error cargando oferta', err);
