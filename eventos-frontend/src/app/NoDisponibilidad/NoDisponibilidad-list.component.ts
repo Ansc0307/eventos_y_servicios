@@ -3,6 +3,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NoDisponibilidadesService } from '../services/no-disponibilidades.service';
 import { ReservasService } from '../services/reservas.service';
+import { RefreshService } from '../services/refresh.service';
 import { NoDisponibilidad } from '../models/NoDisponibilidad.model';
 import { Reserva } from '../models/reserva.model';
 import { ChangeDetectorRef } from '@angular/core';
@@ -159,12 +160,21 @@ export class NoDisponibilidadesListComponent implements OnInit {
   constructor(
     private service: NoDisponibilidadesService,
     private reservasService: ReservasService,
+    private refreshService: RefreshService,
     private cd: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
     this.fetch();
     this.cargarReservas();
+    // Suscribirse a cambios de solicitudes y reservas desde otros componentes
+    this.refreshService.solicitudesRefresh$.subscribe(() => {
+      console.log('[NoDisponibilidadesList] Recibida notificación de cambio en solicitudes');
+    });
+    this.refreshService.reservasRefresh$.subscribe(() => {
+      console.log('[NoDisponibilidadesList] Recibida notificación de cambio en reservas, recargando...');
+      this.cargarReservas();
+    });
   }
 
   cargarReservas() {
@@ -291,7 +301,9 @@ export class NoDisponibilidadesListComponent implements OnInit {
         this.successMessage = `✓ No disponibilidad creada exitosamente (ID: ${data.idNoDisponibilidad})`;
         this.limpiarFormulario();
         this.loadingCreate = false;
-        this.fetch(); // Recargar lista
+        this.fetch(); // Recargar lista de no disponibilidades
+        this.cargarReservas(); // Actualizar lista de reservas en el dropdown
+        this.refreshService.notificaNoDisponibilidadesChanged(); // Notificar a otros componentes
         try { this.cd.detectChanges(); } catch (e) { /* noop */ }
         setTimeout(() => {
           this.successMessage = null;

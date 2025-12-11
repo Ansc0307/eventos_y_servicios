@@ -1,15 +1,24 @@
 import { Routes } from '@angular/router';
 import { DashboardComponent } from './dashboard/dashboard.component';
+import { RoleDashboardComponent } from './dashboard/role-dashboard.component';
+import { OrganizadorDashboardComponent } from './dashboard/organizador-dashboard.component';
+import { ProveedorDashboardComponent } from './dashboard/proveedor-dashboard.component';
 //para notificaciones
 import { NotificacionesMainComponent } from './components/notifications/notificaciones-main/notificaciones-main.component';
 import { PrioridadesListComponent } from './components/notifications/prioridades-list/prioridades-list.component';
 import { TiposListComponent } from './components/notifications/tipos-list/tipos-list.component';
 import { NotificacionesListComponent } from './components/notifications/notificaciones-list/notificaciones-list.component';
 import { ReservasListComponent } from './reservas/reservas-list.component';
+import { ProveedorReservasListComponent } from './reservas/proveedor-reservas-list.component';
 
 export const routes: Routes = [
-  { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
-  { path: 'dashboard', component: DashboardComponent },
+  { path: '', component: RoleDashboardComponent },
+  { path: 'dashboard', component: RoleDashboardComponent },
+  { path: 'dashboard/organizador', component: OrganizadorDashboardComponent },
+  { path: 'dashboard/proveedor', component: ProveedorDashboardComponent },
+  { path: 'proveedor/reservas', component: ProveedorReservasListComponent },
+  // Ruta legacy previa
+  { path: 'dashboard/legacy', component: DashboardComponent },
 
   //rutas para notificaciones
   // Ruta principal de notificaciones

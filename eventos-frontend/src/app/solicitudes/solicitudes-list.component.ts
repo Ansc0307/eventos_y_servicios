@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SolicitudesService } from '../services/solicitudes.service';
+import { RefreshService } from '../services/refresh.service';
 import { Solicitud } from '../models/solicitud.model';
 import { ChangeDetectorRef } from '@angular/core';
 
@@ -52,6 +53,38 @@ import { ChangeDetectorRef } from '@angular/core';
         <div *ngIf="!loading && !solicitud" class="empty">Introduce un ID y pulsa Buscar para ver una solicitud.</div>
       </div>
 
+      <!-- Sección de listado de solicitudes -->
+      <div class="section-separator">
+        <h3>Listado de Solicitudes</h3>
+        <div *ngIf="loadingList">Cargando solicitudes...</div>
+        <div *ngIf="errorList" class="error">Error cargando solicitudes: {{ errorList }}</div>
+        <div class="table-container">
+          <table *ngIf="solicitudes?.length" class="tabla">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Fecha</th>
+                <th>Estado</th>
+                <th>Organizador</th>
+                <th>Proveedor</th>
+                <th>Oferta</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let s of solicitudes">
+                <td>{{ s.idSolicitud }}</td>
+                <td>{{ s.fechaSolicitud | date:'short' }}</td>
+                <td>{{ s.estadoSolicitud }}</td>
+                <td>{{ s.idOrganizador }}</td>
+                <td>{{ s.idProovedor }}</td>
+                <td>{{ s.idOferta }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div *ngIf="!loadingList && (!solicitudes || solicitudes.length === 0)">No hay solicitudes.</div>
+      </div>
+
       <!-- Sección de creación de solicitud -->
       <div class="section-separator">
         <h3>Crear Nueva Solicitud</h3>
@@ -95,24 +128,34 @@ import { ChangeDetectorRef } from '@angular/core';
   styles: [
     `
       .solicitudes { margin-top: 1rem; }
-      .section-separator { margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 2px solid #e0e0e0; }
-      .section-separator:last-child { border-bottom: none; }
-      .section-separator h3 { margin: 0 0 1rem 0; color: #333; }
-      .tabla { width: 100%; border-collapse: collapse; margin-top: 0.75rem }
-      th, td { padding: 8px 12px; border: 1px solid #e0e0e0; text-align: left; }
-      .error { color: #9b1c1c; background: #fee; padding: 8px; border-radius: 4px; margin: 8px 0; }
+      .section-separator { margin-bottom: 1.25rem; padding-bottom: 1rem; border-bottom: 1px solid #e6e6e6; }
+      .section-separator h3 { margin: 0 0 0.75rem 0; color: #2b2b2b; font-size: 1rem; }
+      .table-container { width: 100%; overflow-x: auto; }
+      .tabla { width: 100%; border-collapse: collapse; margin-top: 0.5rem; table-layout: auto; }
+      th, td { padding: 6px 8px; border: 1px solid #ececec; text-align: left; font-size: 0.92rem; white-space: normal; word-break: break-word; min-width: 0; }
+      thead th { background: #fafafa; font-weight: 700; }
+      .error { color: #9b1c1c; background: #fff6f6; padding: 8px; border-radius: 4px; margin: 8px 0; }
       .success { color: #15803d; background: #efe; padding: 8px; border-radius: 4px; margin: 8px 0; }
       .info { color: #1e40af; background: #eff; padding: 8px; border-radius: 4px; margin: 8px 0; }
-      .btn { background: #7c3aed; color: white; padding:8px 12px; border-radius:6px; border:none; cursor:pointer; font-weight: 600; }
+      .btn { background: #6d28d9; color: white; padding: 6px 10px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; font-size: 0.92rem; }
       .btn:disabled { opacity: 0.6; cursor: not-allowed; }
-      .btn.secondary { background: transparent; border:1px solid #ddd; color: #333 }
-      .form { display: flex; flex-direction: column; gap: 1rem; }
-      .form-group { display: flex; flex-direction: column; gap: 0.5rem; }
+      .btn.secondary { background: transparent; border: 1px solid #ddd; color: #333; padding: 5px 9px; }
+      .form { display: flex; flex-direction: column; gap: 0.75rem; max-width: 1100px; }
+      .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+      .form-group.wide { grid-column: 1 / -1; }
       .form-group label { font-weight: 600; color: #333; }
-      .form-group input, .form-group select { padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 0.95rem; }
-      .form-group input:focus, .form-group select:focus { outline: none; border-color: #7c3aed; box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1); }
+      .form-group input, .form-group select { width: 100%; box-sizing: border-box; padding: 8px 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 0.95rem; }
+      .form-group input:focus, .form-group select:focus { outline: none; border-color: #6d28d9; box-shadow: 0 0 0 4px rgba(109,40,217,0.08); }
       .controls { display:flex; gap:8px; align-items:center; margin-bottom:0.75rem; }
       .empty { color: #999; font-style: italic; }
+      .form-actions { display:flex; gap:0.5rem; align-items:center; }
+      @media (min-width: 900px) {
+        .form { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+        .form .form-actions { grid-column: 1 / -1; }
+      }
+      @media (min-width: 1400px) {
+        .form { grid-template-columns: repeat(2, 1fr); }
+      }
     `
   ]
 })
@@ -121,6 +164,11 @@ export class SolicitudesListComponent {
   solicitud: Solicitud | null = null;
   loading = false;
   error: string | null = null;
+
+  // Propiedades para listado completo
+  solicitudes: Solicitud[] = [];
+  loadingList = false;
+  errorList: string | null = null;
 
   // Propiedades para crear solicitud
   nuevaSolicitud = {
@@ -133,7 +181,31 @@ export class SolicitudesListComponent {
   errorCreate: string | null = null;
   successMessage: string | null = null;
 
-  constructor(private service: SolicitudesService, private cd: ChangeDetectorRef) {}
+  constructor(private service: SolicitudesService, private refreshService: RefreshService, private cd: ChangeDetectorRef) {}
+
+  ngOnInit() {
+    this.fetchAll();
+  }
+
+  fetchAll() {
+    console.log('[SolicitudesList] fetchAll: iniciando petición de solicitudes');
+    this.loadingList = true;
+    this.errorList = null;
+    this.service.getAll().subscribe({
+      next: (data) => {
+        console.log('[SolicitudesList] fetchAll: solicitudes recibidas', data);
+        this.solicitudes = data || [];
+        this.loadingList = false;
+        try { this.cd.detectChanges(); } catch (e) { /* noop */ }
+      },
+      error: (err) => {
+        console.error('[SolicitudesList] fetchAll error', err);
+        this.errorList = err?.message || 'Error desconocido';
+        this.loadingList = false;
+        try { this.cd.detectChanges(); } catch (e) { /* noop */ }
+      }
+    });
+  }
 
   buscarPorId() {
     if (!this.solicitudId) return;
@@ -183,6 +255,8 @@ export class SolicitudesListComponent {
         this.successMessage = `✓ Solicitud creada exitosamente (ID: ${data.idSolicitud})`;
         this.limpiarFormulario();
         this.loadingCreate = false;
+        this.fetchAll(); // Recargar listado completo de solicitudes
+        this.refreshService.notificaSolicitudesChanged(); // Notificar a otros componentes que cambió solicitudes
         try { this.cd.detectChanges(); } catch(e) {}
         // Limpiar mensaje después de 3 segundos
         setTimeout(() => {
