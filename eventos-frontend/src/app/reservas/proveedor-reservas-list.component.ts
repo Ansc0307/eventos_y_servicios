@@ -167,14 +167,7 @@ import { forkJoin } from 'rxjs';
                   <p class="text-sm font-semibold text-slate-500 dark:text-slate-400">Fecha de Fin</p>
                   <p class="text-base text-slate-900 dark:text-white">{{ formatDateLong(reservaSeleccionada.fechaReservaFin) }}</p>
                 </div>
-                <div *ngIf="reservaSeleccionada.montoTotal">
-                  <p class="text-sm font-semibold text-slate-500 dark:text-slate-400">Monto Total</p>
-                  <p class="text-base text-slate-900 dark:text-white">\${{ reservaSeleccionada.montoTotal.toLocaleString() }}</p>
-                </div>
-                <div *ngIf="reservaSeleccionada.metodoPago">
-                  <p class="text-sm font-semibold text-slate-500 dark:text-slate-400">Método de Pago</p>
-                  <p class="text-base text-slate-900 dark:text-white">{{ reservaSeleccionada.metodoPago }}</p>
-                </div>
+                
               </div>
             </div>
 
