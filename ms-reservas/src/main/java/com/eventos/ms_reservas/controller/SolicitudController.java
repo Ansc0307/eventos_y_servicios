@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -48,7 +49,7 @@ public class SolicitudController {
         @ApiResponse(responseCode = "403", description = "Prohibido. Solo ORGANIZADOR o ADMIN pueden crear solicitudes")
     })
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN','ORGANIZADOR')")
+    @PreAuthorize("hasAnyRole('ADMIN','PROVEEDOR','ORGANIZADOR')")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<SolicitudDTO> crear(@Valid @RequestBody SolicitudDTO dto) {
         SolicitudDTO creada = solicitudService.crearSolicitud(dto);
@@ -110,7 +111,7 @@ public class SolicitudController {
         @ApiResponse(responseCode = "401", description = "No autenticado")
     })
     @GetMapping("/organizador/{idOrganizador}")
-    @PreAuthorize("hasAnyRole('ADMIN','ORGANIZADOR')")
+    @PreAuthorize("hasAnyRole('ADMIN','PROVEEDOR','ORGANIZADOR')")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<List<SolicitudDTO>> obtenerPorOrganizador(
         @Parameter(description = "ID del organizador", example = "101") 
@@ -126,7 +127,7 @@ public class SolicitudController {
         @ApiResponse(responseCode = "401", description = "No autenticado")
     })
     @GetMapping("/proveedor/{idProveedor}")
-    @PreAuthorize("hasAnyRole('ADMIN','PROVEEDOR')")
+    @PreAuthorize("hasAnyRole('ADMIN','PROVEEDOR','PROVEEDOR')")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<List<SolicitudDTO>> obtenerPorProveedor(
         @Parameter(description = "ID del proveedor", example = "202") 
@@ -202,6 +203,20 @@ public class SolicitudController {
         return ResponseEntity.ok(existe);
     }
 
+    @PatchMapping("/{id}/estado")
+@PreAuthorize("hasAnyRole('ADMIN','PROVEEDOR')")
+@SecurityRequirement(name = "bearerAuth")
+public ResponseEntity<SolicitudDTO> actualizarEstado(
+        @PathVariable Integer id,
+        @RequestParam String estado
+) {
+    SolicitudDTO dto = solicitudService.actualizarEstado(id, estado)
+            .orElseThrow(() -> new RuntimeException("Solicitud no encontrada con ID: " + id));
+
+    return ResponseEntity.ok(dto);
+}
+
+
     // --- Obtener reserva asociada ---
     @Operation(summary = "Obtener reserva de una solicitud", description = "Obtiene la reserva asociada a una solicitud")
     @ApiResponses(value = {
@@ -246,7 +261,7 @@ public class SolicitudController {
         @ApiResponse(responseCode = "403", description = "Solo ADMIN puede eliminar solicitudes")
     })
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','PROVEEDOR','ORGANIZADOR')")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<Void> eliminar(
         @Parameter(description = "ID de la solicitud", example = "1") 

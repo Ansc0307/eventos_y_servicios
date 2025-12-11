@@ -7,11 +7,14 @@ import { ReservasService } from '../services/reservas.service';
 import { Solicitud } from '../models/solicitud.model';
 import { Reserva } from '../models/reserva.model';
 import { forkJoin } from 'rxjs';
+import { SolicitudDetalleComponent } from '../components/solicitud-detalle/solicitud-detalle.component';
+
 
 @Component({
   selector: 'app-proveedor-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, SolicitudDetalleComponent],
+
   template: `
   <div class="font-display bg-background-light dark:bg-background-dark text-[#18181B] dark:text-gray-200 min-h-screen">
     <div class="relative flex h-auto min-h-screen w-full flex-col bg-background-light dark:bg-background-dark overflow-x-hidden">
@@ -165,7 +168,13 @@ import { forkJoin } from 'rxjs';
                         </span>
                       </td>
                       <td class="p-6 text-right space-x-2">
-                        <button class="text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary text-sm font-bold py-2 px-4 rounded-lg border border-slate-300 dark:border-slate-700">Ver Detalle</button>
+                        <button 
+  (click)="verDetalle(solicitud)"
+  class="text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary text-sm font-bold py-2 px-4 rounded-lg border border-slate-300 dark:border-slate-700">
+  Ver Detalle
+</button>
+
+
                         <button class="bg-primary/90 hover:bg-primary text-white text-sm font-bold py-2 px-4 rounded-lg">Responder</button>
                       </td>
                     </tr>
@@ -225,6 +234,12 @@ import { forkJoin } from 'rxjs';
       </div>
     </div>
   </div>
+  <app-solicitud-detalle 
+  *ngIf="modalVisible" 
+  [solicitud]="selectedSolicitud" 
+  (close)="cerrarModal()">
+</app-solicitud-detalle>
+
   `
 })
 export class ProveedorDashboardComponent implements OnInit {
@@ -304,7 +319,8 @@ export class ProveedorDashboardComponent implements OnInit {
 
       // Cargar solicitudes del proveedor
       console.log('Cargando solicitudes para proveedor:', this.idProveedor);
-      this.solicitudesService.getByProveedor(this.idProveedor).subscribe({
+      //this.solicitudesService.getByProveedor(this.idProveedor).subscribe({
+        this.solicitudesService.getAll().subscribe({
         next: (solicitudes) => {
           console.log('Solicitudes recibidas:', solicitudes);
           this.solicitudes = solicitudes;
@@ -393,4 +409,20 @@ export class ProveedorDashboardComponent implements OnInit {
       year: 'numeric'
     });
   }
+
+  // Modal
+modalVisible = false;
+selectedSolicitud: Solicitud | null = null;
+
+verDetalle(solicitud: Solicitud) {
+  this.selectedSolicitud = solicitud;
+  this.modalVisible = true;
+}
+
+cerrarModal() {
+  this.modalVisible = false;
+  this.selectedSolicitud = null;
+}
+
+
 }

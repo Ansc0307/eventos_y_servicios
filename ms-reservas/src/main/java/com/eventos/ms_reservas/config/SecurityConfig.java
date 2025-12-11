@@ -51,19 +51,21 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/v1/reservas/**", "/solicitudes/**", "/no-disponibilidades/**").authenticated()
 
                 // Crear reservas: ORGANIZADOR o ADMIN
-                .requestMatchers(HttpMethod.POST, "/v1/reservas/**").hasAnyRole("ORGANIZADOR", "ADMIN")
+                .requestMatchers(HttpMethod.POST, "/v1/reservas/**").hasAnyRole("ORGANIZADOR", "ADMIN","PROVEEDOR" )
 
                 // Crear solicitudes: ORGANIZADOR o ADMIN
-                .requestMatchers(HttpMethod.POST, "/solicitudes/**").hasAnyRole("ORGANIZADOR", "ADMIN")
+                .requestMatchers(HttpMethod.POST, "/solicitudes/**").hasAnyRole("ORGANIZADOR", "ADMIN","PROVEEDOR")
 
                 // Crear no disponibilidades: solo ADMIN
-                .requestMatchers(HttpMethod.POST, "/no-disponibilidades/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.POST, "/no-disponibilidades/**").hasAnyRole("ADMIN","PROVEEDOR")
 
+                .requestMatchers(HttpMethod.PATCH, "/solicitudes/**")
+    .hasAnyRole("ADMIN","PROVEEDOR")
                 // Eliminar recursos (ADMIN u ORGANIZADOR)
-                .requestMatchers(HttpMethod.DELETE, "/v1/reservas/**", "/solicitudes/**").hasAnyRole("ADMIN", "ORGANIZADOR")
+                .requestMatchers(HttpMethod.DELETE, "/v1/reservas/**", "/solicitudes/**").hasAnyRole("ADMIN","PROVEEDOR", "ORGANIZADOR")
 
                 // Eliminar no disponibilidad (solo ADMIN)
-                .requestMatchers(HttpMethod.DELETE, "/no-disponibilidades/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/no-disponibilidades/**").hasAnyRole("ADMIN","PROVEEDOR")
 
                 // Cualquier otra petición autenticada
                 .anyRequest().authenticated()

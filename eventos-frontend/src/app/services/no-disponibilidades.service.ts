@@ -6,7 +6,7 @@ import { NoDisponibilidad } from '../models/NoDisponibilidad.model';
 @Injectable({ providedIn: 'root' })
 export class NoDisponibilidadesService {
   // use the frontend proxy: /api -> http://localhost:8080/ms-reservas
-  private readonly base = '/api/no-disponibilidades';
+  private readonly base = '/ms-reservas/no-disponibilidades';
 
   constructor(private http: HttpClient) {}
 

@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,9 +31,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import org.springframework.security.access.prepost.PreAuthorize;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
 @Tag(name = "Reservas", description = "Operaciones relacionadas con las reservas de eventos")
@@ -76,7 +76,7 @@ public class ReservaController {
             @ApiResponse(responseCode = "404", description = "La solicitud asociada no existe")
     })
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN','ORGANIZADOR') or hasAuthority('SCOPE_reservas.write')")
+    @PreAuthorize("hasAnyRole('ADMIN','PROVEEDOR','ORGANIZADOR') or hasAuthority('SCOPE_reservas.write')")
     public ResponseEntity<ReservaDTO> crearReserva(@Valid @RequestBody ReservaDTO reservaDTO) {
         Reserva reserva = ReservaMapper.toEntity(reservaDTO);
         Reserva saved = reservaService.save(reserva);
@@ -92,7 +92,7 @@ public class ReservaController {
             @ApiResponse(responseCode = "404", description = "Reserva no encontrada")
     })
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN','ORGANIZADOR') or hasAuthority('SCOPE_reservas.write')")
+    @PreAuthorize("hasAnyRole('ADMIN','PROVEEDOR','ORGANIZADOR') or hasAuthority('SCOPE_reservas.write')")
     public ResponseEntity<ReservaDTO> actualizarReserva(
             @PathVariable Integer id,
             @Valid @RequestBody ReservaDTO reservaDTO) {
@@ -115,7 +115,7 @@ public class ReservaController {
             @ApiResponse(responseCode = "404", description = "Reserva no encontrada")
     })
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN','ORGANIZADOR')")
+    @PreAuthorize("hasAnyRole('ADMIN','PROVEEDOR','ORGANIZADOR')")
     public ResponseEntity<Void> eliminarReserva(@PathVariable Integer id) {
         boolean deleted = reservaService.delete(id);
         if (!deleted)

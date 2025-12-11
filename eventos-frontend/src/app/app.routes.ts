@@ -9,6 +9,8 @@ import { PrioridadesListComponent } from './components/notifications/prioridades
 import { TiposListComponent } from './components/notifications/tipos-list/tipos-list.component';
 import { NotificacionesListComponent } from './components/notifications/notificaciones-list/notificaciones-list.component';
 import { ReservasListComponent } from './reservas/reservas-list.component';
+import { SolicitudesListComponent } from './solicitudes/solicitudes-list.component';
+import { NoDisponibilidadesListComponent } from './NoDisponibilidad/NoDisponibilidad-list.component';
 import { ProveedorReservasListComponent } from './reservas/proveedor-reservas-list.component';
 
 export const routes: Routes = [
@@ -35,6 +37,17 @@ export const routes: Routes = [
     path: 'reservas', 
     component: ReservasListComponent 
   },
+
+    { 
+    path: 'solicitudes', 
+    component: SolicitudesListComponent 
+  },
+
+{ 
+    path: 'no-disponibilidades', 
+    component: NoDisponibilidadesListComponent 
+  },
+
   { path: 'ofertas', loadComponent: () => import('./ofertas/oferta-list.component').then(m => m.OfertaListComponent) },
 //   { 
 //     path: 'ofertas', 

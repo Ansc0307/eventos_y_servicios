@@ -53,7 +53,7 @@ public class NoDisponibilidadController {
         @ApiResponse(responseCode = "403", description = "Prohibido. Solo ORGANIZADOR o ADMIN pueden crear registros")
     })
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN','ORGANIZADOR')")
+    @PreAuthorize("hasAnyRole('ADMIN','PROVEEDOR','ORGANIZADOR')")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<NoDisponibilidadDTO> crear(
             @Valid @RequestBody NoDisponibilidadDTO dto) {
@@ -134,7 +134,7 @@ public class NoDisponibilidadController {
         @ApiResponse(responseCode = "404", description = "No disponibilidad no encontrada")
     })
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN','ORGANIZADOR')")
+    @PreAuthorize("hasAnyRole('ADMIN','PROVEEDOR','ORGANIZADOR')")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<NoDisponibilidadDTO> actualizar(
             @Parameter(description = "ID de la no disponibilidad", example = "1") @PathVariable Integer id,
@@ -154,7 +154,7 @@ public class NoDisponibilidadController {
         @ApiResponse(responseCode = "404", description = "No disponibilidad no encontrada")
     })
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN','ORGANIZADOR')")
+    @PreAuthorize("hasAnyRole('ADMIN','PROVEEDOR','ORGANIZADOR')")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<Void> eliminar(
             @Parameter(description = "ID de la no disponibilidad", example = "1", required = true)

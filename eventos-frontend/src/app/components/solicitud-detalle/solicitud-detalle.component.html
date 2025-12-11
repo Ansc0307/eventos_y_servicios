@@ -1,0 +1,14 @@
+<div *ngIf="visible" class="modal-container">
+  <div class="modal">
+    <h2>Detalle de Solicitud</h2>
+
+    <p><strong>ID:</strong> {{ solicitud?.idSolicitud }}</p>
+    <p><strong>Fecha:</strong> {{ solicitud?.fechaSolicitud | date:'short' }}</p>
+    <p><strong>Estado:</strong> {{ solicitud?.estadoSolicitud }}</p>
+    <p><strong>Organizador:</strong> {{ solicitud?.idOrganizador }}</p>
+    <p><strong>Proveedor:</strong> {{ solicitud?.idProovedor }}</p>
+    <p><strong>Oferta:</strong> {{ solicitud?.idOferta }}</p>
+
+    <button (click)="cerrar()">Cerrar</button>
+  </div>
+</div>

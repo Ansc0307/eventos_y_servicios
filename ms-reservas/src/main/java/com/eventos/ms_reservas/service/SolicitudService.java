@@ -64,6 +64,16 @@ public class SolicitudService {
 
     // NUEVOS MÉTODOS
 
+    public Optional<SolicitudDTO> actualizarEstado(Integer id, String nuevoEstado) {
+    return solicitudRepository.findById(id)
+            .map(solicitud -> {
+                solicitud.setEstadoSolicitud(nuevoEstado);
+                Solicitud actualizada = solicitudRepository.save(solicitud);
+                return SolicitudMapper.toDTO(actualizada);
+            });
+}
+
+
     public List<SolicitudDTO> obtenerPorEstado(String estado) {
         return solicitudRepository.findByEstadoSolicitud(estado)
                 .stream()
