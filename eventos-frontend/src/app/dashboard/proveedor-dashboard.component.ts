@@ -8,14 +8,13 @@ import { Solicitud } from '../models/solicitud.model';
 import { Reserva } from '../models/reserva.model';
 import { forkJoin } from 'rxjs';
 import { SolicitudDetalleComponent } from '../components/solicitud-detalle/solicitud-detalle.component';
-import { ReservaDetalleComponent } from '../components/reservas-detalle/reservas-detalle.component';
 import { ResponderSolicitudComponent } from '../components/solicitud-detalle/app-responder-solicitud';
 
 
 @Component({
   selector: 'app-proveedor-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, SolicitudDetalleComponent,ResponderSolicitudComponent,ReservaDetalleComponent],
+  imports: [CommonModule, RouterLink, SolicitudDetalleComponent, ResponderSolicitudComponent],
 
   template: `
   <div class="font-display bg-background-light dark:bg-background-dark text-[#18181B] dark:text-gray-200 min-h-screen">
@@ -223,12 +222,11 @@ import { ResponderSolicitudComponent } from '../components/solicitud-detalle/app
                       </td>
                       <td class="p-6 text-right space-x-2">
                         <td class="p-6 text-right space-x-2">
-  <button 
-    (click)="verDetalleReserva(reserva)"
-    class="text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary text-sm font-bold py-2 px-4 rounded-lg border border-slate-300 dark:border-slate-700">
-    Ver Detalle
-  </button>
-
+                          <button 
+                            (click)="verDetalleReserva(reserva)"
+                            class="text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary text-sm font-bold py-2 px-4 rounded-lg border border-slate-300 dark:border-slate-700">
+                            Ver Detalle
+                          </button>
                         </td>
                     </tr>
                   </tbody>
@@ -263,11 +261,112 @@ import { ResponderSolicitudComponent } from '../components/solicitud-detalle/app
 </app-responder-solicitud>
 
 
-<app-reserva-detalle
-  *ngIf="modalReservaVisible"
-  [reserva]="selectedReserva"
-  (close)="cerrarReservaModal()">
-</app-reserva-detalle>
+  <!-- Modal de Detalle (mismo estilo que reservas list) -->
+  <div *ngIf="mostrarModal" (click)="cerrarModalReserva()" 
+       class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div (click)="$event.stopPropagation()" 
+         class="bg-white dark:bg-slate-900 rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+      <!-- Header -->
+      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-primary/5">
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-3xl text-primary">event_note</span>
+          <div>
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Detalle de Reserva</h2>
+            <p class="text-sm text-slate-500 dark:text-slate-400">Información completa</p>
+          </div>
+        </div>
+        <button (click)="cerrarModalReserva()" 
+                class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
+          <span class="material-symbols-outlined text-slate-600 dark:text-slate-300">close</span>
+        </button>
+      </div>
+
+      <!-- Content -->
+      <div class="flex-1 overflow-y-auto p-6">
+        <div *ngIf="reservaSeleccionada && solicitudSeleccionada" class="space-y-6">
+          <!-- Información de la Reserva -->
+          <div class="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-6 border border-slate-200 dark:border-slate-700">
+            <div class="flex items-center gap-2 mb-4">
+              <span class="material-symbols-outlined text-primary">event</span>
+              <h3 class="text-xl font-bold text-slate-900 dark:text-white">Información de la Reserva</h3>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <p class="text-sm font-semibold text-slate-500 dark:text-slate-400">ID Reserva</p>
+                <p class="text-base text-slate-900 dark:text-white">#{{ reservaSeleccionada.idReserva }}</p>
+              </div>
+              <div>
+                <p class="text-sm font-semibold text-slate-500 dark:text-slate-400">Estado</p>
+                <span [class]="'inline-flex items-center px-3 py-1 rounded-full text-sm font-medium mt-1 ' + getEstadoClass(reservaSeleccionada.estado)">
+                  {{ getEstadoLabel(reservaSeleccionada.estado) }}
+                </span>
+              </div>
+              <div>
+                <p class="text-sm font-semibold text-slate-500 dark:text-slate-400">Fecha de Inicio</p>
+                <p class="text-base text-slate-900 dark:text-white">{{ formatDateLong(reservaSeleccionada.fechaReservaInicio) }}</p>
+              </div>
+              <div>
+                <p class="text-sm font-semibold text-slate-500 dark:text-slate-400">Fecha de Fin</p>
+                <p class="text-base text-slate-900 dark:text-white">{{ formatDateLong(reservaSeleccionada.fechaReservaFin) }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Información de la Solicitud -->
+          <div class="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-6 border border-slate-200 dark:border-slate-700">
+            <div class="flex items-center gap-2 mb-4">
+              <span class="material-symbols-outlined text-primary">description</span>
+              <h3 class="text-xl font-bold text-slate-900 dark:text-white">Información de la Solicitud</h3>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <p class="text-sm font-semibold text-slate-500 dark:text-slate-400">ID Solicitud</p>
+                <p class="text-base text-slate-900 dark:text-white">#{{ solicitudSeleccionada.idSolicitud }}</p>
+              </div>
+              <div>
+                <p class="text-sm font-semibold text-slate-500 dark:text-slate-400">Estado Solicitud</p>
+                <span [class]="'inline-flex items-center px-3 py-1 rounded-full text-sm font-medium mt-1 ' + getEstadoClass(solicitudSeleccionada.estadoSolicitud)">
+                  {{ getEstadoLabel(solicitudSeleccionada.estadoSolicitud) }}
+                </span>
+              </div>
+              <div>
+                <p class="text-sm font-semibold text-slate-500 dark:text-slate-400">Fecha de Solicitud</p>
+                <p class="text-base text-slate-900 dark:text-white">{{ formatDateLong(solicitudSeleccionada.fechaSolicitud) }}</p>
+              </div>
+              <div>
+                <p class="text-sm font-semibold text-slate-500 dark:text-slate-400">ID Organizador</p>
+                <p class="text-base text-slate-900 dark:text-white">#{{ solicitudSeleccionada.idOrganizador }}</p>
+              </div>
+              <div>
+                <p class="text-sm font-semibold text-slate-500 dark:text-slate-400">ID Proveedor</p>
+                <p class="text-base text-slate-900 dark:text-white">#{{ solicitudSeleccionada.idProovedor }}</p>
+              </div>
+              <div>
+                <p class="text-sm font-semibold text-slate-500 dark:text-slate-400">ID Oferta</p>
+                <p class="text-base text-slate-900 dark:text-white">#{{ solicitudSeleccionada.idOferta }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Loading del modal -->
+        <div *ngIf="loadingDetalle" class="flex items-center justify-center py-12">
+          <div class="text-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+            <p class="mt-4 text-gray-600 dark:text-gray-400">Cargando detalles...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/30">
+        <button (click)="cerrarModalReserva()" 
+                class="px-6 py-2.5 rounded-lg text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 font-semibold transition-colors">
+          Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
 
   `
 })
@@ -441,6 +540,17 @@ export class ProveedorDashboardComponent implements OnInit {
     });
   }
 
+  formatDateLong(dateString: string): string {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('es-ES', {
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+
   // Modal
 modalVisible = false;
 selectedSolicitud: Solicitud | null = null;
@@ -474,20 +584,38 @@ actualizarSolicitud(solicitudActualizada: Solicitud) {
   if (index !== -1) this.solicitudes[index] = solicitudActualizada;
 }
 
-// Variables del modal de reservas
-modalReservaVisible = false;
-selectedReserva: Reserva | null = null;
+// Modal reservas con solicitud (mismo estilo que lista)
+mostrarModal = false;
+loadingDetalle = false;
+reservaSeleccionada: Reserva | null = null;
+solicitudSeleccionada: Solicitud | null = null;
 
-// Método para abrir modal
 verDetalleReserva(reserva: Reserva) {
-  this.selectedReserva = reserva;
-  this.modalReservaVisible = true;
+  this.reservaSeleccionada = reserva;
+  this.loadingDetalle = true;
+  this.mostrarModal = true;
+  // Cargar solicitud asociada vía endpoint de reservas
+  this.reservasService.getSolicitudByReservaId(reserva.idReserva).subscribe({
+    next: (solicitud) => {
+      this.solicitudSeleccionada = solicitud;
+      this.loadingDetalle = false;
+      this.cdr.detectChanges();
+    },
+    error: (err) => {
+      console.error('Error cargando solicitud de reserva en dashboard:', err);
+      // Fallback: buscar en solicitudes cargadas
+      const s = this.solicitudes.find(x => x.idSolicitud === reserva.idSolicitud);
+      if (s) this.solicitudSeleccionada = s;
+      this.loadingDetalle = false;
+      this.cdr.detectChanges();
+    }
+  });
 }
 
-// Método para cerrar modal
-cerrarReservaModal() {
-  this.modalReservaVisible = false;
-  this.selectedReserva = null;
+cerrarModalReserva() {
+  this.mostrarModal = false;
+  this.reservaSeleccionada = null;
+  this.solicitudSeleccionada = null;
 }
 
 
