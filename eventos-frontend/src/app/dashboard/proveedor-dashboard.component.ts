@@ -8,13 +8,14 @@ import { Solicitud } from '../models/solicitud.model';
 import { Reserva } from '../models/reserva.model';
 import { forkJoin } from 'rxjs';
 import { SolicitudDetalleComponent } from '../components/solicitud-detalle/solicitud-detalle.component';
+import { ReservaDetalleComponent } from '../components/reservas-detalle/reservas-detalle.component';
 import { ResponderSolicitudComponent } from '../components/solicitud-detalle/app-responder-solicitud';
 
 
 @Component({
   selector: 'app-proveedor-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, SolicitudDetalleComponent,ResponderSolicitudComponent],
+  imports: [CommonModule, RouterLink, SolicitudDetalleComponent,ResponderSolicitudComponent,ReservaDetalleComponent],
 
   template: `
   <div class="font-display bg-background-light dark:bg-background-dark text-[#18181B] dark:text-gray-200 min-h-screen">
@@ -221,8 +222,14 @@ import { ResponderSolicitudComponent } from '../components/solicitud-detalle/app
                         </span>
                       </td>
                       <td class="p-6 text-right space-x-2">
-                        <button class="text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary text-sm font-bold py-2 px-4 rounded-lg border border-slate-300 dark:border-slate-700">Ver Detalle</button>
-                      </td>
+                        <td class="p-6 text-right space-x-2">
+  <button 
+    (click)="verDetalleReserva(reserva)"
+    class="text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary text-sm font-bold py-2 px-4 rounded-lg border border-slate-300 dark:border-slate-700">
+    Ver Detalle
+  </button>
+
+                        </td>
                     </tr>
                   </tbody>
                 </table>
@@ -254,6 +261,14 @@ import { ResponderSolicitudComponent } from '../components/solicitud-detalle/app
   (updated)="actualizarSolicitud($event)"
 >
 </app-responder-solicitud>
+
+
+<app-reserva-detalle
+  *ngIf="modalReservaVisible"
+  [reserva]="selectedReserva"
+  (close)="cerrarReservaModal()">
+</app-reserva-detalle>
+
   `
 })
 export class ProveedorDashboardComponent implements OnInit {
@@ -456,5 +471,22 @@ actualizarSolicitud(solicitudActualizada: Solicitud) {
   const index = this.solicitudes.findIndex(s => s.idSolicitud === solicitudActualizada.idSolicitud);
   if (index !== -1) this.solicitudes[index] = solicitudActualizada;
 }
+
+// Variables del modal de reservas
+modalReservaVisible = false;
+selectedReserva: Reserva | null = null;
+
+// Método para abrir modal
+verDetalleReserva(reserva: Reserva) {
+  this.selectedReserva = reserva;
+  this.modalReservaVisible = true;
+}
+
+// Método para cerrar modal
+cerrarReservaModal() {
+  this.modalReservaVisible = false;
+  this.selectedReserva = null;
+}
+
 
 }
