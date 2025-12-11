@@ -1,43 +1,39 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Oferta } from '../models/oferta.model';
 
 @Injectable({ providedIn: 'root' })
 export class OfertasService {
+  private http = inject(HttpClient);
+  // usar la ruta del proxy: /api -> ms-ofertas
+  private apiUrl = '/api/ofertas';
 
-  private baseOfertas = '/ofertas/ofertas';
-  private baseCategorias = '/ofertas/categorias';
-
-  constructor(private http: HttpClient) {}
-
-  // === OFERTAS ===
-  getAll(): Observable<Oferta[]> {
-    return this.http.get<Oferta[]>(this.baseOfertas);
+  obtenerOfertas(): Observable<Oferta[]> {
+    return this.http.get<Oferta[]>(this.apiUrl);
   }
 
-  getById(id: number): Observable<Oferta> {
-    return this.http.get<Oferta>(`${this.baseOfertas}/${id}`);
+  obtenerOferta(id: number): Observable<Oferta> {
+    return this.http.get<Oferta>(`${this.apiUrl}/${id}`);
   }
 
-  create(payload: Partial<Oferta>): Observable<Oferta> {
-    return this.http.post<Oferta>(this.baseOfertas, payload);
+  crearOferta(payload: Partial<Oferta>): Observable<Oferta> {
+    return this.http.post<Oferta>(this.apiUrl, payload);
   }
 
-  update(id: number, payload: Partial<Oferta>): Observable<Oferta> {
-    return this.http.put<Oferta>(`${this.baseOfertas}/${id}`, payload);
+  actualizarOferta(id: number, payload: Partial<Oferta>): Observable<Oferta> {
+    return this.http.put<Oferta>(`${this.apiUrl}/${id}`, payload);
   }
 
-  delete(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.baseOfertas}/${id}`);
+  eliminarOferta(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 
-  // === CATEGORÍAS ===
-  getCategorias(): Observable<any[]> {
-    return this.http.get<any[]>(this.baseCategorias);
+  agregarDescuento(ofertaId: number, payload: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/${ofertaId}/descuentos`, payload);
   }
 
-  createCategoria(payload: any): Observable<any> {
-    return this.http.post<any>(this.baseCategorias, payload);
+  eliminarDescuento(ofertaId: number, descuentoId: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${ofertaId}/descuentos/${descuentoId}`);
   }
 }

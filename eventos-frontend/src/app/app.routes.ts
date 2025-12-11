@@ -26,7 +26,7 @@ export const routes: Routes = [
     path: 'reservas', 
     component: ReservasListComponent 
   },
-  { path: 'ofertas', loadComponent: () => import('./ofertas/oferta-list.component').then(m => m.OfertaListComponent) },
+  { path: 'ofertas', loadComponent: () => import('./ofertas/oferta-list.component').then(m => m.OfertasListComponent) },
 //   { 
 //     path: 'ofertas', 
 //     loadChildren: () => import('./ofertas/ofertas.module').then(m => m.OfertasModule) 

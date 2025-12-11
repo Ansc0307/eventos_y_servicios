@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { CategoriasService } from '../services/categorias.service';
 import { Categoria } from '../models/categoria.model';
+import { CategoriasService } from '../services/categorias.service';
 import { ChangeDetectorRef } from '@angular/core';
 
 @Component({
@@ -63,12 +63,12 @@ export class CategoriasListComponent implements OnInit {
     this.error = null;
 
     this.service.obtenerCategorias().subscribe({
-      next: (data) => {
+      next: (data:any) => {
         this.categorias = data || [];
         this.loading = false;
         try { this.cd.detectChanges(); } catch {}
       },
-      error: (err) => {
+      error: (err:any) => {
         this.error = err?.message || 'Error desconocido';
         this.loading = false;
         try { this.cd.detectChanges(); } catch {}
@@ -86,7 +86,7 @@ export class CategoriasListComponent implements OnInit {
         this.detalle = '';
         this.loadAll();
       },
-      error: (err) => {
+      error: (err:any) => {
         console.error('[CategoriasList] crear error', err);
         this.error = err?.error?.message || err?.message || 'No se pudo crear la categoría';
       }
