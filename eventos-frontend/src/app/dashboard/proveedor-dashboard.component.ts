@@ -8,12 +8,13 @@ import { Solicitud } from '../models/solicitud.model';
 import { Reserva } from '../models/reserva.model';
 import { forkJoin } from 'rxjs';
 import { SolicitudDetalleComponent } from '../components/solicitud-detalle/solicitud-detalle.component';
+import { ResponderSolicitudComponent } from '../components/solicitud-detalle/app-responder-solicitud';
 
 
 @Component({
   selector: 'app-proveedor-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, SolicitudDetalleComponent],
+  imports: [CommonModule, RouterLink, SolicitudDetalleComponent,ResponderSolicitudComponent],
 
   template: `
   <div class="font-display bg-background-light dark:bg-background-dark text-[#18181B] dark:text-gray-200 min-h-screen">
@@ -175,7 +176,12 @@ import { SolicitudDetalleComponent } from '../components/solicitud-detalle/solic
 </button>
 
 
-                        <button class="bg-primary/90 hover:bg-primary text-white text-sm font-bold py-2 px-4 rounded-lg">Responder</button>
+                        <button
+  (click)="abrirResponder(solicitud)"
+  class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
+>
+  Responder
+</button>
                       </td>
                     </tr>
                   </tbody>
@@ -239,7 +245,13 @@ import { SolicitudDetalleComponent } from '../components/solicitud-detalle/solic
   [solicitud]="selectedSolicitud" 
   (close)="cerrarModal()">
 </app-solicitud-detalle>
-
+<app-responder-solicitud
+  *ngIf="modalResponderVisible"
+  [solicitud]="selectedSolicitudResponder"
+  (close)="cerrarResponder()"
+  (updated)="actualizarSolicitud($event)"
+>
+</app-responder-solicitud>
   `
 })
 export class ProveedorDashboardComponent implements OnInit {
@@ -424,5 +436,23 @@ cerrarModal() {
   this.selectedSolicitud = null;
 }
 
+modalResponderVisible = false;
+selectedSolicitudResponder: Solicitud | null = null;
+
+abrirResponder(solicitud: Solicitud) {
+  this.selectedSolicitudResponder = solicitud;
+  this.modalResponderVisible = true;
+}
+
+cerrarResponder() {
+  this.modalResponderVisible = false;
+  this.selectedSolicitudResponder = null;
+}
+
+actualizarSolicitud(solicitudActualizada: Solicitud) {
+  // Actualizar la lista de solicitudes localmente
+  const index = this.solicitudes.findIndex(s => s.idSolicitud === solicitudActualizada.idSolicitud);
+  if (index !== -1) this.solicitudes[index] = solicitudActualizada;
+}
 
 }

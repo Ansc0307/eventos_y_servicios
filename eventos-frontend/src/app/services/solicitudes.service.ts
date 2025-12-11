@@ -95,4 +95,17 @@ export class SolicitudesService {
       })
     );
   }
+  // --- Dentro de SolicitudesService ---
+actualizarEstado(id: number, estado: string): Observable<Solicitud> {
+  const url = `${this.base}/${id}/estado`; // /ms-reservas/solicitudes/{id}/estado
+  return this.http.patch<Solicitud>(url, {}, { params: { estado } }).pipe(
+    timeout(this.timeoutMs),
+    catchError(err => {
+      console.error(`Error actualizando estado de la solicitud ${id}:`, err);
+      return throwError(() => err);
+    })
+  );
+}
+
+
 }
