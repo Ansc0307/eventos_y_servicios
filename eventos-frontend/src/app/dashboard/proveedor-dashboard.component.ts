@@ -279,6 +279,60 @@ export class ProveedorDashboardComponent implements OnInit {
   userName = '';
   idProveedor = 1; // Por defecto
 
+
+    ngOnInit(): void {
+    try {
+      // Obtener nombre de usuario desde Keycloak
+      const tokenParsed = this.keycloak.getKeycloakInstance().tokenParsed;
+      this.userName = tokenParsed?.['preferred_username'] || tokenParsed?.['name'] || 'Proveedor';
+      
+      this.idProveedor = 1;
+
+      // Cargar solicitudes del proveedor
+      console.log('Cargando solicitudes para proveedor:', this.idProveedor);
+      this.solicitudesService.getByProveedor(this.idProveedor).subscribe({
+        //this.solicitudesService.getAll().subscribe({
+        next: (solicitudes) => {
+          console.log('Solicitudes recibidas:', solicitudes);
+          this.solicitudes = solicitudes;
+          
+          // Cargar reservas para cada solicitud
+          if (solicitudes.length > 0) {
+            const reservaRequests = solicitudes.map(s => 
+              this.reservasService.getByIdSolicitud(s.idSolicitud)
+            );
+            
+            forkJoin(reservaRequests).subscribe({
+              next: (reservasArrays) => {
+                this.reservas = reservasArrays.flat();
+                this.loading = false;
+                this.cdr.detectChanges();
+              },
+              error: (err) => {
+                console.error('Error cargando reservas:', err);
+                this.loading = false;
+                this.cdr.detectChanges();
+              }
+            });
+          } else {
+            this.loading = false;
+            this.cdr.detectChanges();
+          }
+        },
+        error: (err) => {
+          console.error('Error cargando solicitudes:', err);
+          this.error = 'Error al cargar las solicitudes: ' + (err.message || err.statusText || 'Error desconocido');
+          this.loading = false;
+          this.cdr.detectChanges();
+        }
+      });
+    } catch (err) {
+      console.error('Error en ngOnInit:', err);
+      this.error = 'Error al inicializar el dashboard';
+      this.loading = false;
+      this.cdr.detectChanges();
+    }
+  }
   // Estadísticas
   get solicitudesPendientes(): number {
     return this.solicitudes.filter(s => s.estadoSolicitud?.toUpperCase() === 'PENDIENTE').length;
@@ -338,59 +392,7 @@ export class ProveedorDashboardComponent implements OnInit {
     private cdr: ChangeDetectorRef
   ) {}
 
-  ngOnInit(): void {
-    try {
-      // Obtener nombre de usuario desde Keycloak
-      const tokenParsed = this.keycloak.getKeycloakInstance().tokenParsed;
-      this.userName = tokenParsed?.['preferred_username'] || tokenParsed?.['name'] || 'Proveedor';
-      
-      this.idProveedor = 1;
 
-      // Cargar solicitudes del proveedor
-      console.log('Cargando solicitudes para proveedor:', this.idProveedor);
-      //this.solicitudesService.getByProveedor(this.idProveedor).subscribe({
-        this.solicitudesService.getAll().subscribe({
-        next: (solicitudes) => {
-          console.log('Solicitudes recibidas:', solicitudes);
-          this.solicitudes = solicitudes;
-          
-          // Cargar reservas para cada solicitud
-          if (solicitudes.length > 0) {
-            const reservaRequests = solicitudes.map(s => 
-              this.reservasService.getByIdSolicitud(s.idSolicitud)
-            );
-            
-            forkJoin(reservaRequests).subscribe({
-              next: (reservasArrays) => {
-                this.reservas = reservasArrays.flat();
-                this.loading = false;
-                this.cdr.detectChanges();
-              },
-              error: (err) => {
-                console.error('Error cargando reservas:', err);
-                this.loading = false;
-                this.cdr.detectChanges();
-              }
-            });
-          } else {
-            this.loading = false;
-            this.cdr.detectChanges();
-          }
-        },
-        error: (err) => {
-          console.error('Error cargando solicitudes:', err);
-          this.error = 'Error al cargar las solicitudes: ' + (err.message || err.statusText || 'Error desconocido');
-          this.loading = false;
-          this.cdr.detectChanges();
-        }
-      });
-    } catch (err) {
-      console.error('Error en ngOnInit:', err);
-      this.error = 'Error al inicializar el dashboard';
-      this.loading = false;
-      this.cdr.detectChanges();
-    }
-  }
 
   getEstadoClass(estado: string): string {
     const estadoUpper = estado?.toUpperCase() || '';
