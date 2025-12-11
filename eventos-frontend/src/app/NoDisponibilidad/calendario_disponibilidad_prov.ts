@@ -298,9 +298,12 @@ volverDashboard() {
     const start = sorted[0].date;
     const end = sorted[sorted.length - 1].date;
 
+    const fechaInicio = new Date(start.getFullYear(), start.getMonth(), start.getDate()).toISOString();
+    const fechaFin = new Date(end.getFullYear(), end.getMonth(), end.getDate()).toISOString();
+
     const payload = {
-      fechaInicio: new Date(start.getFullYear(), start.getMonth(), start.getDate()),
-      fechaFin: new Date(end.getFullYear(), end.getMonth(), end.getDate()),
+      fechaInicio,
+      fechaFin,
       motivo: this.noteText,
       idOferta: 1
     };
