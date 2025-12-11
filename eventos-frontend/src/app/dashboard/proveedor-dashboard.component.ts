@@ -37,10 +37,10 @@ import { ResponderSolicitudComponent } from '../components/solicitud-detalle/app
               </a>
 
 
-              <div class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-primary/10 cursor-pointer">
+              <a routerLink="/proveedor/no-disponibilidades" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-primary/10 cursor-pointer">
                 <span class="material-symbols-outlined text-slate-600 dark:text-slate-300">calendar_today</span>
                 <p class="text-slate-600 dark:text-slate-300 text-sm font-medium leading-normal">Calendario</p>
-              </div>
+              </a>
               <a routerLink="/proveedor/reservas" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-primary/10 cursor-pointer">
                 <span class="material-symbols-outlined text-slate-600 dark:text-slate-300">event</span>
                 <p class="text-slate-600 dark:text-slate-300 text-sm font-medium leading-normal">Reservas</p>
