@@ -11,7 +11,8 @@ import { NotificacionesListComponent } from './components/notifications/notifica
 import { ReservasListComponent } from './reservas/reservas-list.component';
 import { ProveedorReservasListComponent } from './reservas/proveedor-reservas-list.component';
 import { OfertasPageComponent } from './pages/ofertas-page.component';
-import { OfertaDetailComponent } from './pages/oferta-detail.component';
+import { OfertaDetalleComponent } from './pages/oferta-detalle.component';
+//import { OfertaDetailComponent } from './pages/oferta-detail.component';
 
 export const routes: Routes = [
   { path: '', component: RoleDashboardComponent },
@@ -38,7 +39,8 @@ export const routes: Routes = [
     component: ReservasListComponent 
   },
 { path: 'ofertas', component: OfertasPageComponent },
-{ path: 'ofertas/:id', component: OfertaDetailComponent },
+{ path: 'ofertas/:id', component: OfertaDetalleComponent }
+//{ path: 'ofertas/:id', component: OfertaDetailComponent },
 //   { 
 //     path: 'ofertas', 
 //     loadChildren: () => import('./ofertas/ofertas.module').then(m => m.OfertasModule) 
