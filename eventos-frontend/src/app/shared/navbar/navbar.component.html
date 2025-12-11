@@ -1,51 +1,46 @@
-<nav class="app-navbar">
-  <div class="nav-container">
-    <!-- Logo/Brand -->
-    <div class="nav-brand">
-      <a routerLink="/dashboard" class="brand-link">
-        <div class="brand-icon">🎭</div>
-        <span class="brand-text">Event Platform</span>
+<nav class="sticky top-0 z-50 w-full border-b border-slate-200 dark:border-slate-800 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm">
+  <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 md:px-8 h-16 flex items-center justify-between">
+    <!-- Brand -->
+    <div class="flex items-center gap-3 text-text-light dark:text-text-dark">
+      <a routerLink="/dashboard" class="flex items-center gap-2 hover:opacity-90">
+        <span class="material-symbols-outlined text-primary text-2xl">celebration</span>
+        <span class="text-xl font-bold leading-tight tracking-tight">EventosPro</span>
       </a>
     </div>
 
-    <!-- Navigation Links -->
-    <div class="nav-links">
-      <a class="nav-link" routerLink="/usuarios" routerLinkActive="active">
-        <i class="nav-icon">👥</i>
-        <span class="nav-text">Usuarios</span>
+    <!-- Links (preserving routes) -->
+    <div class="hidden md:flex items-center gap-4">
+      <a class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-primary/20 text-sm font-medium text-text-light dark:text-text-dark" routerLink="/usuarios" routerLinkActive="!text-primary">
+        <span class="material-symbols-outlined">group</span>
+        <span>Usuarios</span>
       </a>
-      
-      <a class="nav-link" routerLink="/reservas" routerLinkActive="active">
-        <i class="nav-icon">📅</i>
-        <span class="nav-text">Reservas</span>
+      <a class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-primary/20 text-sm font-medium text-text-light dark:text-text-dark" routerLink="/reservas" routerLinkActive="!text-primary">
+        <span class="material-symbols-outlined">event</span>
+        <span>Reservas</span>
       </a>
-      
-      <a class="nav-link" routerLink="/solicitudes" routerLinkActive="active">
-        <i class="nav-icon">🏢</i>
-        <span class="nav-text">Solicitudes</span>
+      <a class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-primary/20 text-sm font-medium text-text-light dark:text-text-dark" routerLink="/solicitudes" routerLinkActive="!text-primary">
+        <span class="material-symbols-outlined">description</span>
+        <span>Solicitudes</span>
       </a>
-
-      <a class="nav-link" routerLink="/no-disponibilidades" routerLinkActive="active">
-        <i class="nav-icon">🏢</i>
-        <span class="nav-text">No Disponibilidades</span>
+      <a class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-primary/20 text-sm font-medium text-text-light dark:text-text-dark" routerLink="/no-disponibilidades" routerLinkActive="!text-primary">
+        <span class="material-symbols-outlined">do_not_disturb_on</span>
+        <span>No Disponibilidades</span>
       </a>
-
-      <a class="nav-link" routerLink="/ofertas" routerLinkActive="active">
-        <i class="nav-icon">🏢</i>
-        <span class="nav-text">Ofertas</span>
+      <a class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-primary/20 text-sm font-medium text-text-light dark:text-text-dark" routerLink="/ofertas" routerLinkActive="!text-primary">
+        <span class="material-symbols-outlined">storefront</span>
+        <span>Ofertas</span>
       </a>
-      
-      <a class="nav-link" routerLink="/ms-notificaciones" routerLinkActive="active">
-        <i class="nav-icon">🔔</i>
-        <span class="nav-text">Notificaciones</span>
+      <a class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-primary/20 text-sm font-medium text-text-light dark:text-text-dark" routerLink="/ms-notificaciones" routerLinkActive="!text-primary">
+        <span class="material-symbols-outlined">notifications</span>
+        <span>Notificaciones</span>
       </a>
     </div>
 
-    <!-- User Actions -->
-    <div class="nav-actions">
-      <button class="logout-btn" (click)="logout()">
-        <i class="logout-icon">🚪</i>
-        <span class="logout-text">Cerrar Sesión</span>
+    <!-- Actions -->
+    <div class="flex items-center gap-2">
+     
+      <button class="flex h-10 px-3 rounded-lg bg-border-light dark:bg-border-dark text-text-light dark:text-text-dark hover:bg-primary/20 transition-colors" (click)="logout()">
+        <span class="material-symbols-outlined">logout</span>
       </button>
     </div>
   </div>
