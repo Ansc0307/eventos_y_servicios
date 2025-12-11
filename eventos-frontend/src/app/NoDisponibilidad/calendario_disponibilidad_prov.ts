@@ -1,6 +1,8 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import { KeycloakService } from 'keycloak-angular';
 import { NoDisponibilidadesService } from '../services/no-disponibilidades.service';
 import { NoDisponibilidad } from '../models/NoDisponibilidad.model';
 import { RefreshService } from '../services/refresh.service';
@@ -21,6 +23,10 @@ interface CalendarDay {
 
     <!-- ENCABEZADO -->
     <div class="flex flex-wrap justify-between items-start gap-4">
+
+
+
+    
       <div class="flex flex-col gap-2">
         <p class="text-[#0d191b] dark:text-white text-4xl font-black leading-tight tracking-[-0.033em]">Calendario Detallado del Proveedor</p>
        
@@ -35,12 +41,31 @@ interface CalendarDay {
         <div class="flex flex-col">
 
           <!-- TITULO MES -->
-          <div class="flex items-center justify-between pb-4 border-b border-[#e7f1f3] mb-4">
-            <p class="text-[#0d191b] dark:text-white text-xl font-bold">
-              {{ currentMonth | date:'MMMM yyyy' }}
-            </p>
-            
-          </div>
+<div class="flex items-center justify-between pb-4 border-b border-[#e7f1f3] mb-4">
+
+  <!-- Flecha anterior -->
+  <button
+    (click)="prevMonth()"
+    class="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition"
+  >
+    <span class="material-symbols-outlined text-xl">chevron_left</span>
+  </button>
+
+  <!-- Nombre del mes -->
+  <p class="text-[#0d191b] dark:text-white text-xl font-bold">
+    {{ currentMonth | date:'MMMM yyyy' }}
+  </p>
+
+  <!-- Flecha siguiente -->
+  <button
+    (click)="nextMonth()"
+    class="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition"
+  >
+    <span class="material-symbols-outlined text-xl">chevron_right</span>
+  </button>
+
+</div>
+
 
           <!-- DIAS SEMANA -->
           <div class="grid grid-cols-7 gap-1">
@@ -251,17 +276,19 @@ export class CalendarioDetalladoComponent implements OnInit {
 
   /** Cambiar mes */
   prevMonth() {
-    this.currentMonth = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth() - 1, 1);
-    this.buildCalendar();
-  }
+  this.currentMonth = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth() - 1, 1);
+  this.buildCalendar();
+}
 
-  nextMonth() {
-    this.currentMonth = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth() + 1, 1);
-    this.buildCalendar();
-  }
+nextMonth() {
+  this.currentMonth = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth() + 1, 1);
+  this.buildCalendar();
+}
+
 
   limpiar() {
     this.calendarDays.forEach(d => (d.selected = false));
     this.noteText = '';
   }
+  
 }

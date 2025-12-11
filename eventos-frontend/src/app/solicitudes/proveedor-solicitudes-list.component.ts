@@ -4,11 +4,13 @@ import { Router } from '@angular/router';
 import { KeycloakService } from 'keycloak-angular';
 import { SolicitudesService } from '../services/solicitudes.service';
 import { Solicitud } from '../models/solicitud.model';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-proveedor-solicitudes-list',
   standalone: true,
-  imports: [CommonModule],
+ imports: [CommonModule, FormsModule],
+
   template: `
   <div class="font-display bg-background-light dark:bg-background-dark text-[#18181B] dark:text-gray-200 min-h-screen">
     <div class="relative flex min-h-screen w-full">
@@ -70,9 +72,21 @@ import { Solicitud } from '../models/solicitud.model';
             {{ error }}
           </div>
 
+
           <!-- Tabla de Solicitudes -->
           <div *ngIf="!loading && !error" class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-x-auto">
-            <table class="w-full text-left">
+            
+          <table class="w-full text-left">
+          <!-- Filtro por Mes -->
+<div class="mb-6 flex items-center gap-4">
+  <label class="text-sm font-medium text-slate-600 dark:text-slate-300">Filtrar por mes:</label>
+
+  <select [(ngModel)]="mesSeleccionado" (change)="filtrarPorMes()" 
+    class="border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 bg-white dark:bg-slate-900 text-sm">
+    <option value="0">Todos</option>
+    <option *ngFor="let m of meses" [value]="m.value">{{ m.name }}</option>
+  </select>
+</div>
               <thead class="border-b border-slate-200 dark:border-slate-800">
                 <tr>
                   <th class="p-6 text-sm font-semibold text-slate-500 dark:text-slate-400">ID Solicitud</th>
@@ -202,7 +216,9 @@ export class ProveedorSolicitudesListComponent implements OnInit {
     this.error = null;
     this.solicitudesService.getByProveedor(this.idProveedor).subscribe({
       next: (data) => {
-        this.solicitudes = data || [];
+        this.solicitudesOriginal = data || [];
+this.solicitudes = [...this.solicitudesOriginal];
+
         this.loading = false;
         this.cdr.detectChanges();
       },
@@ -281,4 +297,36 @@ export class ProveedorSolicitudesListComponent implements OnInit {
     const date = new Date(dateString);
     return date.toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
   }
+
+  meses = [
+  { value: 1, name: 'Enero' },
+  { value: 2, name: 'Febrero' },
+  { value: 3, name: 'Marzo' },
+  { value: 4, name: 'Abril' },
+  { value: 5, name: 'Mayo' },
+  { value: 6, name: 'Junio' },
+  { value: 7, name: 'Julio' },
+  { value: 8, name: 'Agosto' },
+  { value: 9, name: 'Septiembre' },
+  { value: 10, name: 'Octubre' },
+  { value: 11, name: 'Noviembre' },
+  { value: 12, name: 'Diciembre' }
+];
+
+mesSeleccionado = 0; // 0 = todos
+solicitudesOriginal: Solicitud[] = [];
+
+filtrarPorMes() {
+  if (this.mesSeleccionado === 0) {
+    this.solicitudes = [...this.solicitudesOriginal];
+    return;
+  }
+
+  this.solicitudes = this.solicitudesOriginal.filter(solicitud => {
+    const fecha = new Date(solicitud.fechaSolicitud);
+    return fecha.getMonth() + 1 === this.mesSeleccionado;
+  });
+}
+
+
 }
