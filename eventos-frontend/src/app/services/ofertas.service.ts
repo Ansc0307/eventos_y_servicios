@@ -33,22 +33,31 @@ export class OfertasService {
     );
   }
 
-  getOfertaById(id: number): Observable<Oferta> {
+ getOfertaById(id: number): Observable<Oferta> {
   return this.http.get<any>(`${this.baseUrl}/${id}`).pipe(
-    map((it) => ({
-      id: it.idOfertas ?? it.id,
-      proveedorId: it.proveedorId,
-      titulo: it.titulo,
-      idCategoria: it.categoria?.idCategoria ?? it.idCategoria,
-      categoria: it.categoria,
-      descripcion: it.descripcion,
-      precioBase: it.precioBase,
-      estado: it.estado,
-      activo: it.activo,
-      urlsMedia: (it.medias || []).map((m: any) => m.url),
-      medias: it.medias || [],
-      descuentos: it.descuentos || []
-    } as Oferta))
+    map((it) => {
+      const categoria = it.categoria || it.idCategoria || null;
+
+      // medias puede venir así:
+      // [{ url: "xxx" }] o ["xxx"] o null
+      const medias = it.medias ?? [];
+      const urlsMedia = medias.map((m: any) => m.url ?? m);
+
+      return {
+        id: it.idOfertas ?? it.id,
+        proveedorId: it.proveedorId,
+        titulo: it.titulo,
+        idCategoria: categoria?.idCategoria ?? categoria ?? null,
+        categoria,
+        descripcion: it.descripcion,
+        precioBase: it.precioBase,
+        estado: it.estado,
+        activo: it.activo,
+        medias,
+        descuentos: it.descuentos ?? [],
+        urlsMedia
+      } as Oferta;
+    })
   );
 }
 

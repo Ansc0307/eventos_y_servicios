@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { CurrencyPipe, NgIf, NgFor, CommonModule } from '@angular/common';
+import { CommonModule, NgIf, NgFor, CurrencyPipe } from '@angular/common';
 import { OfertasService } from '../services/ofertas.service';
 
 @Component({
@@ -10,14 +10,14 @@ import { OfertasService } from '../services/ofertas.service';
     CommonModule,
     NgIf,
     NgFor,
-    CurrencyPipe   // <-- IMPORTANTE
+    CurrencyPipe
   ],
-  templateUrl: './oferta-detalle.component.html'
+  templateUrl: 'oferta-detalle.component.html'
 })
 export class OfertaDetalleComponent implements OnInit {
 
-  oferta: any;
-  id!: number;
+  oferta: any = null;
+  images: string[] = [];
 
   constructor(
     private route: ActivatedRoute,
@@ -25,11 +25,22 @@ export class OfertaDetalleComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.id = Number(this.route.snapshot.paramMap.get('id'));
+    const id = Number(this.route.snapshot.paramMap.get('id'));
 
-    this.ofertaService.getOfertaById(this.id).subscribe({
-      next: (data:any) => {
+    this.ofertaService.getOfertaById(id).subscribe({
+      next: (data: any) => {
+        console.log("DETALLE RECIBIDO ===>", data);
+
         this.oferta = data;
+
+        // Preferimos medias si existen
+        if (data.medias?.length > 0) {
+          this.images = data.medias.map((m: any) => m.url);
+        }
+        // Fallback: usar urlsMedia
+        else if (data.urlsMedia?.length > 0) {
+          this.images = data.urlsMedia;
+        }
       },
       error: (err) => {
         console.error('Error cargando oferta', err);
@@ -38,6 +49,6 @@ export class OfertaDetalleComponent implements OnInit {
   }
 
   get mainImage(): string {
-    return this.oferta?.medias?.length > 0 ? this.oferta.medias[0].url : '';
+    return this.images.length > 0 ? this.images[0] : '';
   }
 }
