@@ -1,0 +1,10 @@
+<div class="flex flex-col gap-2">
+  <button
+    *ngFor="let cat of categorias"
+    class="flex items-center justify-between w-full p-3 rounded-lg bg-border-light hover:bg-primary/20"
+    [ngClass]="{ 'bg-primary/20': selected === cat.id }"
+    (click)="select.emit(cat.id)"
+  >
+    <span>{{ cat.detalle }}</span>
+  </button>
+</div>

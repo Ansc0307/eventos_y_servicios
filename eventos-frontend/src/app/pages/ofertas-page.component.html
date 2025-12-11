@@ -1,0 +1,39 @@
+<div class="flex w-full max-w-screen-xl mx-auto gap-8 py-8">
+
+  <!-- Sidebar filtros -->
+  <aside class="hidden lg:flex flex-col w-72 bg-surface-light dark:bg-surface-dark p-6 rounded-xl border">
+    <h3 class="text-lg font-bold mb-6">Filtra tu búsqueda</h3>
+
+    <!-- Categorías dinámicas -->
+    <app-categoria-filter
+      [categorias]="categorias"
+      [selected]="selectedCategory"
+      (select)="filterByCategory($event)">
+    </app-categoria-filter>
+
+    <!-- Botones -->
+    <div class="border-t mt-6 pt-6 flex flex-col gap-3">
+      <button class="h-10 px-4 bg-primary text-white rounded-lg">
+        Aplicar Filtros
+      </button>
+      <button class="h-10 px-4 bg-transparent border rounded-lg">
+        Limpiar Filtros
+      </button>
+    </div>
+  </aside>
+
+  <!-- Cards de ofertas -->
+  <div class="flex-1">
+    <div *ngIf="!ofertas || ofertas.length === 0" class="mb-4 p-4 bg-yellow-50 text-sm rounded">
+      <p class="font-medium">No se encontraron ofertas para mostrar.</p>
+      <pre style="white-space:pre-wrap; max-height:200px; overflow:auto">{{ ofertas | json }}</pre>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+      <app-oferta-card
+        *ngFor="let oferta of ofertas"
+        [oferta]="oferta">
+      </app-oferta-card>
+    </div>
+  </div>
+</div>

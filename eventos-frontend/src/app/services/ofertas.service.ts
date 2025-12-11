@@ -1,39 +1,51 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { Oferta } from '../models/oferta.model';
 
-@Injectable({ providedIn: 'root' })
+@Injectable({
+  providedIn: 'root'
+})
 export class OfertasService {
-  private http = inject(HttpClient);
-  // usar la ruta del proxy: /api -> ms-ofertas
-  private apiUrl = '/api/ofertas';
 
-  obtenerOfertas(): Observable<Oferta[]> {
-    return this.http.get<Oferta[]>(this.apiUrl);
+  // Use a relative path so the Angular dev server proxy can forward requests
+  private baseUrl = '/ofertas/ofertas';
+
+  constructor(private http: HttpClient) {}
+
+  getOfertas(): Observable<Oferta[]> {
+    // Backend returns a different shape; map it to our front-end model
+    return this.http.get<any[]>(this.baseUrl).pipe(
+      map((items) =>
+        items.map((it) => ({
+          id: it.idOfertas ?? it.id,
+          proveedorId: it.proveedorId,
+          titulo: it.titulo,
+          idCategoria: it.categoria?.idCategoria ?? it.idCategoria ?? it.idCategoria,
+          descripcion: it.descripcion,
+          precioBase: it.precioBase,
+          estado: it.estado,
+          activo: it.activo,
+          urlsMedia: (it.medias || it.urlsMedia || []).map((m: any) => m.url ?? m)
+        } as Oferta))
+      )
+    );
   }
 
-  obtenerOferta(id: number): Observable<Oferta> {
-    return this.http.get<Oferta>(`${this.apiUrl}/${id}`);
-  }
-
-  crearOferta(payload: Partial<Oferta>): Observable<Oferta> {
-    return this.http.post<Oferta>(this.apiUrl, payload);
-  }
-
-  actualizarOferta(id: number, payload: Partial<Oferta>): Observable<Oferta> {
-    return this.http.put<Oferta>(`${this.apiUrl}/${id}`, payload);
-  }
-
-  eliminarOferta(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
-  }
-
-  agregarDescuento(ofertaId: number, payload: any): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/${ofertaId}/descuentos`, payload);
-  }
-
-  eliminarDescuento(ofertaId: number, descuentoId: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${ofertaId}/descuentos/${descuentoId}`);
+  getOferta(id: number): Observable<Oferta> {
+    return this.http.get<any>(`${this.baseUrl}/${id}`).pipe(
+      map((it) => ({
+        id: it.idOfertas ?? it.id,
+        proveedorId: it.proveedorId,
+        titulo: it.titulo,
+        idCategoria: it.categoria?.idCategoria ?? it.idCategoria,
+        descripcion: it.descripcion,
+        precioBase: it.precioBase,
+        estado: it.estado,
+        activo: it.activo,
+        urlsMedia: (it.medias || it.urlsMedia || []).map((m: any) => m.url ?? m)
+      } as Oferta))
+    );
   }
 }

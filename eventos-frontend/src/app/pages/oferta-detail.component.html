@@ -1,0 +1,28 @@
+<div class="max-w-4xl mx-auto py-8 px-4">
+  <div *ngIf="oferta; else loading">
+    <div class="mb-6">
+      <div class="w-full bg-center bg-cover aspect-video rounded-xl overflow-hidden"
+           [style.backgroundImage]="(oferta.urlsMedia && oferta.urlsMedia.length) ? 'url(' + oferta.urlsMedia[0] + ')' : ''">
+      </div>
+    </div>
+
+    <h1 class="text-2xl font-bold mb-2">{{ oferta.titulo }}</h1>
+    <p class="text-sm text-text-muted-light mb-4">{{ oferta.descripcion }}</p>
+    <p class="text-primary font-bold text-xl mb-6">Bs. {{ oferta.precioBase }}</p>
+
+    <section>
+      <h2 class="font-semibold mb-2">Detalles</h2>
+      <ul class="list-disc pl-5">
+        <li><strong>ID:</strong> {{ oferta.id }}</li>
+        <li><strong>Proveedor ID:</strong> {{ oferta.proveedorId }}</li>
+        <li><strong>Categoría ID:</strong> {{ oferta.idCategoria }}</li>
+        <li><strong>Estado:</strong> {{ oferta.estado }}</li>
+        <li><strong>Activo:</strong> {{ oferta.activo }}</li>
+      </ul>
+    </section>
+  </div>
+
+  <ng-template #loading>
+    <p>Cargando oferta...</p>
+  </ng-template>
+</div>
