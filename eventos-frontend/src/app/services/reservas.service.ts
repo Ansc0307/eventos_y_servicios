@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, timeout, catchError, throwError } from 'rxjs';
 import { Reserva } from '../models/reserva.model';
 import { Solicitud } from '../models/solicitud.model';
+import { NoDisponibilidad } from '../models/NoDisponibilidad.model';
 
 @Injectable({ providedIn: 'root' })
 export class ReservasService {
@@ -44,6 +45,16 @@ export class ReservasService {
       timeout(10000),
       catchError(err => {
         console.error('Error obteniendo solicitud por reserva:', err);
+        return throwError(() => err);
+      })
+    );
+  }
+
+  getNoDisponibilidadByReserva(idReserva: number): Observable<NoDisponibilidad> {
+    return this.http.get<NoDisponibilidad>(`${this.base}/${idReserva}/no-disponibilidad`).pipe(
+      timeout(10000),
+      catchError(err => {
+        console.error('Error obteniendo no disponibilidad por reserva:', err);
         return throwError(() => err);
       })
     );

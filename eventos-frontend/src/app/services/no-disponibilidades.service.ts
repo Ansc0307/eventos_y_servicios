@@ -39,5 +39,17 @@ export class NoDisponibilidadesService {
       })
     );
   }
+
+  // Según especificación: GET /no-disponibilidades/{id}/reserva -> obtener reserva asociada
+  // Lo usaremos para listar no disponibilidades asociadas a una reserva (por su id)
+  getByReserva(reservaId: number): Observable<NoDisponibilidad[]> {
+    return this.http.get<NoDisponibilidad[]>(`${this.base}/reserva/${reservaId}`).pipe(
+      timeout(this.timeoutMs),
+      catchError(err => {
+        console.error('Error obteniendo no disponibilidades por reserva:', err);
+        return throwError(() => err);
+      })
+    );
+  }
 }
  

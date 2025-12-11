@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { KeycloakService } from 'keycloak-angular';
 import { SolicitudesService } from '../services/solicitudes.service';
 import { ReservasService } from '../services/reservas.service';
+import { NoDisponibilidadesService } from '../services/no-disponibilidades.service';
 import { Reserva } from '../models/reserva.model';
 import { Solicitud } from '../models/solicitud.model';
 import { forkJoin } from 'rxjs';
@@ -108,6 +109,9 @@ import { forkJoin } from 'rxjs';
                     <td class="p-6 text-right space-x-2">
                       <button (click)="verDetalle(reserva)" class="text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary text-sm font-bold py-2 px-4 rounded-lg border border-slate-300 dark:border-slate-700">
                         Ver Detalle
+                      </button>
+                      <button (click)="abrirEditar(reserva)" class="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 text-sm font-bold py-2 px-4 rounded-lg border border-slate-300 dark:border-slate-700">
+                        Editar
                       </button>
                     </td>
                   </tr>
@@ -226,6 +230,63 @@ import { forkJoin } from 'rxjs';
         </div>
       </div>
     </div>
+
+    <!-- Modal de Editar Estado -->
+    <div *ngIf="mostrarEditar" (click)="cerrarEditar()"
+         class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div (click)="$event.stopPropagation()"
+           class="bg-white dark:bg-slate-900 rounded-xl shadow-2xl max-w-xl w-full overflow-hidden">
+        <!-- Header -->
+        <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-primary/5">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-3xl text-primary">edit</span>
+            <div>
+              <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Editar Estado de Reserva</h2>
+              <p class="text-sm text-slate-500 dark:text-slate-400">Reserva #{{ reservaSeleccionada?.idReserva }}</p>
+            </div>
+          </div>
+          <button (click)="cerrarEditar()"
+                  class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
+            <span class="material-symbols-outlined text-slate-600 dark:text-slate-300">close</span>
+          </button>
+        </div>
+
+        <!-- Content -->
+        <div class="p-6 space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Nuevo Estado</label>
+            <div class="flex gap-3">
+              <button (click)="nuevoEstado = 'CONFIRMADA'"
+                      [class]="'px-4 py-2 rounded-lg border text-sm font-semibold ' + (nuevoEstado === 'CONFIRMADA' ? 'bg-green-100 border-green-300 text-green-800' : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200')">
+                Confirmada
+              </button>
+              <button (click)="nuevoEstado = 'CANCELADA'"
+                      [class]="'px-4 py-2 rounded-lg border text-sm font-semibold ' + (nuevoEstado === 'CANCELADA' ? 'bg-red-100 border-red-300 text-red-800' : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200')">
+                Cancelada
+              </button>
+            </div>
+          </div>
+
+          <div class="bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4" *ngIf="nuevoEstado === 'CANCELADA'">
+            <p class="text-sm text-yellow-800 dark:text-yellow-200">
+              Al cancelar la reserva se eliminarán todas las no disponibilidades asociadas.
+            </p>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/30">
+          <button (click)="cerrarEditar()"
+                  class="px-6 py-2.5 rounded-lg text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 font-semibold transition-colors">
+            Cancelar
+          </button>
+          <button (click)="guardarEstado()" [disabled]="guardandoEstado || !nuevoEstado"
+                  class="px-6 py-2.5 rounded-lg text-white bg-primary hover:bg-primary/90 disabled:opacity-50 font-semibold transition-colors">
+            {{ guardandoEstado ? 'Guardando...' : 'Guardar' }}
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
   `
 })
@@ -240,6 +301,9 @@ export class ProveedorReservasListComponent implements OnInit {
   loadingDetalle = false;
   reservaSeleccionada: Reserva | null = null;
   solicitudSeleccionada: Solicitud | null = null;
+  mostrarEditar = false;
+  nuevoEstado: 'CONFIRMADA' | 'CANCELADA' | '' = '';
+  guardandoEstado = false;
 
   get todasLasReservas(): Reserva[] {
     return this.reservas
@@ -251,7 +315,8 @@ export class ProveedorReservasListComponent implements OnInit {
     private keycloak: KeycloakService,
     private solicitudesService: SolicitudesService,
     private reservasService: ReservasService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private noDispService: NoDisponibilidadesService
   ) {}
 
   ngOnInit(): void {
@@ -399,5 +464,73 @@ export class ProveedorReservasListComponent implements OnInit {
     this.mostrarModal = false;
     this.reservaSeleccionada = null;
     this.solicitudSeleccionada = null;
+  }
+
+  abrirEditar(reserva: Reserva): void {
+    this.reservaSeleccionada = reserva;
+    const upper = (reserva.estado || '').toUpperCase();
+    this.nuevoEstado = upper === 'CONFIRMADA' ? 'CONFIRMADA' : upper === 'CANCELADA' ? 'CANCELADA' : '';
+    this.mostrarEditar = true;
+  }
+
+  cerrarEditar(): void {
+    this.mostrarEditar = false;
+    this.nuevoEstado = '';
+    this.reservaSeleccionada = null;
+  }
+
+  guardarEstado(): void {
+    if (!this.reservaSeleccionada || !this.nuevoEstado) return;
+    this.guardandoEstado = true;
+    const id = this.reservaSeleccionada.idReserva;
+    const payload = { ...this.reservaSeleccionada, estado: this.nuevoEstado, fechaActualizacion: new Date().toISOString() } as any;
+
+    this.reservasService.update(id, payload).subscribe({
+      next: (resActualizada) => {
+        const idx = this.reservas.findIndex(r => r.idReserva === id);
+        if (idx !== -1) this.reservas[idx] = resActualizada;
+
+        if (this.nuevoEstado === 'CANCELADA') {
+          // eliminar no disponibilidad asociada via GET /v1/reservas/{id}/no-disponibilidad
+          this.reservasService.getNoDisponibilidadByReserva(id).subscribe({
+            next: (noDisp: any) => {
+              if (noDisp?.idNoDisponibilidad) {
+                this.noDispService.delete(noDisp.idNoDisponibilidad).subscribe({
+                  next: () => {
+                    this.guardandoEstado = false;
+                    this.cerrarEditar();
+                    this.cdr.detectChanges();
+                  },
+                  error: (err) => {
+                    console.error('Error eliminando no disponibilidad:', err);
+                    this.guardandoEstado = false;
+                    this.cerrarEditar();
+                  }
+                });
+              } else {
+                // No hay no disponibilidad asociada, continuar
+                this.guardandoEstado = false;
+                this.cerrarEditar();
+                this.cdr.detectChanges();
+              }
+            },
+            error: (err) => {
+              console.error('Error obteniendo no disponibilidad de la reserva:', err);
+              // Continuar aunque falle (puede no haber no disponibilidad)
+              this.guardandoEstado = false;
+              this.cerrarEditar();
+            }
+          });
+        } else {
+          this.guardandoEstado = false;
+          this.cerrarEditar();
+          this.cdr.detectChanges();
+        }
+      },
+      error: (err) => {
+        console.error('Error actualizando reserva:', err);
+        this.guardandoEstado = false;
+      }
+    });
   }
 }

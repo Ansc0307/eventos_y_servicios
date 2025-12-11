@@ -87,23 +87,29 @@ export class ResponderSolicitudComponent {
           console.log('[ResponderSolicitud] Estado de solicitud actualizado:', solicitudActualizada);
           // Si se aprueba, crear la reserva y registrar no disponibilidad
           if (this.estadoSeleccionado === 'APROBADA') {
-            const nowIso = new Date().toISOString();
-            const fechaBase = this.solicitud!.fechaSolicitud || nowIso;
+            // Backend espera LocalDateTime en formato ISO sin 'Z' (yyyy-MM-ddTHH:mm:ss)
+            const now = new Date();
+            const formatLocalDateTime = (date: Date | string) => {
+              const d = typeof date === 'string' ? new Date(date) : date;
+              const pad = (n: number) => n.toString().padStart(2, '0');
+              return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+            };
+            const nowLocal = formatLocalDateTime(now);
+            // Usar fechas de la solicitud si existen, si no usar fecha actual
+            const fechaInicio = this.solicitud!.fechaSolicitud ? formatLocalDateTime(this.solicitud!.fechaSolicitud) : nowLocal;
+            const fechaFin = fechaInicio; // Por ahora mismo día, ajustar según lógica de negocio
 
             const nuevaReserva = {
-              // idReserva lo asigna la BD, no enviar si no es requerido
               idSolicitud: this.solicitud!.idSolicitud,
-              fechaReservaInicio: fechaBase,
-              fechaReservaFin: fechaBase,
-              estado: 'PENDIENTE',
-              fechaCreacion: nowIso,
-              fechaActualizacion: nowIso
+              fechaReservaInicio: fechaInicio,
+              fechaReservaFin: fechaFin,
+              estado: 'PENDIENTE'
             } as any;
 
-            console.log('[ResponderSolicitud] Creando reserva con payload:', nuevaReserva);
+            console.log('[ResponderSolicitud] 🚀 Creando reserva con payload:', JSON.stringify(nuevaReserva, null, 2));
             this.reservasService.create(nuevaReserva).subscribe({
               next: (reservaCreada) => {
-                console.log('[ResponderSolicitud] Reserva creada:', reservaCreada);
+                console.log('[ResponderSolicitud] ✅ Reserva creada exitosamente:', reservaCreada);
                 // Usar el idReserva devuelto por la BD para registrar no disponibilidad
                 const payloadNoDisp: Omit<NoDisponibilidad, 'idNoDisponibilidad'> = {
                   idOferta: this.solicitud!.idOferta,
@@ -113,16 +119,18 @@ export class ResponderSolicitudComponent {
                   idReserva: reservaCreada.idReserva
                 };
 
-                console.log('[ResponderSolicitud] Registrando no disponibilidad con payload:', payloadNoDisp);
+                console.log('[ResponderSolicitud] 🚀 Registrando no disponibilidad con payload:', JSON.stringify(payloadNoDisp, null, 2));
                 this.noDispService.create(payloadNoDisp).subscribe({
                   next: () => {
-                    console.log('[ResponderSolicitud] No disponibilidad registrada correctamente');
+                    console.log('[ResponderSolicitud] ✅ No disponibilidad registrada correctamente');
                     this.success = 'Solicitud aprobada, reserva creada y no disponibilidad registrada';
                     this.updated.emit(solicitudActualizada);
                     this.loading = false;
                   },
                   error: (err) => {
-                    console.error('[ResponderSolicitud] Error registrando no disponibilidad:', err);
+                    console.error('[ResponderSolicitud] ❌ Error registrando no disponibilidad:', err);
+                    console.error('Status:', err.status);
+                    console.error('Error completo:', JSON.stringify(err.error || err, null, 2));
                     this.error = 'Se aprobó y creó la reserva, pero falló la no disponibilidad';
                     this.updated.emit(solicitudActualizada);
                     this.loading = false;
@@ -130,8 +138,11 @@ export class ResponderSolicitudComponent {
                 });
               },
               error: (err) => {
-                console.error('[ResponderSolicitud] Error creando reserva:', err);
-                this.error = 'Se aprobó la solicitud, pero falló la creación de la reserva';
+                console.error('[ResponderSolicitud] ❌ Error creando reserva:', err);
+                console.error('HTTP Status:', err.status);
+                console.error('Error backend:', JSON.stringify(err.error || {}, null, 2));
+                console.error('Headers:', err.headers);
+                this.error = 'Se aprobó la solicitud, pero falló la creación de la reserva. Ver consola.';
                 this.updated.emit(solicitudActualizada);
                 this.loading = false;
               }

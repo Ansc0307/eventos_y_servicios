@@ -171,6 +171,17 @@ public class NoDisponibilidadService {
     }
 
     /**
+     * Obtiene todas las no disponibilidades asociadas a una reserva
+     * @param reservaId ID de la reserva
+     * @return Lista de no disponibilidades de la reserva
+     */
+    public List<NoDisponibilidadDTO> obtenerPorIdReserva(Integer reservaId) {
+        return repository.findByIdReserva(reservaId).stream()
+                .map(NoDisponibilidadMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    /**
      * Obtiene todas las no disponibilidades que tienen reserva asociada
      * @return Lista de no disponibilidades con reserva
      */

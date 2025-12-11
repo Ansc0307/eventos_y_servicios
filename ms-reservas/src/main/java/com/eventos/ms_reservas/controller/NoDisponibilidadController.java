@@ -202,6 +202,20 @@ public class NoDisponibilidadController {
     }
 
     // -------------------------------------------------------------
+    // 🔹 LISTAR POR RESERVA
+    // -------------------------------------------------------------
+    @Operation(summary = "Listar por reserva", description = "Obtiene todas las no disponibilidades asociadas a una reserva")
+    @GetMapping("/reserva/{idReserva}")
+    @PreAuthorize("isAuthenticated()")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<List<NoDisponibilidadDTO>> listarPorReserva(
+            @Parameter(description = "ID de la reserva", example = "10", required = true)
+            @PathVariable Integer idReserva) {
+        LOGGER.info("Listando no disponibilidades para reserva: {}", idReserva);
+        return ResponseEntity.ok(service.obtenerPorIdReserva(idReserva));
+    }
+
+    // -------------------------------------------------------------
     // 🔹 LISTAR CON / SIN RESERVA
     // -------------------------------------------------------------
     @Operation(summary = "Listar con reserva", description = "Obtiene todas las no disponibilidades que tienen reserva asociada")
