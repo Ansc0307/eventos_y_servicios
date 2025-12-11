@@ -31,10 +31,12 @@ import { ResponderSolicitudComponent } from '../components/solicitud-detalle/app
                 <span class="material-symbols-outlined text-slate-900 dark:text-white">dashboard</span>
                 <p class="text-slate-900 dark:text-white text-sm font-medium leading-normal">Dashboard</p>
               </div>
-              <div class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-primary/10 cursor-pointer">
-                <span class="material-symbols-outlined text-slate-600 dark:text-slate-300">inbox</span>
+              <a routerLink="/proveedor/solicitudes" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-primary/10 cursor-pointer">
+                <span class="material-symbols-outlined text-slate-600 dark:text-slate-300">event</span>
                 <p class="text-slate-600 dark:text-slate-300 text-sm font-medium leading-normal">Solicitudes</p>
-              </div>
+              </a>
+
+
               <div class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-primary/10 cursor-pointer">
                 <span class="material-symbols-outlined text-slate-600 dark:text-slate-300">calendar_today</span>
                 <p class="text-slate-600 dark:text-slate-300 text-sm font-medium leading-normal">Calendario</p>

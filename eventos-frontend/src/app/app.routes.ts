@@ -12,6 +12,7 @@ import { ReservasListComponent } from './reservas/reservas-list.component';
 import { SolicitudesListComponent } from './solicitudes/solicitudes-list.component';
 import { NoDisponibilidadesListComponent } from './NoDisponibilidad/NoDisponibilidad-list.component';
 import { ProveedorReservasListComponent } from './reservas/proveedor-reservas-list.component';
+import { ProveedorSolicitudesListComponent } from './solicitudes/proveedor-solicitudes-list.component';
 
 export const routes: Routes = [
   { path: '', component: RoleDashboardComponent },
@@ -19,6 +20,7 @@ export const routes: Routes = [
   { path: 'dashboard/organizador', component: OrganizadorDashboardComponent },
   { path: 'dashboard/proveedor', component: ProveedorDashboardComponent },
   { path: 'proveedor/reservas', component: ProveedorReservasListComponent },
+  { path: 'proveedor/solicitudes', component: ProveedorSolicitudesListComponent },
   // Ruta legacy previa
   { path: 'dashboard/legacy', component: DashboardComponent },
 
