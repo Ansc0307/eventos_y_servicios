@@ -47,6 +47,16 @@ public class ReservaService {
         return reservaRepository.findByIdSolicitud(idSolicitud);
     }
 
+    @Transactional(readOnly = true)
+    public List<Reserva> getByIdProveedor(Integer idProveedor) {
+        return reservaRepository.findByIdProveedor(idProveedor);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Reserva> getByIdOrganizador(Integer idOrganizador) {
+        return reservaRepository.findByIdOrganizador(idOrganizador);
+    }
+
    /*  public Reserva save(Reserva reserva) {
         // Validar conflictos de horarios antes de guardar
         if (reserva.getIdReserva() == null) {
