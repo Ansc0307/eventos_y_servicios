@@ -7,6 +7,7 @@ import { NoDisponibilidadesService } from '../services/no-disponibilidades.servi
 import { Solicitud } from '../models/solicitud.model';
 import { Reserva } from '../models/reserva.model';
 import { NoDisponibilidad } from '../models/NoDisponibilidad.model';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-solicitud-reserva-form',
@@ -50,7 +51,7 @@ import { NoDisponibilidad } from '../models/NoDisponibilidad.model';
           <!-- Page Heading -->
           <div class="flex min-w-72 flex-col gap-1 mb-6">
             <h1 class="text-[#0d191b] dark:text-white tracking-light text-2xl sm:text-3xl font-bold leading-tight">Solicitud de Reserva para Salón de Eventos 'El Mirador'</h1>
-            <p class="text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">Completa los siguientes campos para enviar tu solicitud al proveedor.</p>
+            <p class="text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">Completa los siguientes campos para enviar tu solicitud al proveedor. Si solo es evento de un dia haz double click</p>
           </div>
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <!-- Left Column: Date Range -->
@@ -146,17 +147,19 @@ import { NoDisponibilidad } from '../models/NoDisponibilidad.model';
   styles: []
 })
 export class SolicitudReservaFormComponent implements OnInit {
-  currentMonth: Date = new Date();
-  fechaInicio: string = '';
-  fechaFin: string = '';
-  startTime: string = '09:00';
-  endTime: string = '17:00';
-  attendees: number = 50;
-  noDisponibilidades: NoDisponibilidad[] = [];
-  disabledDates: Set<string> = new Set();
-  showConfirmation: boolean = false;
-  loading: boolean = false;
-  error: string = '';
+  currentMonth: Date = new Date();
+  fechaInicio: string = '';
+  fechaFin: string = '';
+  startTime: string = '09:00';
+  endTime: string = '17:00';
+  attendees: number = 50;
+  noDisponibilidades: NoDisponibilidad[] = [];
+  // 🆕 Añadimos lista de reservas para el calendario
+  reservas: Reserva[] = []; 
+  disabledDates: Set<string> = new Set();
+  showConfirmation: boolean = false;
+  loading: boolean = false;
+  error: string = '';
 
   constructor(
     private solicitudesService: SolicitudesService,
@@ -164,9 +167,74 @@ export class SolicitudReservaFormComponent implements OnInit {
     private noDispService: NoDisponibilidadesService
   ) {}
 
-  ngOnInit(): void {
-    this.loadNoDisponibilidades();
-  }
+ ngOnInit(): void {
+    this.loadRestrictions();
+  }
+
+
+
+
+// ... (dentro de SolicitudReservaFormComponent)
+
+  loadRestrictions() {
+    this.loading = true;
+    
+    forkJoin({
+      noDisponibilidades: this.noDispService.getAll(),
+      reservas: this.reservasService.getTodasLasReservas()
+    }).subscribe({
+      next: (results) => {
+        this.noDisponibilidades = results.noDisponibilidades.filter(nd => nd.idOferta === 1);
+        this.reservas = results.reservas;
+        
+        // 👈 ESTO ES CRUCIAL: Se llama al finalizar la carga
+        this.calculateDisabledDates(); 
+        
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Error loading restrictions', err);
+        this.error = 'Error al cargar las restricciones de disponibilidad.';
+        this.loading = false;
+      }
+    });
+  }
+
+
+
+  /**
+   * Combina NoDisponibilidades y Reservas para marcar fechas como deshabilitadas.
+   */
+  calculateDisabledDates() {
+    this.disabledDates.clear();
+    
+    // Función auxiliar para agregar días de un rango al Set
+    const addDatesInRange = (startDateStr: string, endDateStr: string) => {
+      const start = new Date(startDateStr);
+      const end = new Date(endDateStr);
+      
+      // Iterar día por día
+      for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+        // Usar toISOString().split('T')[0] para obtener solo la fecha YYYY-MM-DD
+        this.disabledDates.add(d.toISOString().split('T')[0]);
+      }
+    };
+
+    // 1. Fechas deshabilitadas por NoDisponibilidad (cierre, mantenimiento, etc.)
+    this.noDisponibilidades.forEach(nd => {
+      addDatesInRange(nd.fechaInicio, nd.fechaFin);
+    });
+    
+    // 2. Fechas deshabilitadas por Reservas existentes (CONFIRMADA, PENDIENTE, etc.)
+    this.reservas.forEach(reserva => {
+      // Podrías querer filtrar por estado si solo CONFIRMADA bloquea. 
+      // Para mayor precaución, bloqueamos todas las que no estén RECHAZADAS.
+      if (reserva.estado !== 'RECHAZADA') {
+        addDatesInRange(reserva.fechaReservaInicio, reserva.fechaReservaFin);
+      }
+    });
+  }
+
 
   loadNoDisponibilidades() {
     this.noDispService.getAll().subscribe({
@@ -181,75 +249,98 @@ export class SolicitudReservaFormComponent implements OnInit {
     });
   }
 
-  calculateDisabledDates() {
-    this.disabledDates.clear();
-    this.noDisponibilidades.forEach(nd => {
-      const start = new Date(nd.fechaInicio);
-      const end = new Date(nd.fechaFin);
-      for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-        this.disabledDates.add(d.toISOString().split('T')[0]);
-      }
-    });
-  }
 
-  getDaysInMonth() {
-    const year = this.currentMonth.getFullYear();
-    const month = this.currentMonth.getMonth();
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-    const days = [];
-    // Add previous month days to fill the grid
-    const startDay = firstDay.getDay();
-    for (let i = startDay - 1; i >= 0; i--) {
-      const date = new Date(year, month, -i);
-      days.push({ date, isCurrentMonth: false, isDisabled: true });
-    }
-    // Add current month days
-    for (let i = 1; i <= lastDay.getDate(); i++) {
-      const date = new Date(year, month, i);
-      const dateStr = date.toISOString().split('T')[0];
-      const isDisabled = this.disabledDates.has(dateStr);
-      days.push({ date, isCurrentMonth: true, isDisabled });
-    }
-    // Add next month days to fill the grid
-    const totalDays = days.length;
-    const remaining = 42 - totalDays;
-    for (let i = 1; i <= remaining; i++) {
-      const date = new Date(year, month + 1, i);
-      days.push({ date, isCurrentMonth: false, isDisabled: true });
-    }
-    return days;
-  }
+// En SolicitudReservaFormComponent
 
-  selectDate(date: Date) {
-    const dateStr = date.toISOString().split('T')[0];
-    if (this.disabledDates.has(dateStr)) return;
-    if (!this.fechaInicio) {
-      this.fechaInicio = dateStr;
-    } else if (!this.fechaFin) {
-      if (dateStr < this.fechaInicio) {
-        this.fechaFin = this.fechaInicio;
-        this.fechaInicio = dateStr;
-      } else {
-        this.fechaFin = dateStr;
-      }
-    } else {
-      // Reset selection
-      this.fechaInicio = dateStr;
-      this.fechaFin = '';
-    }
-  }
+  getDaysInMonth() {
+    const year = this.currentMonth.getFullYear();
+    const month = this.currentMonth.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const days = [];
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Para comparar solo la fecha
 
-  isSelected(date: Date): boolean {
-    const dateStr = date.toISOString().split('T')[0];
-    return dateStr === this.fechaInicio || dateStr === this.fechaFin;
-  }
+    // Add previous month days to fill the grid
+    const startDay = firstDay.getDay();
+    for (let i = startDay - 1; i >= 0; i--) {
+      const date = new Date(year, month, -i);
+      days.push({ date, isCurrentMonth: false, isDisabled: true });
+    }
+    
+    // Add current month days
+    for (let i = 1; i <= lastDay.getDate(); i++) {
+      const date = new Date(year, month, i);
+      const dateStr = date.toISOString().split('T')[0];
+      
+      // ⚠️ Una fecha está deshabilitada si:
+      // 1. Está marcada en disabledDates (por Reserva o NoDisp).
+      // 2. Es una fecha pasada.
+      const isPast = date < today;
+      const isDisabled = isPast || this.disabledDates.has(dateStr); // Combina ambas restricciones
+      
+      days.push({ date, isCurrentMonth: true, isDisabled });
+    }
+    // Add next month days to fill the grid
+    const totalDays = days.length;
+    const remaining = 42 - totalDays;
+    for (let i = 1; i <= remaining; i++) {
+      const date = new Date(year, month + 1, i);
+      days.push({ date, isCurrentMonth: false, isDisabled: true });
+    }
+    return days;
+  }
 
-  isInRange(date: Date): boolean {
-    if (!this.fechaInicio || !this.fechaFin) return false;
-    const dateStr = date.toISOString().split('T')[0];
-    return dateStr >= this.fechaInicio && dateStr <= this.fechaFin;
-  }
+  // ... (dentro de SolicitudReservaFormComponent)
+
+  selectDate(date: Date) {
+    const dateStr = date.toISOString().split('T')[0];
+    if (this.disabledDates.has(dateStr)) return;
+
+    if (!this.fechaInicio) {
+      // Caso 1: Primera selección
+      this.fechaInicio = dateStr;
+      this.fechaFin = ''; // Asegurar que Fin esté vacío
+    } else if (!this.fechaFin) {
+      // Caso 2: Segunda selección
+      
+      if (dateStr === this.fechaInicio) {
+        // 🆕 El usuario hizo clic en la misma fecha: SELECCIÓN DE UN SOLO DÍA
+        this.fechaFin = dateStr;
+      } else if (dateStr < this.fechaInicio) {
+        // Selección en orden inverso
+        this.fechaFin = this.fechaInicio;
+        this.fechaInicio = dateStr;
+      } else {
+        // Selección normal
+        this.fechaFin = dateStr;
+      }
+    } else {
+      // Caso 3: Ya hay un rango seleccionado (tres clics, reiniciar)
+      this.fechaInicio = dateStr;
+      this.fechaFin = '';
+    }
+  }
+
+
+
+isSelected(date: Date): boolean {
+    const dateStr = date.toISOString().split('T')[0];
+    // Retorna true si es la fecha de inicio, la fecha de fin, o si ambas son iguales (un solo día)
+    return dateStr === this.fechaInicio || dateStr === this.fechaFin;
+  }
+
+  isInRange(date: Date): boolean {
+    if (!this.fechaInicio || !this.fechaFin) return false;
+    const dateStr = date.toISOString().split('T')[0];
+    
+    // 🆕 Excluye el caso de un solo día para evitar que se pinte de azul claro el "rango" (que es solo ese día)
+    if (this.fechaInicio === this.fechaFin) return false;
+    
+    // Retorna si la fecha está entre el inicio y el fin (excluyendo los días de inicio y fin, que ya cubre isSelected)
+    return dateStr > this.fechaInicio && dateStr < this.fechaFin;
+  }
+
 
   prevMonth() {
     this.currentMonth = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth() - 1, 1);
@@ -267,63 +358,117 @@ export class SolicitudReservaFormComponent implements OnInit {
     if (this.attendees > 1) this.attendees--;
   }
 
-  submit() {
-    if (!this.fechaInicio || !this.fechaFin || !this.startTime || !this.endTime) {
-      this.error = 'Selecciona fecha de inicio, fecha de fin, hora de inicio y fin';
-      return;
-    }
-    const startDateTime = new Date(this.fechaInicio + 'T' + this.startTime);
-    const endDateTime = new Date(this.fechaFin + 'T' + this.endTime);
-    if (startDateTime >= endDateTime) {
-      this.error = 'La fecha/hora de inicio debe ser menor que la fecha/hora de fin';
-      return;
-    }
-    // Check overlap with no-disponibilidades
-    const overlaps = this.noDisponibilidades.some(nd => {
-      const ndStart = new Date(nd.fechaInicio);
-      const ndEnd = new Date(nd.fechaFin);
-      return startDateTime < ndEnd && endDateTime > ndStart;
-    });
-    if (overlaps) {
-      this.error = 'El período seleccionado no está disponible';
-      return;
-    }
-    this.loading = true;
-    this.error = '';
-    // Create solicitud
-    const solicitudPayload = {
-      fechaSolicitud: new Date().toISOString(),
-      idOrganizador: 14,
-      idProovedor: 1,
-      idOferta: 1,
-      estadoSolicitud: 'PENDIENTE'
-    };
-    this.solicitudesService.create(solicitudPayload).subscribe({
-      next: (solicitud: Solicitud) => {
-        // Create reserva
-        const reservaPayload = {
-          idSolicitud: solicitud.idSolicitud,
-          fechaReservaInicio: startDateTime.toISOString(),
-          fechaReservaFin: endDateTime.toISOString(),
-          estado: 'PENDIENTE'
-        };
-        this.reservasService.create(reservaPayload).subscribe({
-          next: (reserva: Reserva) => {
-            this.loading = false;
-            this.showConfirmation = true;
-          },
-          error: (err) => {
-            this.loading = false;
-            this.error = 'Error creando reserva: ' + (err?.error?.message || err?.message || 'Error desconocido');
-          }
-        });
-      },
-      error: (err) => {
-        this.loading = false;
-        this.error = 'Error creando solicitud: ' + (err?.error?.message || err?.message || 'Error desconocido');
-      }
-    });
-  }
+ // ... (código existente)
+
+  submit() {
+    if (!this.fechaInicio || !this.fechaFin || !this.startTime || !this.endTime) {
+      this.error = 'Selecciona fecha de inicio, fecha de fin, hora de inicio y fin';
+      return;
+    }
+
+    const startDateTime = new Date(this.fechaInicio + 'T' + this.startTime);
+    const endDateTime = new Date(this.fechaFin + 'T' + this.endTime);
+
+    if (startDateTime >= endDateTime) {
+      this.error = 'La fecha/hora de inicio debe ser menor que la fecha/hora de fin';
+      return;
+    }
+
+    // -------------------------------------------------------------------
+    // 1. Validación de No Disponibilidades (ya existente)
+    // -------------------------------------------------------------------
+    const overlapsND = this.noDisponibilidades.some(nd => {
+      const ndStart = new Date(nd.fechaInicio);
+      const ndEnd = new Date(nd.fechaFin);
+      return startDateTime < ndEnd && endDateTime > ndStart;
+    });
+
+    if (overlapsND) {
+      this.error = 'El período seleccionado ya está marcado como NO DISPONIBLE (cierre, mantenimiento, etc.).';
+      return;
+    }
+
+    this.loading = true;
+    this.error = '';
+
+    // Formato para el backend (ISO string, que el backend puede parsear a LocalDateTime)
+    // El backend de Java espera 'yyyy-MM-ddTHH:mm:ss', vamos a asegurarnos de que el formato sea limpio.
+    const formatLocalDateTime = (date: Date) => {
+      const d = new Date(date);
+      const pad = (n: number) => n.toString().padStart(2, '0');
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+    };
+
+    const inicioFormatted = formatLocalDateTime(startDateTime);
+    const finFormatted = formatLocalDateTime(endDateTime);
+
+    // -------------------------------------------------------------------
+    // 2. 🆕 NUEVA: Validación de Reservas Conflictivas (con el backend)
+    // -------------------------------------------------------------------
+    this.reservasService.getReservasConflictivas(inicioFormatted, finFormatted).subscribe({
+      next: (reservasConflictivas: Reserva[]) => {
+        
+        if (reservasConflictivas.length > 0) {
+          this.error = `Ya existe(n) ${reservasConflictivas.length} reserva(s) que se solapa(n) con el período solicitado.`;
+          this.loading = false;
+          return;
+        }
+
+        // Si no hay conflictos, proceder a crear la solicitud y la reserva
+        this.createSolicitudAndReserva(inicioFormatted, finFormatted);
+      },
+      error: (err) => {
+        console.error('Error al verificar reservas conflictivas:', err);
+        this.loading = false;
+        this.error = 'Error de conexión al verificar disponibilidad. Intenta nuevamente.';
+      }
+    });
+  }
+
+  // -------------------------------------------------------------------
+  // 🆕 NUEVO: Método helper para encapsular la creación
+  // -------------------------------------------------------------------
+  private createSolicitudAndReserva(inicioFormatted: string, finFormatted: string) {
+    // Create solicitud
+    const solicitudPayload = {
+      fechaSolicitud: new Date().toISOString(),
+      idOrganizador: 14, // Usar IDs estáticos/mockeados
+      idProovedor: 1, // Usar IDs estáticos/mockeados
+      idOferta: 1, // Usar IDs estáticos/mockeados (asumimos que la restricción es por oferta)
+      estadoSolicitud: 'PENDIENTE'
+    };
+
+    this.solicitudesService.create(solicitudPayload).subscribe({
+      next: (solicitud: Solicitud) => {
+        // Create reserva (en estado PENDIENTE)
+        const reservaPayload = {
+          idSolicitud: solicitud.idSolicitud,
+          fechaReservaInicio: inicioFormatted, // Usamos las fechas ya formateadas
+          fechaReservaFin: finFormatted,      // Usamos las fechas ya formateadas
+          estado: 'PENDIENTE'
+        };
+
+        this.reservasService.create(reservaPayload).subscribe({
+          next: (reserva: Reserva) => {
+            this.loading = false;
+            this.showConfirmation = true;
+          },
+          error: (err) => {
+            this.loading = false;
+            this.error = 'Error creando reserva: ' + (err?.error?.message || err?.message || 'Error desconocido');
+            
+            // ⚠️ Consideración: Si falla la creación de la reserva,
+            // la Solicitud ya fue creada. Deberías considerar eliminar
+            // la Solicitud recién creada para no dejarla "huérfana".
+          }
+        });
+      },
+      error: (err) => {
+        this.loading = false;
+        this.error = 'Error creando solicitud: ' + (err?.error?.message || err?.message || 'Error desconocido');
+      }
+    });
+  }
 
   closeConfirmation() {
     this.showConfirmation = false;
