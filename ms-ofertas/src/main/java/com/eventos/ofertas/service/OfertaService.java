@@ -239,4 +239,10 @@ public class OfertaService {
         dto.setFecha(resena.getFecha());
         return dto;
     }
+    public OfertaResponseDTO obtenerOfertaPorId(Long id) {
+    Oferta oferta = ofertaRepository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException("Oferta no encontrada con ID: " + id));
+    return convertirAResponseDTO(oferta);
+}
+
 }

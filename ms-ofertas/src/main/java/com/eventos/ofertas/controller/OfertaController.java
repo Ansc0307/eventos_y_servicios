@@ -105,7 +105,38 @@ public class OfertaController {
         List<OfertaResponseDTO> ofertas = ofertaService.obtenerOfertasPorCategoria(idCategoria);
         return ResponseEntity.ok(ofertas);
     }
-    
+    //--------------------------
+    // Obtener Oferta por ID (público)
+    //--------------------------
+    /**
+     * GET /ofertas/{id} - Obtener oferta por ID
+     */ 
+    /**
+ * GET /ofertas/{id} - Obtener una oferta por ID
+ */
+    @Operation(
+        summary = "Obtener una oferta por ID",
+        description = "Retorna los detalles de una oferta específica"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Oferta encontrada",
+            content = @Content(schema = @Schema(implementation = OfertaResponseDTO.class))
+        ),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Oferta no encontrada"
+        )
+    })
+    @GetMapping("/{id}")
+    public ResponseEntity<OfertaResponseDTO> obtenerOfertaPorId(
+            @Parameter(description = "ID de la oferta", required = true)
+            @PathVariable Long id) {
+        OfertaResponseDTO oferta = ofertaService.obtenerOfertaPorId(id);
+        return ResponseEntity.ok(oferta);
+    }
+
     // --------------------------
     // Actualizar Oferta
     // --------------------------
