@@ -13,6 +13,13 @@ import { ProveedorReservasListComponent } from './reservas/proveedor-reservas-li
 import { OfertasPageComponent } from './pages/ofertas-page.component';
 import { OfertaDetalleComponent } from './pages/oferta-detalle.component';
 //import { OfertaDetailComponent } from './pages/oferta-detail.component';
+// para solicitudes y no disponibilidades
+import { SolicitudesListComponent } from './solicitudes/solicitudes-list.component';
+import { NoDisponibilidadesListComponent } from './NoDisponibilidad/NoDisponibilidad-list.component';
+import { ProveedorSolicitudesListComponent } from './solicitudes/proveedor-solicitudes-list.component';
+import { CalendarioDetalladoComponent } from './NoDisponibilidad/calendario_disponibilidad_prov';
+import { SolicitudReservaFormComponent } from './solicitudes/solicitud-reserva-form.component';
+
 
 export const routes: Routes = [
   { path: '', component: RoleDashboardComponent },
@@ -20,6 +27,8 @@ export const routes: Routes = [
   { path: 'dashboard/organizador', component: OrganizadorDashboardComponent },
   { path: 'dashboard/proveedor', component: ProveedorDashboardComponent },
   { path: 'proveedor/reservas', component: ProveedorReservasListComponent },
+  { path: 'proveedor/solicitudes', component: ProveedorSolicitudesListComponent },
+     { path: 'proveedor/no-disponibilidades', component: CalendarioDetalladoComponent },
   // Ruta legacy previa
   { path: 'dashboard/legacy', component: DashboardComponent },
 
@@ -38,6 +47,18 @@ export const routes: Routes = [
     path: 'reservas', 
     component: ReservasListComponent 
   },
+
+
+ { 
+    path: 'solicitudes', 
+    component: SolicitudesListComponent 
+  },
+
+{ 
+    path: 'no-disponibilidades', 
+    component: NoDisponibilidadesListComponent 
+  },
+
 {
   path: 'ofertas',
   children: [
