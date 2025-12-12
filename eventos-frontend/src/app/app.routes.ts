@@ -48,14 +48,15 @@ export const routes: Routes = [
         import('./pages/oferta-detalle.component').then(m => m.OfertaDetalleComponent)
     }
   ]
+},
+
+{
+  path: 'proveedor/ofertas/crear',
+  loadComponent: () =>
+    import('./components/crear-oferta/crear-oferta.component')
+      .then(m => m.CrearOfertaComponent)
 }
 
-
-//{ path: 'ofertas/:id', component: OfertaDetailComponent },
-//   { 
-//     path: 'ofertas', 
-//     loadChildren: () => import('./ofertas/ofertas.module').then(m => m.OfertasModule) 
-//   },
 //   { 
 //     path: 'notificaciones', 
 //     loadChildren: () => import('./notificaciones/notificaciones.module').then(m => m.NotificacionesModule) 

@@ -93,7 +93,9 @@ import { forkJoin } from 'rxjs';
             <div *ngIf="!loading && !error">
               <div class="flex flex-wrap justify-between gap-3 items-center">
                 <p class="text-slate-900 dark:text-white text-4xl font-black leading-tight tracking-[-0.033em] min-w-72">Dashboard</p>
-                <button class="bg-primary text-white font-bold py-2.5 px-6 rounded-lg flex items-center gap-2">
+                <button 
+                  routerLink="/proveedor/ofertas/crear"
+                  class="bg-primary text-white font-bold py-2.5 px-6 rounded-lg flex items-center gap-2">
                   <span class="material-symbols-outlined">add_circle</span>
                   Crear Nueva Oferta
                 </button>

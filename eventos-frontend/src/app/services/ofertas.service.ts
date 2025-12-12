@@ -60,5 +60,19 @@ export class OfertasService {
     })
   );
 }
-
+crearOferta(oferta: any): Observable<Oferta> {
+  return this.http.post<any>(this.baseUrl, oferta).pipe(
+    map((it) => ({
+      id: it.idOfertas ?? it.id,
+      proveedorId: it.proveedorId,
+      titulo: it.titulo,
+      idCategoria: it.categoria?.idCategoria ?? it.idCategoria ?? null,
+      descripcion: it.descripcion,
+      precioBase: it.precioBase,
+      estado: it.estado,
+      activo: it.activo,
+      urlsMedia: (it.medias || it.urlsMedia || []).map((m: any) => m.url ?? m)
+    } as Oferta))
+  );
+}
 }
