@@ -148,10 +148,18 @@ import { forkJoin } from 'rxjs';
                         {{ getEstadoLabel(reserva.estado) }}
                       </span>
                     </td>
-                    <td class="p-6 text-right space-x-2 flex items-center justify-end">
-                      <button *ngIf="isPendiente(reserva.estado)" title="Solo se puede cambiar el estado de la solicitud" class="inline-flex items-center justify-center text-orange-600 dark:text-orange-400 h-10 w-10 rounded-lg border border-orange-300 dark:border-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors cursor-help">
-                        <span class="material-symbols-outlined">help</span>
-                      </button>
+                    <td class="p-6 text-right space-x-2 flex items-center justify-end relative">
+                      <div *ngIf="isPendiente(reserva.estado)" class="relative group">
+                        <button (mouseenter)="mostrarTooltipHelp(reserva.idReserva)" (mouseleave)="ocultarTooltipHelp()" class="inline-flex items-center justify-center text-orange-600 dark:text-orange-400 h-10 w-10 rounded-lg border border-orange-300 dark:border-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors cursor-help">
+                          <span class="material-symbols-outlined">help</span>
+                        </button>
+                        <!-- Tooltip flotante -->
+                        <div *ngIf="mostrarTooltip && tooltipId === reserva.idReserva" class="absolute bottom-full left-0 mb-2 px-3 py-2 bg-orange-600 text-white text-xs rounded-lg whitespace-nowrap z-50 shadow-lg">
+                          Solo se puede cambiar el estado de la solicitud
+                          <!-- Flecha del tooltip -->
+                          <div class="absolute top-full left-3 w-2 h-2 bg-orange-600 transform rotate-45"></div>
+                        </div>
+                      </div>
                       <button *ngIf="isEditable(reserva.estado)" (click)="abrirEditar(reserva)" class="inline-flex items-center justify-center text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 h-10 w-10 rounded-lg border border-blue-300 dark:border-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
                         <span class="material-symbols-outlined">edit</span>
                       </button>
@@ -349,6 +357,8 @@ export class ProveedorReservasListComponent implements OnInit {
   mostrarEditar = false;
   nuevoEstado: 'CONFIRMADA' | 'CANCELADA' | '' = '';
   guardandoEstado = false;
+  mostrarTooltip = false;
+  tooltipId: number | null = null;
 
   // Filtros
   filtroFecha: 'futuro' | 'todas' = 'futuro';
@@ -532,6 +542,16 @@ export class ProveedorReservasListComponent implements OnInit {
   // Mostrar botón de ayuda para PENDIENTE
   isPendiente(estado: string): boolean {
     return (estado || '').toUpperCase() === 'PENDIENTE';
+  }
+
+  mostrarTooltipHelp(id: number): void {
+    this.mostrarTooltip = true;
+    this.tooltipId = id;
+  }
+
+  ocultarTooltipHelp(): void {
+    this.mostrarTooltip = false;
+    this.tooltipId = null;
   }
 
   // Mostrar botón Editar solo para APROBADA
