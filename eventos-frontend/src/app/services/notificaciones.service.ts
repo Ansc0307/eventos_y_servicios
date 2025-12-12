@@ -10,12 +10,17 @@ import { TipoNotificacion } from '../models/notifications/tipo-notificacion.mode
 })
 export class NotificacionesService {
   private baseUrl = '/ms-notifications/v1';
+  private userId = 1; // Usuario por defecto para desarrollo
 
   constructor(private http: HttpClient) {}
 
   // ===== NOTIFICACIONES =====
   getNotificaciones(): Observable<Notificacion[]> {
     return this.http.get<Notificacion[]>(`${this.baseUrl}/notificaciones`);
+  }
+
+  getNotificacionesPorUsuario(): Observable<Notificacion[]> {
+    return this.http.get<Notificacion[]>(`${this.baseUrl}/notificaciones/usuario/${this.userId}`);
   }
 
   getNotificacionById(id: number): Observable<Notificacion> {
@@ -32,6 +37,10 @@ export class NotificacionesService {
 
   eliminarNotificacion(id: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/notificaciones/${id}`);
+  }
+
+  marcarComoLeida(id: number): Observable<Notificacion> {
+    return this.http.patch<Notificacion>(`${this.baseUrl}/notificaciones/${id}/leida`, {});
   }
 
   // ===== PRIORIDADES =====
