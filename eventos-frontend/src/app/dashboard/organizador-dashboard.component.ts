@@ -1,5 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { KeycloakService } from 'keycloak-angular';
 import { SolicitudesService } from '../services/solicitudes.service';
 import { ReservasService } from '../services/reservas.service';
@@ -82,7 +83,7 @@ import { forkJoin } from 'rxjs';
             <div *ngIf="!loading && !error">
               <div class="flex flex-wrap items-center justify-between gap-4 mb-8">
                 <h1 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">¡Bienvenido de nuevo, {{ userName }}!</h1>
-                <button class="flex min-w-[84px] items-center justify-center gap-2 overflow-hidden rounded-lg h-10 px-5 bg-primary text-white text-sm font-bold shadow-sm hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-background-dark">
+                <button (click)="buscarOfertas()" class="flex min-w-[84px] items-center justify-center gap-2 overflow-hidden rounded-lg h-10 px-5 bg-primary text-white text-sm font-bold shadow-sm hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-background-dark">
                   <span class="material-symbols-outlined !text-xl">search</span>
                   <span>Buscar Ofertas</span>
                 </button>
@@ -225,7 +226,8 @@ export class OrganizadorDashboardComponent implements OnInit {
     private keycloak: KeycloakService,
     private solicitudesService: SolicitudesService,
     private reservasService: ReservasService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -341,5 +343,9 @@ export class OrganizadorDashboardComponent implements OnInit {
   getDay(dateString: string): string {
     const date = new Date(dateString);
     return date.getDate().toString();
+  }
+
+  buscarOfertas() {
+    this.router.navigate(['/solicitud-reserva']);
   }
 }

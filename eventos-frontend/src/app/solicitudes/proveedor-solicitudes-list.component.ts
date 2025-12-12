@@ -5,11 +5,12 @@ import { KeycloakService } from 'keycloak-angular';
 import { SolicitudesService } from '../services/solicitudes.service';
 import { Solicitud } from '../models/solicitud.model';
 import { FormsModule } from '@angular/forms';
+import { ResponderSolicitudComponent } from '../components/solicitud-detalle/app-responder-solicitud';
 
 @Component({
   selector: 'app-proveedor-solicitudes-list',
   standalone: true,
- imports: [CommonModule, FormsModule],
+ imports: [CommonModule, FormsModule, ResponderSolicitudComponent],
 
   template: `
   <div class="font-display bg-background-light dark:bg-background-dark text-[#18181B] dark:text-gray-200 min-h-screen">
@@ -112,6 +113,15 @@ import { FormsModule } from '@angular/forms';
                     <button (click)="verDetalle(s)" class="text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary text-sm font-bold py-2 px-4 rounded-lg border border-slate-300 dark:border-slate-700">
                       Ver Detalle
                     </button>
+                    <button
+  *ngIf="s.estadoSolicitud?.toUpperCase() === 'PENDIENTE'"
+  (click)="abrirResponder(s)"
+  class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
+>
+  Responder
+</button>
+
+
                   </td>
                 </tr>
               </tbody>
@@ -176,6 +186,12 @@ import { FormsModule } from '@angular/forms';
       </div>
     </div>
   </div>
+  <app-responder-solicitud
+  *ngIf="modalResponderVisible"
+  [solicitud]="selectedSolicitudResponder"
+  (close)="cerrarResponder()"
+  (updated)="actualizarSolicitud($event)"
+>
   `
 })
 export class ProveedorSolicitudesListComponent implements OnInit {
@@ -330,6 +346,27 @@ filtrarPorMes() {
     return fecha.getMonth() + 1 === this.mesSeleccionado;
   });
 }
+
+modalResponderVisible = false;
+selectedSolicitudResponder: Solicitud | null = null;
+
+abrirResponder(solicitud: Solicitud) {
+  this.selectedSolicitudResponder = solicitud;
+  this.modalResponderVisible = true;
+}
+
+cerrarResponder() {
+  this.modalResponderVisible = false;
+  this.selectedSolicitudResponder = null;
+}
+
+actualizarSolicitud(solicitudActualizada: Solicitud) {
+  // Actualizar la lista de solicitudes localmente
+  const index = this.solicitudes.findIndex(s => s.idSolicitud === solicitudActualizada.idSolicitud);
+  if (index !== -1) this.solicitudes[index] = solicitudActualizada;
+}
+
+
 
 
 }

@@ -14,6 +14,7 @@ import { NoDisponibilidadesListComponent } from './NoDisponibilidad/NoDisponibil
 import { ProveedorReservasListComponent } from './reservas/proveedor-reservas-list.component';
 import { ProveedorSolicitudesListComponent } from './solicitudes/proveedor-solicitudes-list.component';
 import { CalendarioDetalladoComponent } from './NoDisponibilidad/calendario_disponibilidad_prov';
+import { SolicitudReservaFormComponent } from './solicitudes/solicitud-reserva-form.component';
 
 export const routes: Routes = [
   { path: '', component: RoleDashboardComponent },
@@ -60,5 +61,6 @@ export const routes: Routes = [
 //   { 
 //     path: 'notificaciones', 
 //     loadChildren: () => import('./notificaciones/notificaciones.module').then(m => m.NotificacionesModule) 
-//   }
+//   },
+  { path: 'solicitud-reserva', component: SolicitudReservaFormComponent }
 ];

@@ -1,0 +1,336 @@
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { SolicitudesService } from '../services/solicitudes.service';
+import { ReservasService } from '../services/reservas.service';
+import { NoDisponibilidadesService } from '../services/no-disponibilidades.service';
+import { Solicitud } from '../models/solicitud.model';
+import { Reserva } from '../models/reserva.model';
+import { NoDisponibilidad } from '../models/NoDisponibilidad.model';
+
+@Component({
+  selector: 'app-solicitud-reserva-form',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  template: `
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#13c8ec",
+              "background-light": "#f6f8f8",
+              "background-dark": "#101f22",
+            },
+            fontFamily: {
+              "display": ["Manrope", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+    </style>
+    <div class="relative flex min-h-screen w-full flex-col items-center justify-center p-4 sm:p-6 md:p-8 font-display bg-background-light dark:bg-background-dark">
+      <!-- Form View -->
+      <div class="w-full max-w-4xl rounded-xl bg-white dark:bg-background-dark dark:border dark:border-white/10 shadow-lg transition-all" *ngIf="!showConfirmation">
+        <div class="p-6 sm:p-8">
+          <!-- Close Button -->
+          <button class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+          <!-- Page Heading -->
+          <div class="flex min-w-72 flex-col gap-1 mb-6">
+            <h1 class="text-[#0d191b] dark:text-white tracking-light text-2xl sm:text-3xl font-bold leading-tight">Solicitud de Reserva para Salón de Eventos 'El Mirador'</h1>
+            <p class="text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">Completa los siguientes campos para enviar tu solicitud al proveedor.</p>
+          </div>
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Left Column: Date Range -->
+            <div class="flex flex-col gap-4">
+              <!-- Title: Select Date Range -->
+              <h2 class="text-[#0d191b] dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] pt-2">Selecciona el período del evento</h2>
+              <!-- Calendar Picker -->
+              <div class="flex min-w-72 flex-1 flex-col gap-0.5">
+                <div class="flex items-center p-1 justify-between">
+                  <button class="text-[#0d191b] dark:text-white hover:bg-gray-100 dark:hover:bg-white/10 rounded-full" (click)="prevMonth()">
+                    <div class="flex size-10 items-center justify-center">
+                      <span class="material-symbols-outlined text-lg">chevron_left</span>
+                    </div>
+                  </button>
+                  <p class="text-[#0d191b] dark:text-white text-base font-bold leading-tight flex-1 text-center">{{ currentMonth | date:'MMMM yyyy' }}</p>
+                  <button class="text-[#0d191b] dark:text-white hover:bg-gray-100 dark:hover:bg-white/10 rounded-full" (click)="nextMonth()">
+                    <div class="flex size-10 items-center justify-center">
+                      <span class="material-symbols-outlined text-lg">chevron_right</span>
+                    </div>
+                  </button>
+                </div>
+                <div class="grid grid-cols-7">
+                  <p class="text-gray-500 dark:text-gray-400 text-[13px] font-bold leading-normal tracking-[0.015em] flex h-10 w-full items-center justify-center pb-0.5">D</p>
+                  <p class="text-gray-500 dark:text-gray-400 text-[13px] font-bold leading-normal tracking-[0.015em] flex h-10 w-full items-center justify-center pb-0.5">L</p>
+                  <p class="text-gray-500 dark:text-gray-400 text-[13px] font-bold leading-normal tracking-[0.015em] flex h-10 w-full items-center justify-center pb-0.5">M</p>
+                  <p class="text-gray-500 dark:text-gray-400 text-[13px] font-bold leading-normal tracking-[0.015em] flex h-10 w-full items-center justify-center pb-0.5">X</p>
+                  <p class="text-gray-500 dark:text-gray-400 text-[13px] font-bold leading-normal tracking-[0.015em] flex h-10 w-full items-center justify-center pb-0.5">J</p>
+                  <p class="text-gray-500 dark:text-gray-400 text-[13px] font-bold leading-normal tracking-[0.015em] flex h-10 w-full items-center justify-center pb-0.5">V</p>
+                  <p class="text-gray-500 dark:text-gray-400 text-[13px] font-bold leading-normal tracking-[0.015em] flex h-10 w-full items-center justify-center pb-0.5">S</p>
+                  <button *ngFor="let day of getDaysInMonth()" class="h-10 w-full text-[#0d191b] dark:text-white text-sm font-medium leading-normal hover:bg-gray-100 dark:hover:bg-white/10" [class.text-gray-400]="!day.isCurrentMonth" [class.dark:text-gray-600]="!day.isCurrentMonth" [class.text-red-500]="day.isDisabled" [class.line-through]="day.isDisabled" [disabled]="day.isDisabled || !day.isCurrentMonth" (click)="selectDate(day.date)">
+                    <div class="flex size-full items-center justify-center rounded-full" [class.bg-primary]="isSelected(day.date)" [class.text-white]="isSelected(day.date)" [class.bg-blue-200]="isInRange(day.date) && !isSelected(day.date)">{{ day.date.getDate() }}</div>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <!-- Right Column: Time & Attendees -->
+            <div class="flex flex-col gap-4">
+              <!-- Title: Select Time -->
+              <h2 class="text-[#0d191b] dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] pt-2">Elige el horario</h2>
+              <!-- Time TextFields -->
+              <div class="flex flex-col sm:flex-row items-end gap-4">
+                <label class="flex flex-col min-w-40 flex-1">
+                  <p class="text-[#0d191b] dark:text-gray-300 text-base font-medium leading-normal pb-2">Hora de inicio</p>
+                  <input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#0d191b] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-[#cfe3e7] dark:border-gray-600 bg-white dark:bg-gray-800 focus:border-primary h-14 p-[15px] text-base font-normal leading-normal" type="time" [(ngModel)]="startTime" />
+                </label>
+                <label class="flex flex-col min-w-40 flex-1">
+                  <p class="text-[#0d191b] dark:text-gray-300 text-base font-medium leading-normal pb-2">Hora de fin</p>
+                  <input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#0d191b] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-[#cfe3e7] dark:border-gray-600 bg-white dark:bg-gray-800 focus:border-primary h-14 p-[15px] text-base font-normal leading-normal" type="time" [(ngModel)]="endTime" />
+                </label>
+              </div>
+              <!-- Title: Attendees -->
+              <h2 class="text-[#0d191b] dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] pt-4">Número de asistentes</h2>
+              <!-- Number Input -->
+              <div class="flex flex-col">
+                <div class="relative flex items-center max-w-[200px]">
+                  <button class="flex-shrink-0 bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 hover:bg-gray-200 inline-flex items-center justify-center border border-gray-300 dark:border-gray-600 rounded-l-lg h-14 w-14 focus:ring-gray-100 dark:focus:ring-gray-700 focus:ring-2 focus:outline-none" type="button" (click)="decrementAttendees()">
+                    <span class="material-symbols-outlined text-xl text-[#0d191b] dark:text-white">remove</span>
+                  </button>
+                  <input class="flex-shrink-0 text-gray-900 dark:text-white border-x-0 border-gray-300 dark:border-gray-600 h-14 text-center text-base font-medium w-full bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary/50" type="number" [(ngModel)]="attendees" min="1" />
+                  <button class="flex-shrink-0 bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 hover:bg-gray-200 inline-flex items-center justify-center border border-gray-300 dark:border-gray-600 rounded-r-lg h-14 w-14 focus:ring-gray-100 dark:focus:ring-gray-700 focus:ring-2 focus:outline-none" type="button" (click)="incrementAttendees()">
+                    <span class="material-symbols-outlined text-xl text-[#0d191b] dark:text-white">add</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Submit Button -->
+          <div class="border-t border-gray-200 dark:border-gray-700 mt-8 pt-6 flex justify-end">
+            <button class="flex items-center justify-center rounded-lg bg-primary px-6 py-3 text-base font-bold text-[#0d191b] transition-all hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 dark:focus:ring-offset-background-dark" (click)="submit()" [disabled]="loading">
+              Enviar Solicitud
+            </button>
+          </div>
+          <div *ngIf="error" class="text-red-500 mt-4">{{ error }}</div>
+        </div>
+      </div>
+      <!-- Confirmation View -->
+      <div class="w-full max-w-lg rounded-xl bg-white dark:bg-background-dark dark:border dark:border-white/10 shadow-lg transition-all mt-10" *ngIf="showConfirmation">
+        <div class="flex flex-col items-center justify-center gap-6 p-8 sm:p-12 text-center">
+          <div class="flex h-20 w-20 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/50">
+            <span class="material-symbols-outlined text-5xl text-green-500 dark:text-green-400">check_circle</span>
+          </div>
+          <div class="flex flex-col gap-2">
+            <h2 class="text-2xl font-bold text-[#0d191b] dark:text-white">¡Solicitud Enviada!</h2>
+            <p class="text-gray-600 dark:text-gray-400">Tu solicitud ha sido enviada al proveedor. Recibirás una notificación por correo electrónico cuando respondan.</p>
+          </div>
+          <button class="w-full flex items-center justify-center rounded-lg bg-primary px-6 py-3 text-base font-bold text-[#0d191b] transition-all hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 dark:focus:ring-offset-background-dark" (click)="closeConfirmation()">
+            Entendido
+          </button>
+        </div>
+      </div>
+    </div>
+  `,
+  styles: []
+})
+export class SolicitudReservaFormComponent implements OnInit {
+  currentMonth: Date = new Date();
+  fechaInicio: string = '';
+  fechaFin: string = '';
+  startTime: string = '09:00';
+  endTime: string = '17:00';
+  attendees: number = 50;
+  noDisponibilidades: NoDisponibilidad[] = [];
+  disabledDates: Set<string> = new Set();
+  showConfirmation: boolean = false;
+  loading: boolean = false;
+  error: string = '';
+
+  constructor(
+    private solicitudesService: SolicitudesService,
+    private reservasService: ReservasService,
+    private noDispService: NoDisponibilidadesService
+  ) {}
+
+  ngOnInit(): void {
+    this.loadNoDisponibilidades();
+  }
+
+  loadNoDisponibilidades() {
+    this.noDispService.getAll().subscribe({
+      next: (data) => {
+        // Filter by idOferta=1 (since static)
+        this.noDisponibilidades = data.filter(nd => nd.idOferta === 1);
+        this.calculateDisabledDates();
+      },
+      error: (err) => {
+        console.error('Error loading no disponibilidades', err);
+      }
+    });
+  }
+
+  calculateDisabledDates() {
+    this.disabledDates.clear();
+    this.noDisponibilidades.forEach(nd => {
+      const start = new Date(nd.fechaInicio);
+      const end = new Date(nd.fechaFin);
+      for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+        this.disabledDates.add(d.toISOString().split('T')[0]);
+      }
+    });
+  }
+
+  getDaysInMonth() {
+    const year = this.currentMonth.getFullYear();
+    const month = this.currentMonth.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const days = [];
+    // Add previous month days to fill the grid
+    const startDay = firstDay.getDay();
+    for (let i = startDay - 1; i >= 0; i--) {
+      const date = new Date(year, month, -i);
+      days.push({ date, isCurrentMonth: false, isDisabled: true });
+    }
+    // Add current month days
+    for (let i = 1; i <= lastDay.getDate(); i++) {
+      const date = new Date(year, month, i);
+      const dateStr = date.toISOString().split('T')[0];
+      const isDisabled = this.disabledDates.has(dateStr);
+      days.push({ date, isCurrentMonth: true, isDisabled });
+    }
+    // Add next month days to fill the grid
+    const totalDays = days.length;
+    const remaining = 42 - totalDays;
+    for (let i = 1; i <= remaining; i++) {
+      const date = new Date(year, month + 1, i);
+      days.push({ date, isCurrentMonth: false, isDisabled: true });
+    }
+    return days;
+  }
+
+  selectDate(date: Date) {
+    const dateStr = date.toISOString().split('T')[0];
+    if (this.disabledDates.has(dateStr)) return;
+    if (!this.fechaInicio) {
+      this.fechaInicio = dateStr;
+    } else if (!this.fechaFin) {
+      if (dateStr < this.fechaInicio) {
+        this.fechaFin = this.fechaInicio;
+        this.fechaInicio = dateStr;
+      } else {
+        this.fechaFin = dateStr;
+      }
+    } else {
+      // Reset selection
+      this.fechaInicio = dateStr;
+      this.fechaFin = '';
+    }
+  }
+
+  isSelected(date: Date): boolean {
+    const dateStr = date.toISOString().split('T')[0];
+    return dateStr === this.fechaInicio || dateStr === this.fechaFin;
+  }
+
+  isInRange(date: Date): boolean {
+    if (!this.fechaInicio || !this.fechaFin) return false;
+    const dateStr = date.toISOString().split('T')[0];
+    return dateStr >= this.fechaInicio && dateStr <= this.fechaFin;
+  }
+
+  prevMonth() {
+    this.currentMonth = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth() - 1, 1);
+  }
+
+  nextMonth() {
+    this.currentMonth = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth() + 1, 1);
+  }
+
+  incrementAttendees() {
+    this.attendees++;
+  }
+
+  decrementAttendees() {
+    if (this.attendees > 1) this.attendees--;
+  }
+
+  submit() {
+    if (!this.fechaInicio || !this.fechaFin || !this.startTime || !this.endTime) {
+      this.error = 'Selecciona fecha de inicio, fecha de fin, hora de inicio y fin';
+      return;
+    }
+    const startDateTime = new Date(this.fechaInicio + 'T' + this.startTime);
+    const endDateTime = new Date(this.fechaFin + 'T' + this.endTime);
+    if (startDateTime >= endDateTime) {
+      this.error = 'La fecha/hora de inicio debe ser menor que la fecha/hora de fin';
+      return;
+    }
+    // Check overlap with no-disponibilidades
+    const overlaps = this.noDisponibilidades.some(nd => {
+      const ndStart = new Date(nd.fechaInicio);
+      const ndEnd = new Date(nd.fechaFin);
+      return startDateTime < ndEnd && endDateTime > ndStart;
+    });
+    if (overlaps) {
+      this.error = 'El período seleccionado no está disponible';
+      return;
+    }
+    this.loading = true;
+    this.error = '';
+    // Create solicitud
+    const solicitudPayload = {
+      fechaSolicitud: new Date().toISOString(),
+      idOrganizador: 14,
+      idProovedor: 1,
+      idOferta: 1,
+      estadoSolicitud: 'PENDIENTE'
+    };
+    this.solicitudesService.create(solicitudPayload).subscribe({
+      next: (solicitud: Solicitud) => {
+        // Create reserva
+        const reservaPayload = {
+          idSolicitud: solicitud.idSolicitud,
+          fechaReservaInicio: startDateTime.toISOString(),
+          fechaReservaFin: endDateTime.toISOString(),
+          estado: 'PENDIENTE'
+        };
+        this.reservasService.create(reservaPayload).subscribe({
+          next: (reserva: Reserva) => {
+            this.loading = false;
+            this.showConfirmation = true;
+          },
+          error: (err) => {
+            this.loading = false;
+            this.error = 'Error creando reserva: ' + (err?.error?.message || err?.message || 'Error desconocido');
+          }
+        });
+      },
+      error: (err) => {
+        this.loading = false;
+        this.error = 'Error creando solicitud: ' + (err?.error?.message || err?.message || 'Error desconocido');
+      }
+    });
+  }
+
+  closeConfirmation() {
+    this.showConfirmation = false;
+    this.fechaInicio = '';
+    this.fechaFin = '';
+    this.startTime = '09:00';
+    this.endTime = '17:00';
+    this.attendees = 50;
+  }
+}

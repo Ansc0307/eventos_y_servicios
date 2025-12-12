@@ -250,6 +250,7 @@ import { ResponderSolicitudComponent } from '../components/solicitud-detalle/app
   <app-solicitud-detalle 
   *ngIf="modalVisible" 
   [solicitud]="selectedSolicitud" 
+  [reserva]="selectedReserva"
   (close)="cerrarModal()">
 </app-solicitud-detalle>
 <app-responder-solicitud
@@ -456,11 +457,11 @@ export class ProveedorDashboardComponent implements OnInit {
     return 0;
   }
 
-  // Las 3 solicitudes pendientes más antiguas (ordenadas por fecha ascendente)
+  // Las 3 solicitudes pendientes más recientes (ordenadas por fecha descendente)
   get nuevasSolicitudes(): Solicitud[] {
     return this.solicitudes
       .filter(s => s.estadoSolicitud?.toUpperCase() === 'PENDIENTE')
-      .sort((a, b) => new Date(a.fechaSolicitud).getTime() - new Date(b.fechaSolicitud).getTime())
+      .sort((a, b) => new Date(b.fechaSolicitud).getTime() - new Date(a.fechaSolicitud).getTime())
       .slice(0, 3);
   }
 
@@ -554,15 +555,19 @@ export class ProveedorDashboardComponent implements OnInit {
   // Modal
 modalVisible = false;
 selectedSolicitud: Solicitud | null = null;
+selectedReserva: Reserva | null = null;
 
 verDetalle(solicitud: Solicitud) {
   this.selectedSolicitud = solicitud;
+  // Buscar reserva asociada
+  this.selectedReserva = this.reservas.find(r => r.idSolicitud === solicitud.idSolicitud) || null;
   this.modalVisible = true;
 }
 
 cerrarModal() {
   this.modalVisible = false;
   this.selectedSolicitud = null;
+  this.selectedReserva = null;
 }
 
 modalResponderVisible = false;
