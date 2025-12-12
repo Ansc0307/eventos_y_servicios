@@ -166,9 +166,16 @@ interface CalendarDay {
                   <p class="text-xs italic" *ngIf="nd.motivo">{{ nd.motivo }}</p>
                 </div>
 
-                <button (click)="eliminarNoDisponibilidad(nd.idNoDisponibilidad)">
-                  <span class="material-symbols-outlined text-xl">delete</span>
-                </button>
+               <button *ngIf="!nd.idReserva"
+        (click)="eliminarNoDisponibilidad(nd.idNoDisponibilidad)">
+  <span class="material-symbols-outlined text-xl">delete</span>
+</button>
+
+<!-- Si tiene reserva → mostramos un ícono bloqueado -->
+<span *ngIf="nd.idReserva"
+      class="material-symbols-outlined text-xl text-gray-400 cursor-not-allowed">
+  lock
+</span>
 
               </div>
             </div>
