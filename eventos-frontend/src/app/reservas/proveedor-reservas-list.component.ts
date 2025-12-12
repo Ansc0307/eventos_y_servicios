@@ -1,5 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { KeycloakService } from 'keycloak-angular';
 import { SolicitudesService } from '../services/solicitudes.service';
@@ -12,7 +13,7 @@ import { forkJoin } from 'rxjs';
 @Component({
   selector: 'app-proveedor-reservas-list',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   template: `
   <div class="font-display bg-background-light dark:bg-background-dark text-[#18181B] dark:text-gray-200 min-h-screen">
     <div class="relative flex min-h-screen w-full">
@@ -60,6 +61,41 @@ import { forkJoin } from 'rxjs';
         </header>
 
         <div class="p-10">
+          <!-- Filtros -->
+          <div class="mb-6 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6">
+            <div class="flex flex-wrap items-center gap-4">
+              <!-- Botones de Fecha -->
+              <div class="flex gap-2">
+                <button (click)="filtroFecha = 'futuro'; aplicarFiltros()" 
+                        [class]="'px-4 py-2 rounded-lg text-sm font-semibold transition-colors ' + (filtroFecha === 'futuro' ? 'bg-primary text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700')">
+                  Solo Futuras
+                </button>
+                <button (click)="filtroFecha = 'todas'; aplicarFiltros()" 
+                        [class]="'px-4 py-2 rounded-lg text-sm font-semibold transition-colors ' + (filtroFecha === 'todas' ? 'bg-primary text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700')">
+                  Ver Todas
+                </button>
+              </div>
+
+              <!-- Selector de Estado -->
+              <div class="flex items-center gap-2">
+                <label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Filtrar por Estado:</label>
+                <select [(ngModel)]="filtroEstado" (change)="aplicarFiltros()"
+                        class="px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm font-medium">
+                  <option value="">Todos los Estados</option>
+                  <option value="PENDIENTE">Pendiente</option>
+                  <option value="APROBADA">Aprobada</option>
+                  <option value="CONFIRMADA">Confirmada</option>
+                  <option value="CANCELADA">Cancelada</option>
+                </select>
+              </div>
+
+              <!-- Info del filtro -->
+              <div class="text-sm text-slate-600 dark:text-slate-400 ml-auto">
+                Mostrando <span class="font-semibold">{{ reservasFiltradas.length }}</span> de {{ todasLasReservas.length }} reservas
+              </div>
+            </div>
+          </div>
+
           <!-- Loading -->
           <div *ngIf="loading" class="flex items-center justify-center py-12">
             <div class="text-center">
@@ -81,8 +117,14 @@ import { forkJoin } from 'rxjs';
               <p class="mt-4 text-slate-500 dark:text-slate-400">No tienes reservas registradas</p>
             </div>
 
+            <!-- Sin reservas después del filtro -->
+            <div *ngIf="todasLasReservas.length > 0 && reservasFiltradas.length === 0" class="text-center py-12">
+              <span class="material-symbols-outlined text-6xl text-slate-300 dark:text-slate-600">filter_list_off</span>
+              <p class="mt-4 text-slate-500 dark:text-slate-400">No hay reservas que coincidan con los filtros</p>
+            </div>
+
             <!-- Con reservas -->
-            <div *ngIf="todasLasReservas.length > 0" class="overflow-x-auto">
+            <div *ngIf="todasLasReservas.length > 0 && reservasFiltradas.length > 0" class="overflow-x-auto">
               <table class="w-full text-left">
                 <thead class="border-b border-slate-200 dark:border-slate-800">
                   <tr>
@@ -95,7 +137,7 @@ import { forkJoin } from 'rxjs';
                   </tr>
                 </thead>
                 <tbody>
-                  <tr *ngFor="let reserva of todasLasReservas" 
+                  <tr *ngFor="let reserva of reservasFiltradas" 
                       class="border-b border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50">
                     <td class="p-6 text-sm font-medium text-slate-800 dark:text-slate-100">#{{ reserva.idReserva }}</td>
                     <td class="p-6 text-sm text-slate-600 dark:text-slate-300">#{{ reserva.idSolicitud }}</td>
@@ -107,6 +149,9 @@ import { forkJoin } from 'rxjs';
                       </span>
                     </td>
                     <td class="p-6 text-right space-x-2 flex items-center justify-end">
+                      <button *ngIf="isPendiente(reserva.estado)" title="Solo se puede cambiar el estado de la solicitud" class="inline-flex items-center justify-center text-orange-600 dark:text-orange-400 h-10 w-10 rounded-lg border border-orange-300 dark:border-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors cursor-help">
+                        <span class="material-symbols-outlined">help</span>
+                      </button>
                       <button *ngIf="isEditable(reserva.estado)" (click)="abrirEditar(reserva)" class="inline-flex items-center justify-center text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 h-10 w-10 rounded-lg border border-blue-300 dark:border-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
                         <span class="material-symbols-outlined">edit</span>
                       </button>
@@ -256,11 +301,11 @@ import { forkJoin } from 'rxjs';
           <div>
             <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Nuevo Estado</label>
             <div class="flex gap-3">
-              <button *ngIf="canConfirm(reservaSeleccionada?.estado || '')" (click)="nuevoEstado = 'CONFIRMADA'"
+              <button (click)="nuevoEstado = 'CONFIRMADA'"
                       [class]="'px-4 py-2 rounded-lg border text-sm font-semibold ' + (nuevoEstado === 'CONFIRMADA' ? 'bg-green-100 border-green-300 text-green-800' : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200')">
                 Confirmada
               </button>
-              <button *ngIf="canCancel(reservaSeleccionada?.estado || '')" (click)="nuevoEstado = 'CANCELADA'"
+              <button (click)="nuevoEstado = 'CANCELADA'"
                       [class]="'px-4 py-2 rounded-lg border text-sm font-semibold ' + (nuevoEstado === 'CANCELADA' ? 'bg-red-100 border-red-300 text-red-800' : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200')">
                 Cancelada
               </button>
@@ -305,6 +350,11 @@ export class ProveedorReservasListComponent implements OnInit {
   nuevoEstado: 'CONFIRMADA' | 'CANCELADA' | '' = '';
   guardandoEstado = false;
 
+  // Filtros
+  filtroFecha: 'futuro' | 'todas' = 'futuro';
+  filtroEstado: string = '';
+  reservasFiltradas: Reserva[] = [];
+
   get todasLasReservas(): Reserva[] {
     return this.reservas
       .sort((a, b) => new Date(b.fechaReservaInicio).getTime() - new Date(a.fechaReservaInicio).getTime());
@@ -338,6 +388,7 @@ export class ProveedorReservasListComponent implements OnInit {
             forkJoin(reservaRequests).subscribe({
               next: (reservasArrays) => {
                 this.reservas = reservasArrays.flat();
+                this.aplicarFiltros();
                 this.loading = false;
                 this.cdr.detectChanges();
               },
@@ -478,10 +529,33 @@ export class ProveedorReservasListComponent implements OnInit {
     this.reservaSeleccionada = null;
   }
 
-  // Mostrar botón Editar solo para estados PENDIENTE o CONFIRMADA
+  // Mostrar botón de ayuda para PENDIENTE
+  isPendiente(estado: string): boolean {
+    return (estado || '').toUpperCase() === 'PENDIENTE';
+  }
+
+  // Mostrar botón Editar solo para APROBADA
   isEditable(estado: string): boolean {
-    const e = (estado || '').toUpperCase();
-    return e === 'PENDIENTE' || e === 'CONFIRMADA';
+    return (estado || '').toUpperCase() === 'APROBADA';
+  }
+
+  // Aplicar filtros de fecha y estado
+  aplicarFiltros(): void {
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+
+    this.reservasFiltradas = this.todasLasReservas.filter((reserva) => {
+      // Filtro por fecha
+      const fechaInicio = new Date(reserva.fechaReservaInicio);
+      fechaInicio.setHours(0, 0, 0, 0);
+      
+      const cumpleFecha = this.filtroFecha === 'todas' || fechaInicio >= hoy;
+
+      // Filtro por estado
+      const cumpleEstado = !this.filtroEstado || reserva.estado?.toUpperCase() === this.filtroEstado.toUpperCase();
+
+      return cumpleFecha && cumpleEstado;
+    });
   }
 
   // Permitir confirmar solo cuando está PENDIENTE
@@ -514,6 +588,7 @@ export class ProveedorReservasListComponent implements OnInit {
                 this.noDispService.delete(noDisp.idNoDisponibilidad).subscribe({
                   next: () => {
                     this.guardandoEstado = false;
+                    this.aplicarFiltros();
                     this.cerrarEditar();
                     this.cdr.detectChanges();
                   },
@@ -526,6 +601,7 @@ export class ProveedorReservasListComponent implements OnInit {
               } else {
                 // No hay no disponibilidad asociada, continuar
                 this.guardandoEstado = false;
+                this.aplicarFiltros();
                 this.cerrarEditar();
                 this.cdr.detectChanges();
               }
@@ -539,6 +615,7 @@ export class ProveedorReservasListComponent implements OnInit {
           });
         } else {
           this.guardandoEstado = false;
+          this.aplicarFiltros();
           this.cerrarEditar();
           this.cdr.detectChanges();
         }
