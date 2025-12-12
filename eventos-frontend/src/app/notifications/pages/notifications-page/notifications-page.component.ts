@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Subject, takeUntil } from 'rxjs';
 import { NotificacionesService } from '../../../services/notificaciones.service';
 import { ModalService } from '../../../services/modal.service';
 import { Notificacion, NotificacionCreate } from '../../../models/notifications/notification.model';
@@ -23,7 +24,7 @@ import { EmptyStateComponent } from '../../components/empty-state/empty-state.co
   templateUrl: './notifications-page.component.html',
   //styleUrls: ['./notifications-page.component.css']
 })
-export class NotificationsPageComponent implements OnInit {
+export class NotificationsPageComponent implements OnInit, OnDestroy {
   notificaciones: Notificacion[] = [];
   filteredNotificaciones: Notificacion[] = [];
   isLoading: boolean = true;
@@ -40,9 +41,12 @@ export class NotificationsPageComponent implements OnInit {
     tipo: null as number | null
   };
 
+  private destroy$ = new Subject<void>();
+
   constructor(
     private notificacionesService: NotificacionesService,
-    private modalService: ModalService
+    private modalService: ModalService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -50,81 +54,127 @@ export class NotificationsPageComponent implements OnInit {
     this.cargarDatosModales();
   }
 
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
   cargarNotificaciones(): void {
     this.isLoading = true;
     this.error = null;
+    this.cdr.detectChanges(); // Forzar detección de cambios inicial
     
-    this.notificacionesService.getNotificacionesPorUsuario().subscribe({
-      next: (data) => {
-        this.notificaciones = data;
-        this.aplicarFiltros();
-        this.isLoading = false;
-      },
-      error: (err) => {
-        console.error('Error al cargar notificaciones:', err);
-        this.error = 'Error al cargar las notificaciones';
-        this.isLoading = false;
-      }
-    });
+    console.log('Cargando notificaciones...');
+    
+    this.notificacionesService.getNotificacionesPorUsuario()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data) => {
+          console.log('Notificaciones cargadas:', data);
+          this.notificaciones = data || [];
+          this.aplicarFiltros();
+          this.isLoading = false;
+          this.cdr.detectChanges();
+          console.log('isLoading después de cargar:', this.isLoading);
+        },
+        error: (err) => {
+          console.error('Error al cargar notificaciones:', err);
+          this.error = this.obtenerMensajeError(err);
+          this.isLoading = false;
+          this.notificaciones = [];
+          this.filteredNotificaciones = [];
+          this.cdr.detectChanges();
+        },
+        complete: () => {
+          console.log('Carga completada');
+          this.isLoading = false;
+          this.cdr.detectChanges();
+        }
+      });
+  }
+
+  obtenerMensajeError(error: any): string {
+    console.log('Error detallado:', error);
+    
+    if (error.status === 0) {
+      return 'Error de conexión: No se pudo conectar con el servidor.';
+    } else if (error.status === 404) {
+      return 'No se encontraron notificaciones para el usuario.';
+    } else if (error.status === 401 || error.status === 403) {
+      return 'No tienes permisos para ver las notificaciones.';
+    } else {
+      return `Error ${error.status}: ${error.message || 'Error desconocido'}`;
+    }
   }
 
   cargarDatosModales(): void {
     // Cargar prioridades
-    this.notificacionesService.getPrioridades().subscribe({
-      next: (data) => {
-        this.prioridades = data;
-      },
-      error: (err) => {
-        console.error('Error al cargar prioridades:', err);
-      }
-    });
+    this.notificacionesService.getPrioridades()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data) => {
+          this.prioridades = data || [];
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          console.error('Error al cargar prioridades:', err);
+        }
+      });
 
     // Cargar tipos
-    this.notificacionesService.getTiposNotificacion().subscribe({
-      next: (data) => {
-        this.tipos = data;
-      },
-      error: (err) => {
-        console.error('Error al cargar tipos:', err);
-      }
-    });
+    this.notificacionesService.getTiposNotificacion()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data) => {
+          this.tipos = data || [];
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          console.error('Error al cargar tipos:', err);
+        }
+      });
   }
 
   aplicarFiltros(): void {
     let filtradas = [...this.notificaciones];
     
-    // Filtro por estado de lectura
     if (this.filtros.leido !== null) {
       filtradas = filtradas.filter(n => n.leido === this.filtros.leido);
     }
     
-    // Filtro por prioridad
     if (this.filtros.prioridad !== null) {
       filtradas = filtradas.filter(n => n.prioridad.id === this.filtros.prioridad);
     }
     
-    // Filtro por tipo
     if (this.filtros.tipo !== null) {
       filtradas = filtradas.filter(n => n.tipoNotificacion.id === this.filtros.tipo);
     }
     
     this.filteredNotificaciones = filtradas;
+    this.cdr.detectChanges();
+    console.log('Filtros aplicados. Total:', this.notificaciones.length, 'Filtradas:', filtradas.length);
+  }
+
+  recargarNotificaciones(): void {
+    this.cargarNotificaciones();
   }
 
   onMarcarComoLeida(id: number): void {
-    this.notificacionesService.marcarComoLeida(id).subscribe({
-      next: (notificacionActualizada) => {
-        // Actualizar la notificación en la lista
-        const index = this.notificaciones.findIndex(n => n.id === id);
-        if (index !== -1) {
-          this.notificaciones[index] = notificacionActualizada;
-          this.aplicarFiltros();
+    this.notificacionesService.marcarComoLeida(id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          // Actualizar localmente
+          const index = this.notificaciones.findIndex(n => n.id === id);
+          if (index !== -1) {
+            this.notificaciones[index].leido = true;
+            this.aplicarFiltros();
+          }
+        },
+        error: (err) => {
+          console.error('Error al marcar como leída:', err);
         }
-      },
-      error: (err) => {
-        console.error('Error al marcar como leída:', err);
-      }
-    });
+      });
   }
 
   marcarTodasComoLeidas(): void {
@@ -134,43 +184,56 @@ export class NotificationsPageComponent implements OnInit {
       return;
     }
 
-    // Marcar todas como leídas (en un caso real, debería haber un endpoint para esto)
+    // Contador para saber cuándo todas han sido procesadas
+    let procesadas = 0;
+    
     noLeidas.forEach(notificacion => {
-      this.notificacionesService.marcarComoLeida(notificacion.id).subscribe({
-        next: (notificacionActualizada) => {
-          const index = this.notificaciones.findIndex(n => n.id === notificacion.id);
-          if (index !== -1) {
-            this.notificaciones[index] = notificacionActualizada;
+      this.notificacionesService.marcarComoLeida(notificacion.id)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: () => {
+            notificacion.leido = true;
+            procesadas++;
+            
+            // Cuando todas han sido procesadas, actualizar la vista
+            if (procesadas === noLeidas.length) {
+              this.aplicarFiltros();
+            }
+          },
+          error: (err) => {
+            console.error(`Error al marcar ${notificacion.id} como leída:`, err);
+            procesadas++;
+            
+            if (procesadas === noLeidas.length) {
+              this.aplicarFiltros();
+            }
           }
-        },
-        error: (err) => {
-          console.error(`Error al marcar notificación ${notificacion.id} como leída:`, err);
-        }
-      });
+        });
     });
-
-    // Actualizar la lista después de un breve delay
-    setTimeout(() => {
-      this.aplicarFiltros();
-    }, 500);
   }
 
   onEliminarNotificacion(id: number): void {
     if (confirm('¿Estás seguro de que deseas eliminar esta notificación?')) {
-      this.notificacionesService.eliminarNotificacion(id).subscribe({
-        next: () => {
-          // Eliminar de la lista
-          this.notificaciones = this.notificaciones.filter(n => n.id !== id);
-          this.aplicarFiltros();
-        },
-        error: (err) => {
-          console.error('Error al eliminar notificación:', err);
-        }
-      });
+      this.notificacionesService.eliminarNotificacion(id)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: () => {
+            this.notificaciones = this.notificaciones.filter(n => n.id !== id);
+            this.aplicarFiltros();
+          },
+          error: (err) => {
+            console.error('Error al eliminar notificación:', err);
+          }
+        });
     }
   }
 
   onCrearNotificacion(): void {
+    if (this.prioridades.length === 0 || this.tipos.length === 0) {
+      alert('Cargando datos, por favor espera...');
+      return;
+    }
+
     const campos = [
       {
         name: 'asunto',
@@ -205,20 +268,22 @@ export class NotificationsPageComponent implements OnInit {
         const nuevaNotificacion: NotificacionCreate = {
           asunto: resultado.asunto,
           mensaje: resultado.mensaje,
-          userId: 1, // Usuario actual (deberías obtener esto de tu servicio de autenticación)
+          userId: 1,
           prioridad: { id: parseInt(resultado.prioridadId) },
           tipoNotificacion: { id: parseInt(resultado.tipoId) }
         };
 
-        this.notificacionesService.crearNotificacion(nuevaNotificacion).subscribe({
-          next: (notificacionCreada) => {
-            this.notificaciones.unshift(notificacionCreada);
-            this.aplicarFiltros();
-          },
-          error: (err) => {
-            console.error('Error al crear notificación:', err);
-          }
-        });
+        this.notificacionesService.crearNotificacion(nuevaNotificacion)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: (notificacionCreada) => {
+              this.notificaciones.unshift(notificacionCreada);
+              this.aplicarFiltros();
+            },
+            error: (err) => {
+              console.error('Error al crear notificación:', err);
+            }
+          });
       }
     });
   }

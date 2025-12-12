@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { Notificacion, NotificacionCreate } from '../models/notifications/notification.model';
 import { Prioridad } from '../models/notifications/prioridad.model';
 import { TipoNotificacion } from '../models/notifications/tipo-notificacion.model';
@@ -20,8 +20,17 @@ export class NotificacionesService {
   }
 
   getNotificacionesPorUsuario(): Observable<Notificacion[]> {
-    return this.http.get<Notificacion[]>(`${this.baseUrl}/notificaciones/usuario/${this.userId}`);
-  }
+    console.log('🔵 Llamando a getNotificacionesPorUsuario');
+    const url = `${this.baseUrl}/notificaciones/usuario/${this.userId}`;
+    console.log('🔵 URL:', url);
+    
+    return this.http.get<Notificacion[]>(url).pipe(
+      tap({
+        next: (data) => console.log('✅ Respuesta recibida:', data),
+        error: (err) => console.error('❌ Error en la petición:', err)
+      })
+    );
+}
 
   getNotificacionById(id: number): Observable<Notificacion> {
     return this.http.get<Notificacion>(`${this.baseUrl}/notificaciones/${id}`);
