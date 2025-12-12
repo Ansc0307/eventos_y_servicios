@@ -1,3 +1,19 @@
-<p>
-  empty-state works!
-</p>
+<div class="flex flex-col items-center justify-center py-20 text-center">
+  <div class="mb-6 p-6 rounded-full bg-primary/10">
+    <span class="material-symbols-outlined text-4xl text-primary">
+      notifications_off
+    </span>
+  </div>
+  <h3 class="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2">
+    {{ titulo }}
+  </h3>
+  <p class="text-slate-600 dark:text-slate-400 mb-6 max-w-md">
+    {{ mensaje }}
+  </p>
+  <button *ngIf="mostrarBoton" 
+          (click)="botonClick.emit()"
+          class="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium">
+    <span class="material-symbols-outlined">refresh</span>
+    {{ textoBoton }}
+  </button>
+</div>

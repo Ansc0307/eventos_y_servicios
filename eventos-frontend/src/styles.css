@@ -23,3 +23,72 @@
   min-height: 80px;
   resize: vertical;
 }
+
+/* Estilos para SweetAlert2 */
+.swal-field-group {
+  margin-bottom: 1rem;
+  text-align: left;
+}
+
+.swal-field-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #334155;
+  font-size: 0.875rem;
+}
+
+.swal-field-group .swal2-input,
+.swal-field-group .swal2-select,
+.swal-field-group .swal2-textarea {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  transition: border-color 0.15s ease-in-out;
+}
+
+.swal-field-group .swal2-input:focus,
+.swal-field-group .swal2-select:focus,
+.swal-field-group .swal2-textarea:focus {
+  outline: none;
+  border-color: #13c8ec;
+  box-shadow: 0 0 0 3px rgba(19, 200, 236, 0.1);
+}
+
+.swal-field-group .swal2-textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+/* Asegurar que SweetAlert2 respete el tema oscuro */
+.swal2-popup {
+  font-family: 'Manrope', sans-serif !important;
+}
+
+.swal2-title {
+  color: #1e293b !important;
+  font-weight: 700 !important;
+}
+
+body.dark .swal2-popup {
+  background-color: #101f22 !important;
+  color: #cbd5e1 !important;
+}
+
+body.dark .swal2-title {
+  color: #f1f5f9 !important;
+}
+
+body.dark .swal-field-group label {
+  color: #cbd5e1 !important;
+}
+
+body.dark .swal-field-group .swal2-input,
+body.dark .swal-field-group .swal2-select,
+body.dark .swal-field-group .swal2-textarea {
+  background-color: #1e293b !important;
+  border-color: #475569 !important;
+  color: #f1f5f9 !important;
+}

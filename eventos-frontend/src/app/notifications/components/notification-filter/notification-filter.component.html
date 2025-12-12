@@ -1,3 +1,100 @@
-<p>
-  notification-filter works!
-</p>
+<div class="relative">
+  <button 
+    (click)="mostrarFiltros = !mostrarFiltros"
+    class="flex items-center gap-2 min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-sm font-bold leading-normal tracking-[0.015em] hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+    <span class="material-symbols-outlined text-lg">filter_list</span>
+    <span class="truncate">Filtrar</span>
+  </button>
+
+  <!-- Panel de filtros desplegable -->
+  <div *ngIf="mostrarFiltros" 
+       class="absolute right-0 mt-2 w-80 bg-white dark:bg-slate-800 rounded-lg shadow-xl z-50 border border-slate-200 dark:border-slate-700 p-4">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Filtros</h3>
+      <button 
+        (click)="mostrarFiltros = false"
+        class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+
+    <div class="space-y-4">
+      <!-- Estado de lectura -->
+      <div>
+        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+          Estado
+        </label>
+        <div class="flex gap-2">
+          <button *ngFor="let opcion of estadoOpciones"
+                  (click)="filtros.leido = opcion.value; onFiltroChange()"
+                  [class]="filtros.leido === opcion.value 
+                    ? 'bg-primary text-white' 
+                    : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300'"
+                  class="px-3 py-2 rounded text-sm font-medium transition-colors">
+            {{ opcion.label }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Prioridad -->
+      <div>
+        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+          Prioridad
+        </label>
+        <div class="flex flex-wrap gap-2">
+          <button (click)="filtros.prioridad = null; onFiltroChange()"
+                  [class]="filtros.prioridad === null 
+                    ? 'bg-primary text-white' 
+                    : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300'"
+                  class="px-3 py-2 rounded text-sm font-medium transition-colors">
+            Todas
+          </button>
+          <button *ngFor="let prioridad of prioridades"
+                  (click)="filtros.prioridad = prioridad.id; onFiltroChange()"
+                  [class]="filtros.prioridad === prioridad.id 
+                    ? getPrioridadClass(prioridad.nombre, true) 
+                    : getPrioridadClass(prioridad.nombre, false)"
+                  class="px-3 py-2 rounded text-sm font-medium transition-colors">
+            {{ prioridad.nombre }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Tipo -->
+      <div>
+        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+          Tipo
+        </label>
+        <div class="flex flex-wrap gap-2">
+          <button (click)="filtros.tipo = null; onFiltroChange()"
+                  [class]="filtros.tipo === null 
+                    ? 'bg-primary text-white' 
+                    : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300'"
+                  class="px-3 py-2 rounded text-sm font-medium transition-colors">
+            Todos
+          </button>
+          <button *ngFor="let tipo of tipos"
+                  (click)="filtros.tipo = tipo.id; onFiltroChange()"
+                  [class]="filtros.tipo === tipo.id 
+                    ? 'bg-primary text-white' 
+                    : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300'"
+                  class="px-3 py-2 rounded text-sm font-medium transition-colors">
+            {{ tipo.nombre }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex justify-between mt-6 pt-4 border-t border-slate-200 dark:border-slate-700">
+      <button (click)="limpiarFiltros()"
+              [disabled]="!filtros.leido && !filtros.prioridad && !filtros.tipo"
+              class="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-300 disabled:opacity-50 disabled:cursor-not-allowed">
+        Limpiar filtros
+      </button>
+      <button (click)="mostrarFiltros = false"
+              class="px-4 py-2 bg-primary text-white text-sm font-medium rounded hover:bg-primary/90">
+        Aplicar
+      </button>
+    </div>
+  </div>
+</div>

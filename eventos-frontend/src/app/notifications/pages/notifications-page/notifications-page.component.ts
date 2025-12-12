@@ -21,7 +21,7 @@ import { EmptyStateComponent } from '../../components/empty-state/empty-state.co
     EmptyStateComponent
   ],
   templateUrl: './notifications-page.component.html',
-  styleUrls: ['./notifications-page.component.css']
+  //styleUrls: ['./notifications-page.component.css']
 })
 export class NotificationsPageComponent implements OnInit {
   notificaciones: Notificacion[] = [];

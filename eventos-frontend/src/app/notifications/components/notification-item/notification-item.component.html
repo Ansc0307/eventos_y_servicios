@@ -1,3 +1,66 @@
-<p>
-  notification-item works!
-</p>
+<div class="flex gap-4 px-4 py-3 justify-between cursor-pointer transition-colors"
+     [class]="getBackgroundClass()">
+  <!-- Icono y contenido -->
+  <div class="flex items-start gap-4 flex-1">
+    <!-- Icono según tipo -->
+    <div class="text-slate-800 dark:text-slate-200 flex items-center justify-center rounded-lg bg-black/5 dark:bg-white/10 shrink-0 size-12">
+      <span class="material-symbols-outlined text-2xl" [class]="getIconoTipo().color">
+        {{ getIconoTipo().icon }}
+      </span>
+    </div>
+    
+    <!-- Contenido -->
+    <div class="flex flex-1 flex-col justify-center min-w-0">
+      <p class="text-slate-900 dark:text-slate-100 text-base font-medium leading-normal">
+        {{ notificacion.asunto }}
+      </p>
+      <p class="text-slate-600 dark:text-slate-400 text-sm font-normal leading-normal mt-1">
+        {{ notificacion.mensaje }}
+      </p>
+      <div class="flex items-center gap-3 mt-2">
+        <span class="text-slate-500 dark:text-slate-500 text-sm font-normal leading-normal">
+          {{ getTiempoTranscurrido() }}
+        </span>
+        <span class="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ring-1 ring-inset"
+              [class]="getColorPorPrioridad()">
+          {{ notificacion.prioridad.nombre }}
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Indicador de no leído y acciones -->
+  <div class="shrink-0 flex items-center gap-3">
+    <!-- Badge de tipo -->
+    <span class="inline-flex items-center rounded-full bg-slate-500/10 px-2 py-1 text-xs font-medium text-slate-500 ring-1 ring-inset ring-slate-500/20">
+      {{ notificacion.tipoNotificacion.nombre }}
+    </span>
+    
+    <!-- Indicador de no leído -->
+    <div *ngIf="!notificacion.leido" class="size-3 rounded-full bg-primary"></div>
+    
+    <!-- Menú de acciones -->
+    <div class="relative group">
+      <button class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
+        <span class="material-symbols-outlined">more_vert</span>
+      </button>
+      <div class="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-lg shadow-lg z-10 hidden group-hover:block border border-slate-200 dark:border-slate-700">
+        <div class="py-1">
+          <button 
+            *ngIf="!notificacion.leido"
+            (click)="marcarComoLeida.emit(notificacion.id)"
+            class="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-2">
+            <span class="material-symbols-outlined text-sm">check_circle</span>
+            Marcar como leída
+          </button>
+          <button 
+            (click)="eliminar.emit(notificacion.id)"
+            class="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2">
+            <span class="material-symbols-outlined text-sm">delete</span>
+            Eliminar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
