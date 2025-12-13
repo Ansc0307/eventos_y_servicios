@@ -130,10 +130,7 @@ import { OfertaCardComponent } from '../components/oferta-card/oferta-card.compo
                   <p class="text-slate-600 dark:text-slate-300 text-base font-medium leading-normal">Mensajes Sin Leer</p>
                   <p class="text-slate-900 dark:text-white tracking-light text-3xl font-bold leading-tight">{{ mensajesSinLeer }}</p>
                 </div>
-                <div class="flex flex-col gap-2 rounded-xl p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-                  <p class="text-slate-600 dark:text-slate-300 text-base font-medium leading-normal">Ingresos del Mes</p>
-                  <p class="text-slate-900 dark:text-white tracking-light text-3xl font-bold leading-tight">{{ ingresosDelMes === 0 ? '$0' : '$' + ingresosDelMes.toLocaleString() }}</p>
-                </div>
+               
               </div>
 
             <div class="mt-8 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
@@ -147,10 +144,7 @@ import { OfertaCardComponent } from '../components/oferta-card/oferta-card.compo
                           [class]="'flex flex-col items-center justify-center border-b-[3px] pb-[13px] pt-4 ' + (activeTab === 'reservas' ? 'border-b-primary text-slate-900 dark:text-white' : 'border-b-transparent text-slate-500 dark:text-slate-400')">
                     <p class="text-sm font-bold leading-normal tracking-[0.015em]">Proximas Reservas</p>
                   </button>
-                  <button (click)="setActiveTab('historial')" 
-                          [class]="'flex flex-col items-center justify-center border-b-[3px] pb-[13px] pt-4 ' + (activeTab === 'historial' ? 'border-b-primary text-slate-900 dark:text-white' : 'border-b-transparent text-slate-500 dark:text-slate-400')">
-                    <p class="text-sm font-bold leading-normal tracking-[0.015em]">Historial</p>
-                  </button>
+                  
                 </div>
               </div>
 
@@ -245,13 +239,7 @@ import { OfertaCardComponent } from '../components/oferta-card/oferta-card.compo
                 </table>
               </div>
 
-              <!-- Tab Historial -->
-              <div *ngIf="activeTab === 'historial'" class="overflow-x-auto">
-                <div class="text-center py-12">
-                  <span class="material-symbols-outlined text-6xl text-slate-300 dark:text-slate-600">history</span>
-                  <p class="mt-4 text-slate-500 dark:text-slate-400">Historial en desarrollo</p>
-                </div>
-              </div>
+              
             </div>
             </div>
           </div>
@@ -325,6 +313,51 @@ import { OfertaCardComponent } from '../components/oferta-card/oferta-card.compo
             </div>
           </div>
 
+  <!-- INFORMACIÓN OFERTA -->
+          <div *ngIf="solicitudSeleccionada?.idOferta"
+               class="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-6 border border-slate-200 dark:border-slate-700">
+
+            <div class="flex items-center gap-2 mb-4">
+              <span class="material-symbols-outlined text-primary">local_offer</span>
+              <h3 class="text-xl font-bold text-slate-900 dark:text-white">Información de la Oferta</h3>
+            </div>
+
+            <div *ngIf="loadingOferta" class="flex items-center gap-3">
+              <div class="animate-spin h-5 w-5 border-b-2 border-primary rounded-full"></div>
+              <span>Cargando oferta...</span>
+            </div>
+
+            <div *ngIf="errorOferta" class="text-red-600">
+              {{ errorOferta }}
+            </div>
+
+            <div *ngIf="oferta" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <p class="text-sm font-semibold text-slate-500">ID Oferta</p>
+                <p>#{{ oferta.id }}</p>
+              </div>
+
+              <div>
+                <p class="text-sm font-semibold text-slate-500">Título</p>
+                <p class="font-medium text-primary">{{ oferta.titulo }}</p>
+              </div>
+
+              <div>
+                <p class="text-sm font-semibold text-slate-500">Precio Base</p>
+                <p>{{ oferta.precioBase | currency }}</p>
+              </div>
+
+              <div>
+                <p class="text-sm font-semibold text-slate-500">Estado Oferta</p>
+                <span class="inline-flex px-3 py-1 rounded-full text-sm font-medium mt-1"
+                      [ngClass]="getEstadoClass(oferta.estado)">
+                  {{ getEstadoLabel(oferta.estado) }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+
           <!-- Información de la Solicitud -->
           <div class="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-6 border border-slate-200 dark:border-slate-700">
             <div class="flex items-center gap-2 mb-4">
@@ -391,7 +424,9 @@ export class ProveedorDashboardComponent implements OnInit {
   userName = '';
   idProveedor = 1; // Por defecto
   misOfertas: Oferta[] = [];
-
+oferta: Oferta | null = null;
+  loadingOferta = false;
+  errorOferta: string | null = null;
 
     ngOnInit(): void {
     try {
@@ -503,6 +538,25 @@ export class ProveedorDashboardComponent implements OnInit {
   ) {}
 
 
+cargarOferta(idOferta: number) {
+    this.loadingOferta = true;
+    this.errorOferta = null;
+
+    this.ofertasService.getOfertaById(idOferta).subscribe({
+      next: (data) => {
+        this.oferta = data;
+        this.loadingOferta = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.errorOferta = 'No se pudo cargar la oferta';
+        this.loadingOferta = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+
 
   getEstadoClass(estado: string): string {
     const estadoUpper = estado?.toUpperCase() || '';
@@ -606,31 +660,52 @@ reservaSeleccionada: Reserva | null = null;
 solicitudSeleccionada: Solicitud | null = null;
 
 verDetalleReserva(reserva: Reserva) {
-  this.reservaSeleccionada = reserva;
-  this.loadingDetalle = true;
-  this.mostrarModal = true;
-  // Cargar solicitud asociada vía endpoint de reservas
-  this.reservasService.getSolicitudByReservaId(reserva.idReserva).subscribe({
-    next: (solicitud) => {
-      this.solicitudSeleccionada = solicitud;
-      this.loadingDetalle = false;
-      this.cdr.detectChanges();
-    },
-    error: (err) => {
-      console.error('Error cargando solicitud de reserva en dashboard:', err);
-      // Fallback: buscar en solicitudes cargadas
-      const s = this.solicitudes.find(x => x.idSolicitud === reserva.idSolicitud);
-      if (s) this.solicitudSeleccionada = s;
-      this.loadingDetalle = false;
-      this.cdr.detectChanges();
-    }
-  });
+  this.reservaSeleccionada = reserva;
+  this.loadingDetalle = true;
+  this.mostrarModal = true;
+  
+  // [NUEVO] Limpiar la información previa de la oferta
+  this.oferta = null;
+  this.errorOferta = null;
+
+  // Cargar solicitud asociada vía endpoint de reservas
+  this.reservasService.getSolicitudByReservaId(reserva.idReserva).subscribe({
+    next: (solicitud) => {
+      this.solicitudSeleccionada = solicitud;
+
+      // [NUEVO] Llamar a cargarOferta si existe un idOferta
+      if (solicitud.idOferta) {
+        this.cargarOferta(solicitud.idOferta);
+      }
+
+      this.loadingDetalle = false;
+      this.cdr.detectChanges();
+    },
+    error: (err) => {
+      console.error('Error cargando solicitud de reserva en dashboard:', err);
+      // Fallback: buscar en solicitudes cargadas
+      const s = this.solicitudes.find(x => x.idSolicitud === reserva.idSolicitud);
+      if (s) {
+        this.solicitudSeleccionada = s;
+        // [NUEVO] Si encuentra la solicitud en el fallback, también intenta cargar la oferta
+        if (s.idOferta) {
+          this.cargarOferta(s.idOferta);
+        }
+      }
+            
+      this.loadingDetalle = false;
+      this.cdr.detectChanges();
+    }
+  });
 }
 
 cerrarModalReserva() {
-  this.mostrarModal = false;
-  this.reservaSeleccionada = null;
-  this.solicitudSeleccionada = null;
+  this.mostrarModal = false;
+  this.reservaSeleccionada = null;
+  this.solicitudSeleccionada = null;
+  // [NUEVO] Limpiar el estado de la oferta
+  this.oferta = null; 
+  this.errorOferta = null;
 }
 
 

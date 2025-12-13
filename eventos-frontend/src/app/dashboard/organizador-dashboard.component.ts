@@ -1,17 +1,20 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { KeycloakService } from 'keycloak-angular';
 import { SolicitudesService } from '../services/solicitudes.service';
 import { ReservasService } from '../services/reservas.service';
+import { OfertasService } from '../services/ofertas.service'; // 🟢 Importar OfertasService
 import { Solicitud } from '../models/solicitud.model';
+import { Oferta } from '../models/oferta.model'; 
 import { Reserva } from '../models/reserva.model';
 import { forkJoin } from 'rxjs';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-organizador-dashboard',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule,RouterLink],
   template: `
   <div class="font-display bg-background-light dark:bg-background-dark text-[#18181B] dark:text-gray-200 min-h-screen">
     <div class="relative flex min-h-screen w-full">
@@ -246,6 +249,39 @@ import { forkJoin } from 'rxjs';
             </div>
           </div>
 
+           <div *ngIf="selectedSolicitud?.idOferta" class="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-6 mb-6 border border-slate-200 dark:border-slate-700">
+                    <h3 class="text-xl font-bold text-slate-800 dark:text-slate-100 mb-4">Detalles de la Oferta</h3>
+                    <div *ngIf="loadingOferta" class="flex items-center justify-center py-6">
+                      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                      <p class="ml-3 text-slate-600 dark:text-slate-300">Cargando oferta...</p>
+                    </div>
+                    <div *ngIf="errorOferta && !loadingOferta" class="bg-red-100 dark:bg-red-900/40 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded">
+                      {{ errorOferta }}
+                    </div>
+
+                    <div *ngIf="ofertaAsociada" class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                      <div>
+                        <p class="font-semibold text-slate-500 dark:text-slate-400">ID Oferta</p>
+                        <p class="text-base text-slate-900 dark:text-white">#{{ ofertaAsociada.id }}</p>
+                      </div>
+                      <div class="md:col-span-2">
+                        <p class="font-semibold text-slate-500 dark:text-slate-400">Título</p>
+                        <a class="text-base text-primary font-medium hover:underline cursor-pointer" 
+                            [routerLink]="['/oferta', ofertaAsociada.id]">
+                          {{ ofertaAsociada.titulo }}
+                        </a>
+                      </div>
+                      <div>
+                        <p class="font-semibold text-slate-500 dark:text-slate-400">Precio Base</p>
+                        <p class="text-base text-slate-900 dark:text-white">{{ ofertaAsociada.precioBase || 'N/A' }}</p> 
+                      </div>
+                      <div>
+                        <p class="font-semibold text-slate-500 dark:text-slate-400">Estado de Oferta</p>
+                        <p class="text-base text-slate-900 dark:text-white">{{ ofertaAsociada.estado }}</p>
+                      </div>
+                    </div>
+                  </div>
+
           <!-- Información de la Reserva asociada (si existe en memoria) -->
           <div class="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-6 border border-slate-200 dark:border-slate-700">
             <div class="flex items-center gap-2 mb-4">
@@ -299,6 +335,16 @@ export class OrganizadorDashboardComponent implements OnInit {
   error: string | null = null;
   userName = '';
   idOrganizador = 14; // Por defecto, se puede obtener del backend más adelante
+
+mostrarModal = false;
+  loadingDetalle = false;
+  errorDetalle: string | null = null;
+  solicitudSeleccionada: Solicitud | null = null;
+  reservaAsociada: any = null;
+
+  ofertaAsociada: Oferta | null = null;
+    loadingOferta = false;
+    errorOferta: string | null = null;
 
   // Estadísticas
   get solicitudesEnviadas(): number {
@@ -354,6 +400,7 @@ export class OrganizadorDashboardComponent implements OnInit {
     private solicitudesService: SolicitudesService,
     private reservasService: ReservasService,
     private cdr: ChangeDetectorRef,
+    private ofertasService: OfertasService,
     private router: Router
   ) {}
 
@@ -500,23 +547,52 @@ export class OrganizadorDashboardComponent implements OnInit {
 
   // Modal de detalle de solicitud (simple)
   modalVisible = false;
-  selectedSolicitud: Solicitud | null = null;
-  selectedReserva: Reserva | null = null;
+  selectedSolicitud: Solicitud | null = null;
+  selectedReserva: Reserva | null = null;
 
   verDetalleSolicitud(solicitud: Solicitud) {
-    this.selectedSolicitud = solicitud;
-    const idSolNum = Number(solicitud.idSolicitud);
-    // Busca la reserva asociada si ya está cargada
-    this.selectedReserva = this.reservas.find(r => Number(r.idSolicitud) === idSolNum) || null;
-    this.modalVisible = true;
-  }
+    this.selectedSolicitud = solicitud;
+    this.modalVisible = true;
+    
+    // Limpiar estados de oferta y reserva
+    this.ofertaAsociada = null;
+    this.loadingOferta = false;
+    this.errorOferta = null;
+    this.selectedReserva = null; // Reiniciar por si acaso
 
-  cerrarModal() {
-    this.modalVisible = false;
-    this.selectedSolicitud = null;
-    this.selectedReserva = null;
-  }
+    const idSolNum = Number(solicitud.idSolicitud);
+    
+    // 1. Buscar la reserva asociada (si ya está cargada en el dashboard)
+    this.selectedReserva = this.reservas.find(r => Number(r.idSolicitud) === idSolNum) || null;
 
+    // 2. Cargar la oferta si existe ID
+    if (solicitud.idOferta) {
+      this.loadingOferta = true;
+      this.ofertasService.getOfertaById(solicitud.idOferta).subscribe({
+        next: (oferta: Oferta) => {
+          this.ofertaAsociada = oferta;
+          this.loadingOferta = false;
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          console.error('Error cargando oferta:', err);
+          this.errorOferta = 'Error al cargar la oferta asociada.';
+          this.loadingOferta = false;
+          this.cdr.detectChanges();
+        }
+      });
+    }
+  }
+
+ cerrarModal() {
+    this.modalVisible = false;
+    this.selectedSolicitud = null;
+    this.selectedReserva = null;
+    // Limpiar las propiedades de la oferta al cerrar
+    this.ofertaAsociada = null;
+    this.errorOferta = null;
+    this.loadingOferta = false;
+  }
   // Navegación a listados completos
   verMisSolicitudes(): void {
     this.router.navigate(['/solicitudes/organizador']);

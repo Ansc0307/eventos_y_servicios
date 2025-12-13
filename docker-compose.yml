@@ -1,6 +1,16 @@
 
 
 services:
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: mailpit
+    restart: unless-stopped
+    ports:
+      - "8025:8025" # UI
+      - "1025:1025" # SMTP
+    networks:
+      - eventos-net
+
   keycloak:
     image: quay.io/keycloak/keycloak:25.0.1
     command:
@@ -9,6 +19,13 @@ services:
     environment:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
+      # Para que los links de emails (verify/reset) funcionen desde el HOST.
+      # Sin esto, Keycloak tiende a generar links con el hostname interno (keycloak:8080)
+      # porque ms-usuarios llama a Keycloak por la red docker.
+      KC_HOSTNAME: localhost
+      KC_HOSTNAME_PORT: 8090
+      KC_HOSTNAME_STRICT: "false"
+      KC_HOSTNAME_STRICT_HTTPS: "false"
     ports:
       - "8090:8080"
     restart: unless-stopped
@@ -17,10 +34,30 @@ services:
     networks:
       - eventos-net
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/realms/eventos/.well-known/openid-configuration"]
+      test: ["CMD-SHELL", "bash -c ': > /dev/tcp/localhost/8080'"]
       interval: 10s
       timeout: 5s
       retries: 6
+
+  keycloak-init:
+    image: quay.io/keycloak/keycloak:25.0.1
+    depends_on:
+      keycloak:
+        condition: service_healthy
+    env_file:
+      - ./.env
+    environment:
+      KEYCLOAK_BASE_URL: http://keycloak:8080
+      KEYCLOAK_PUBLIC_BASE_URL: http://localhost:8090
+      KEYCLOAK_REALM: eventos
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    volumes:
+      - ./keycloak/configure-smtp.sh:/opt/keycloak/configure-smtp.sh:ro
+    entrypoint: ["/bin/sh", "/opt/keycloak/configure-smtp.sh"]
+    networks:
+      - eventos-net
+    restart: "no"
 
   eureka-server:
     build:
@@ -47,12 +84,10 @@ services:
     depends_on:
       eureka-server:
         condition: service_healthy
+    env_file:
+      - ./.env
     environment:
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
-      CONFIG_SERVER_USER: ${CONFIG_SERVER_USER}
-      CONFIG_SERVER_PASSWORD: ${CONFIG_SERVER_PASSWORD}
-      CONFIG_GIT_URI: ${CONFIG_GIT_URI}
-      ENCRYPT_KEY: ${ENCRYPT_KEY}
     networks:
       - eventos-net
     # Ya no montamos config-repo local, el backend ahora es Git
@@ -153,12 +188,22 @@ services:
         condition: service_healthy
       eureka-server:
         condition: service_healthy
+      keycloak:
+        condition: service_healthy
+    env_file:
+      - ./.env
     environment:
       DB_URL: jdbc:postgresql://usuarios-db:5432/usuarios_eventos_db
       DB_USERNAME: postgres
       DB_PASSWORD: admin
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      EUREKA_INSTANCE_HOSTNAME: ms-usuarios
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/eventos/protocol/openid-connect/certs
+      KEYCLOAK_BASE_URL: http://keycloak:8080
+      KEYCLOAK_REALM: eventos
+      KEYCLOAK_ADMIN_CLIENT_ID: ms-usuarios-admin
+      KEYCLOAK_FRONTEND_CLIENT_ID: angular-app
+      KEYCLOAK_VERIFY_EMAIL_REDIRECT_URI: http://localhost:4200/
     # ports:
     #   - "8081:8081"
     networks:
@@ -215,11 +260,9 @@ services:
         condition: service_healthy
       eureka-server:
         condition: service_healthy
+    env_file:
+      - ./.env
     environment:
-      #config-server para ms-notifications
-      CONFIG_SERVER_USER: ${CONFIG_SERVER_USER}
-      CONFIG_SERVER_PASSWORD: ${CONFIG_SERVER_PASSWORD}
-
       SPRING_PROFILES_ACTIVE: docker
       SPRING_R2DBC_URL: r2dbc:postgresql://notifications-db:5432/notifications_db
       SPRING_R2DBC_USERNAME: postgres
@@ -241,12 +284,11 @@ services:
       - "8080:8080"
     networks:
       - eventos-net
+    env_file:
+      - ./.env
     environment:
-      #config-server para ms-notifications
-      CONFIG_SERVER_USER: ${CONFIG_SERVER_USER}
-      CONFIG_SERVER_PASSWORD: ${CONFIG_SERVER_PASSWORD}
       #https
-      SSL_KEYSTORE_PASSWORD: ${SSL_KEYSTORE_PASSWORD}
+      SSL_KEYSTORE_PASSWORD: ${SSL_KEYSTORE_PASSWORD:-}
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
     depends_on:
       eureka-server:

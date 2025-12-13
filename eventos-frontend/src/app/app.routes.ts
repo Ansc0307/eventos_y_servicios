@@ -19,23 +19,43 @@ import { ProveedorSolicitudesListComponent } from './solicitudes/proveedor-solic
 import { OrganizadorReservasListComponent } from './reservas/organizador-reservas-list.component';
 import { OrganizadorSolicitudesListComponent } from './solicitudes/organizador-solicitudes-list.component';
 import { CalendarioDetalladoComponent } from './NoDisponibilidad/calendario_disponibilidad_prov';
+
+import { authGuard } from './auth/auth.guard';
+import { LandingComponent } from './auth/landing/landing.component';
 import { SolicitudReservaFormComponent } from './solicitudes/solicitud-reserva-form.component';
 import { OfertasPageComponent } from './pages/ofertas-page.component';
 import { ProveedorOfertasPageComponent } from './pages/proveedor-ofertas-page.component';
 
-
 export const routes: Routes = [
-  { path: '', component: RoleDashboardComponent },
-  { path: 'dashboard', component: RoleDashboardComponent },
-  { path: 'dashboard/organizador', component: OrganizadorDashboardComponent },
-  { path: 'dashboard/proveedor', component: ProveedorDashboardComponent },
-  { path: 'proveedor/reservas', component: ProveedorReservasListComponent },
-  { path: 'proveedor/solicitudes', component: ProveedorSolicitudesListComponent },
-  { path: 'reservas/organizador', component: OrganizadorReservasListComponent },
-  { path: 'solicitudes/organizador', component: OrganizadorSolicitudesListComponent },
-   { path: 'proveedor/no-disponibilidades', component: CalendarioDetalladoComponent },
+  // Ruta pública inicial
+  { path: '', component: LandingComponent },
+
+  // Ruta pública: registro (consume /usuarios/auth/register)
+  {
+    path: 'registro',
+    loadComponent: () =>
+      import('./auth/registro/registro.component').then((m) => m.RegistroComponent)
+  },
+
+  // Rutas privadas
+  { path: 'dashboard', component: RoleDashboardComponent, canActivate: [authGuard] },
+  {
+    path: 'dashboard/organizador',
+    component: OrganizadorDashboardComponent,
+    canActivate: [authGuard]
+  },
+  {
+    path: 'dashboard/proveedor',
+    component: ProveedorDashboardComponent,
+    canActivate: [authGuard]
+  },
+  { path: 'proveedor/reservas', component: ProveedorReservasListComponent, canActivate: [authGuard] },
+  { path: 'proveedor/solicitudes', component: ProveedorSolicitudesListComponent, canActivate: [authGuard] },
+  { path: 'proveedor/no-disponibilidades', component: CalendarioDetalladoComponent, canActivate: [authGuard] },
+  { path: 'reservas/organizador', component: OrganizadorReservasListComponent, canActivate: [authGuard] },
+  { path: 'solicitudes/organizador', component: OrganizadorSolicitudesListComponent, canActivate: [authGuard] },
   // Ruta legacy previa
-  { path: 'dashboard/legacy', component: DashboardComponent },
+  { path: 'dashboard/legacy', component: DashboardComponent, canActivate: [authGuard] },
 
   //rutas para notificaciones
   // Ruta principal de notificaciones
@@ -53,49 +73,58 @@ export const routes: Routes = [
 //   },
   { 
     path: 'reservas', 
-    component: ReservasListComponent 
+    component: ReservasListComponent,
+    canActivate: [authGuard]
   },
 
     { 
     path: 'solicitudes', 
-    component: SolicitudesListComponent 
+    component: SolicitudesListComponent,
+    canActivate: [authGuard]
   },
 
 { 
     path: 'no-disponibilidades', 
-    component: NoDisponibilidadesListComponent 
+    component: NoDisponibilidadesListComponent,
+    canActivate: [authGuard]
   },
 
-{
-  path: 'ofertas',
-  children: [
-    { path: '', component: OfertasPageComponent },
-    {
-      path: ':id',
-      loadComponent: () =>
-        import('./pages/oferta-detalle.component').then(m => m.OfertaDetalleComponent)
-    }
-  ]
-},
+  {
+    path: 'ofertas',
+    canActivate: [authGuard],
+    children: [
+      { path: '', component: OfertasPageComponent, canActivate: [authGuard] },
+      {
+        path: ':id',
+        canActivate: [authGuard],
+        loadComponent: () =>
+          import('./pages/oferta-detalle.component').then((m) => m.OfertaDetalleComponent)
+      }
+    ]
+  },
 
-{
-  path: 'proveedor/ofertas/crear',
-  loadComponent: () =>
-    import('./components/crear-oferta/crear-oferta.component')
-      .then(m => m.CrearOfertaComponent)
-},
-{ path: 'proveedor/ofertas', component: ProveedorOfertasPageComponent },
-{
-  path: 'proveedor/ofertas/editar/:id',
-  loadComponent: () =>
-    import('./pages/oferta-editar.component')
-      .then(m => m.OfertaEditarComponent)
-},
-
-
+  {
+    path: 'proveedor/ofertas/crear',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./components/crear-oferta/crear-oferta.component').then(
+        (m) => m.CrearOfertaComponent
+      )
+  },
+  { path: 'proveedor/ofertas', component: ProveedorOfertasPageComponent, canActivate: [authGuard] },
+  {
+    path: 'proveedor/ofertas/editar/:id',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./pages/oferta-editar.component').then((m) => m.OfertaEditarComponent)
+  },
+//   { 
+//     path: 'ofertas', 
+//     loadChildren: () => import('./ofertas/ofertas.module').then(m => m.OfertasModule) 
+//   },
 //   { 
 //     path: 'notificaciones', 
 //     loadChildren: () => import('./notificaciones/notificaciones.module').then(m => m.NotificacionesModule) 
 //   },
-  { path: 'solicitud-reserva', component: SolicitudReservaFormComponent }
+  { path: 'solicitud-reserva', component: SolicitudReservaFormComponent, canActivate: [authGuard] }
 ];
