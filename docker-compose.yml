@@ -19,6 +19,13 @@ services:
     environment:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
+      # Para que los links de emails (verify/reset) funcionen desde el HOST.
+      # Sin esto, Keycloak tiende a generar links con el hostname interno (keycloak:8080)
+      # porque ms-usuarios llama a Keycloak por la red docker.
+      KC_HOSTNAME: localhost
+      KC_HOSTNAME_PORT: 8090
+      KC_HOSTNAME_STRICT: "false"
+      KC_HOSTNAME_STRICT_HTTPS: "false"
     ports:
       - "8090:8080"
     restart: unless-stopped
@@ -41,6 +48,7 @@ services:
       - ./.env
     environment:
       KEYCLOAK_BASE_URL: http://keycloak:8080
+      KEYCLOAK_PUBLIC_BASE_URL: http://localhost:8090
       KEYCLOAK_REALM: eventos
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin

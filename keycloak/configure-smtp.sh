@@ -3,6 +3,7 @@ set -eu
 
 KEYCLOAK_BASE_URL="${KEYCLOAK_BASE_URL:-http://keycloak:8080}"
 KEYCLOAK_REALM="${KEYCLOAK_REALM:-eventos}"
+KEYCLOAK_PUBLIC_BASE_URL="${KEYCLOAK_PUBLIC_BASE_URL:-}"
 KEYCLOAK_ADMIN="${KEYCLOAK_ADMIN:-admin}"
 KEYCLOAK_ADMIN_PASSWORD="${KEYCLOAK_ADMIN_PASSWORD:-admin}"
 
@@ -47,6 +48,11 @@ AUTH="${KEYCLOAK_SMTP_AUTH:-true}"
   -s "smtpServer.auth=$AUTH" \
   >/dev/null
 
+if [ -n "$KEYCLOAK_PUBLIC_BASE_URL" ]; then
+  # Ensure action links in emails are clickable from the host browser.
+  "$KCADM" update "realms/$KEYCLOAK_REALM" -s "attributes.frontendUrl=$KEYCLOAK_PUBLIC_BASE_URL" >/dev/null
+fi
+
 if [ -n "${KEYCLOAK_SMTP_USER:-}" ]; then
   "$KCADM" update "realms/$KEYCLOAK_REALM" -s "smtpServer.user=$KEYCLOAK_SMTP_USER" >/dev/null
 fi
@@ -55,4 +61,7 @@ if [ -n "${KEYCLOAK_SMTP_PASSWORD:-}" ]; then
   "$KCADM" update "realms/$KEYCLOAK_REALM" -s "smtpServer.password=$KEYCLOAK_SMTP_PASSWORD" >/dev/null
 fi
 
+if [ -n "$KEYCLOAK_PUBLIC_BASE_URL" ]; then
+  echo "[keycloak-init] Frontend URL set to $KEYCLOAK_PUBLIC_BASE_URL"
+fi
 echo "[keycloak-init] SMTP configured for realm '$KEYCLOAK_REALM' ($KEYCLOAK_SMTP_HOST:$PORT)."
