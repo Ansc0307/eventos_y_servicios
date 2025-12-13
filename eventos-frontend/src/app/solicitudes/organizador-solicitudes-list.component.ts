@@ -3,8 +3,10 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { KeycloakService } from 'keycloak-angular';
 import { SolicitudesService } from '../services/solicitudes.service';
+import { ReservasService } from '../services/reservas.service';
 import { Solicitud } from '../models/solicitud.model';
 import { FormsModule } from '@angular/forms';
+import { finalize, timeout } from 'rxjs/operators';
 
 @Component({
   selector: 'app-organizador-solicitudes-list',
@@ -57,6 +59,39 @@ import { FormsModule } from '@angular/forms';
         </header>
 
         <div class="p-10">
+          <!-- Filtros -->
+          <div class="mb-6 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6">
+            <div class="flex flex-wrap items-center gap-4">
+              <!-- Botones de Fecha -->
+              <div class="flex gap-2">
+                <button (click)="filtroFecha = 'futuro'; aplicarFiltros()" 
+                        [class]="'px-4 py-2 rounded-lg text-sm font-semibold transition-colors ' + (filtroFecha === 'futuro' ? 'bg-primary text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700')">
+                  Solo Futuras
+                </button>
+                <button (click)="filtroFecha = 'todas'; aplicarFiltros()" 
+                        [class]="'px-4 py-2 rounded-lg text-sm font-semibold transition-colors ' + (filtroFecha === 'todas' ? 'bg-primary text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700')">
+                  Ver Todas
+                </button>
+              </div>
+
+              <!-- Selector de Estado -->
+              <div class="flex items-center gap-2">
+                <label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Filtrar por Estado:</label>
+                <select [(ngModel)]="filtroEstado" (change)="aplicarFiltros()"
+                        class="px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm font-medium">
+                  <option value="">Todos los Estados</option>
+                  <option value="PENDIENTE">Pendiente</option>
+                  <option value="APROBADA">Aprobada</option>
+                  <option value="RECHAZADA">Rechazada</option>
+                </select>
+              </div>
+
+              <!-- Info del filtro -->
+              <div class="text-sm text-slate-600 dark:text-slate-400 ml-auto">
+                Mostrando <span class="font-semibold">{{ solicitudesFiltradas.length }}</span> de {{ solicitudes.length }} solicitudes
+              </div>
+            </div>
+          </div>
           <!-- Loading -->
           <div *ngIf="loading" class="flex items-center justify-center py-12">
             <div class="text-center">
@@ -80,10 +115,11 @@ import { FormsModule } from '@angular/forms';
                   <th class="p-6 text-sm font-semibold text-slate-500 dark:text-slate-400">Estado</th>
                   <th class="p-6 text-sm font-semibold text-slate-500 dark:text-slate-400">Organizador</th>
                   <th class="p-6 text-sm font-semibold text-slate-500 dark:text-slate-400">Proveedor</th>
+                  <th class="p-6 text-sm font-semibold text-slate-500 dark:text-slate-400">Acciones</th>
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let s of solicitudes" class="border-b border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                <tr *ngFor="let s of solicitudesFiltradas" class="border-b border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50">
                   <td class="p-6 text-sm font-medium text-slate-800 dark:text-slate-100">#{{ s.idSolicitud }}</td>
                   <td class="p-6 text-sm text-slate-600 dark:text-slate-300">{{ formatDate(s.fechaSolicitud) }}</td>
                   <td class="p-6 text-sm">
@@ -93,9 +129,123 @@ import { FormsModule } from '@angular/forms';
                   </td>
                   <td class="p-6 text-sm text-slate-600 dark:text-slate-300">#{{ s.idOrganizador }}</td>
                   <td class="p-6 text-sm text-slate-600 dark:text-slate-300">#{{ s.idProovedor }}</td>
+                  <td class="p-6 text-sm">
+                    <button (click)="verDetalle(s)" class="px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-semibold hover:bg-primary/90">
+                      Ver Detalle
+                    </button>
+                  </td>
                 </tr>
               </tbody>
             </table>
+          </div>
+
+          <!-- Modal Detalle -->
+          <div *ngIf="mostrarModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+            <div class="w-full max-w-3xl bg-white dark:bg-slate-900 rounded-xl shadow-lg border border-slate-200 dark:border-slate-800">
+              <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800">
+                <h2 class="text-xl font-bold text-slate-900 dark:text-white">Detalle de Solicitud</h2>
+                <button (click)="cerrarModal()" class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
+                  <span class="material-symbols-outlined text-slate-600 dark:text-slate-300">close</span>
+                </button>
+              </div>
+
+              <div class="p-6">
+                <div *ngIf="loadingDetalle" class="flex items-center justify-center py-6">
+                  <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
+                </div>
+
+                <div *ngIf="errorDetalle && !loadingDetalle" class="mb-4 bg-red-100 dark:bg-red-900/40 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded">
+                  {{ errorDetalle }}
+                </div>
+
+                <div *ngIf="!loadingDetalle">
+                  <!-- Datos de la Solicitud -->
+                  <div class="mb-6">
+                    <h3 class="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-3">Solicitud</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <span class="text-slate-500 dark:text-slate-400">ID:</span>
+                        <span class="ml-2 font-medium">#{{ solicitudSeleccionada?.idSolicitud }}</span>
+                      </div>
+                      <div>
+                        <span class="text-slate-500 dark:text-slate-400">Fecha:</span>
+                        <span class="ml-2 font-medium">{{ formatDateLong(solicitudSeleccionada?.fechaSolicitud || '') }}</span>
+                      </div>
+                      <div>
+                        <span class="text-slate-500 dark:text-slate-400">Estado:</span>
+                        <span class="ml-2">
+                          <span [class]="'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ' + getEstadoClass(solicitudSeleccionada?.estadoSolicitud || '')">
+                            {{ getEstadoLabel(solicitudSeleccionada?.estadoSolicitud || '') }}
+                          </span>
+                        </span>
+                      </div>
+                      <div>
+                        <span class="text-slate-500 dark:text-slate-400">Organizador:</span>
+                        <span class="ml-2 font-medium">#{{ solicitudSeleccionada?.idOrganizador }}</span>
+                      </div>
+                      <div>
+                        <span class="text-slate-500 dark:text-slate-400">Proveedor:</span>
+                        <span class="ml-2 font-medium">#{{ solicitudSeleccionada?.idProovedor }}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Datos de la Reserva asociada -->
+                  <div>
+                    <h3 class="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-3">Reserva Asociada</h3>
+                    <div *ngIf="reservaAsociada; else sinReserva" class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <span class="text-slate-500 dark:text-slate-400">ID Reserva:</span>
+                        <span class="ml-2 font-medium">#{{ reservaAsociada?.idReserva }}</span>
+                      </div>
+                      <div>
+                        <span class="text-slate-500 dark:text-slate-400">Estado:</span>
+                        <span class="ml-2">
+                          <span [class]="'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ' + getEstadoClass(reservaAsociada?.estadoReserva || '')">
+                            {{ getEstadoLabel(reservaAsociada?.estadoReserva || '') || 'No informado' }}
+                          </span>
+                        </span>
+                      </div>
+                      <div>
+                        <span class="text-slate-500 dark:text-slate-400">Fecha Inicio:</span>
+                        <span class="ml-2 font-medium">{{ reservaAsociada?.fechaReservaInicio ? formatDateLong(reservaAsociada.fechaReservaInicio) : 'No informado' }}</span>
+                      </div>
+                      <div>
+                        <span class="text-slate-500 dark:text-slate-400">Fecha Fin:</span>
+                        <span class="ml-2 font-medium">{{ reservaAsociada?.fechaReservaFin ? formatDateLong(reservaAsociada.fechaReservaFin) : 'No informado' }}</span>
+                      </div>
+                      <div>
+                        <span class="text-slate-500 dark:text-slate-400">ID Solicitud:</span>
+                        <span class="ml-2 font-medium">{{ reservaAsociada?.idSolicitud ? ('#' + reservaAsociada.idSolicitud) : 'No informado' }}</span>
+                      </div>
+                      <div>
+                        <span class="text-slate-500 dark:text-slate-400">Proveedor:</span>
+                        <span class="ml-2 font-medium">{{ reservaAsociada?.idProveedor ? ('#' + reservaAsociada.idProveedor) : 'No informado' }}</span>
+                      </div>
+                      <div>
+                        <span class="text-slate-500 dark:text-slate-400">Organizador:</span>
+                        <span class="ml-2 font-medium">{{ reservaAsociada?.idOrganizador ? ('#' + reservaAsociada.idOrganizador) : 'No informado' }}</span>
+                      </div>
+                      <div>
+                        <span class="text-slate-500 dark:text-slate-400">Creación:</span>
+                        <span class="ml-2 font-medium">{{ reservaAsociada?.fechaCreacion ? formatDateLong(reservaAsociada.fechaCreacion) : 'No informado' }}</span>
+                      </div>
+                      <div>
+                        <span class="text-slate-500 dark:text-slate-400">Actualización:</span>
+                        <span class="ml-2 font-medium">{{ reservaAsociada?.fechaActualizacion ? formatDateLong(reservaAsociada.fechaActualizacion) : 'No informado' }}</span>
+                      </div>
+                    </div>
+                    <ng-template #sinReserva>
+                      <p class="text-sm text-slate-600 dark:text-slate-400">No hay una reserva asociada a esta solicitud.</p>
+                    </ng-template>
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex justify-end gap-3 px-6 py-4 border-t border-slate-200 dark:border-slate-800">
+                <button (click)="cerrarModal()" class="px-4 py-2 rounded-lg text-sm font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700">Cerrar</button>
+              </div>
+            </div>
           </div>
         </div>
       </main>
@@ -105,15 +255,24 @@ import { FormsModule } from '@angular/forms';
 })
 export class OrganizadorSolicitudesListComponent implements OnInit {
   solicitudes: Solicitud[] = [];
+  solicitudesFiltradas: Solicitud[] = [];
   loading = true;
   error: string | null = null;
   userName = '';
   idOrganizador = 14;
+  filtroFecha: 'futuro' | 'todas' = 'futuro';
+  filtroEstado: string = '';
+  mostrarModal = false;
+  loadingDetalle = false;
+  errorDetalle: string | null = null;
+  solicitudSeleccionada: Solicitud | null = null;
+  reservaAsociada: any = null;
 
   constructor(
     private router: Router,
     private keycloak: KeycloakService,
     private solicitudesService: SolicitudesService,
+    private reservasService: ReservasService,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -126,6 +285,7 @@ export class OrganizadorSolicitudesListComponent implements OnInit {
       this.solicitudesService.getByOrganizador(this.idOrganizador).subscribe({
         next: (solicitudes: Solicitud[]) => {
           this.solicitudes = Array.isArray(solicitudes) ? solicitudes : [];
+          this.aplicarFiltros();
           this.loading = false;
           this.cdr.detectChanges();
         },
@@ -193,5 +353,80 @@ export class OrganizadorSolicitudesListComponent implements OnInit {
       month: '2-digit',
       year: 'numeric'
     });
+  }
+
+  formatDateLong(dateString: string): string {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('es-ES', { 
+      day: '2-digit', 
+      month: 'long',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+
+  aplicarFiltros(): void {
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+
+    this.solicitudesFiltradas = this.solicitudes
+      .sort((a, b) => new Date(b.fechaSolicitud).getTime() - new Date(a.fechaSolicitud).getTime())
+      .filter((s) => {
+        const fecha = new Date(s.fechaSolicitud);
+        fecha.setHours(0, 0, 0, 0);
+        const cumpleFecha = this.filtroFecha === 'todas' || fecha >= hoy;
+        const cumpleEstado = !this.filtroEstado || s.estadoSolicitud?.toUpperCase() === this.filtroEstado.toUpperCase();
+        return cumpleFecha && cumpleEstado;
+      });
+  }
+
+  verDetalle(solicitud: Solicitud): void {
+    this.solicitudSeleccionada = solicitud;
+    this.mostrarModal = true;
+    this.loadingDetalle = true;
+    this.errorDetalle = null;
+    this.reservaAsociada = null;
+
+    // cargar la reserva asociada por idSolicitud (si existe)
+    this.reservasService.getByIdSolicitud(solicitud.idSolicitud)
+      .pipe(
+        timeout(10000),
+        finalize(() => {
+          this.loadingDetalle = false;
+          this.cdr.detectChanges();
+        })
+      )
+      .subscribe({
+        next: (reservas) => {
+          if (Array.isArray(reservas) && reservas.length > 0) {
+            const r: any = reservas[0];
+            // Normaliza nombres de campos que vienen del backend
+            this.reservaAsociada = {
+              ...r,
+              estadoReserva: r.estado || r.estadoReserva || '',
+              fechaReservaInicio: r.fechaReservaInicio || r.fechaReserva || '',
+              fechaReservaFin: r.fechaReservaFin || r.fechaReserva || '',
+              fechaCreacion: r.fechaCreacion || '',
+              fechaActualizacion: r.fechaActualizacion || '',
+              idSolicitud: r.idSolicitud || solicitud.idSolicitud,
+              idProveedor: r.idProveedor || r.idProovedor || solicitud.idProovedor || '',
+              idOrganizador: r.idOrganizador || r.id_organizador || solicitud.idOrganizador || ''
+            };
+          } else {
+            this.reservaAsociada = null;
+          }
+        },
+        error: (err: any) => {
+          console.error('Error cargando reserva asociada:', err);
+          this.errorDetalle = 'No se pudo cargar la reserva asociada.';
+        }
+      });
+  }
+
+  cerrarModal(): void {
+    this.mostrarModal = false;
+    this.solicitudSeleccionada = null;
+    this.reservaAsociada = null;
   }
 }
