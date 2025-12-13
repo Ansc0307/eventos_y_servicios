@@ -1,5 +1,6 @@
 package com.eventos.ms_notifications.service;
 
+import com.eventos.ms_notifications.dto.NotificacionConNombresDTO;
 import com.eventos.ms_notifications.dto.NotificacionDTO;
 import com.eventos.ms_notifications.exception.InvalidInputException;
 import com.eventos.ms_notifications.exception.NotFoundException;
@@ -22,68 +23,58 @@ public class NotificacionService {
         this.notificacionMapper = notificacionMapper;
     }
 
+    /**
+     * Obtiene todas las notificaciones (CON NOMBRES usando JOIN)
+     */
     public Flux<NotificacionDTO> obtenerTodas() {
-        return notificacionRepository.findAll()
-                .map(notificacionMapper::toDto);
+        return notificacionRepository.findAllWithNames()
+                .map(NotificacionConNombresDTO::toNotificacionDTO);
     }
 
+    /**
+     * Obtiene una notificación por ID (CON NOMBRES usando JOIN)
+     */
     public Mono<NotificacionDTO> obtenerPorId(Long id) {
-        return notificacionRepository.findById(id)
+        return notificacionRepository.findByIdWithNames(id)
                 .switchIfEmpty(Mono.error(new NotFoundException("Notificación no encontrada con ID: " + id)))
-                .map(notificacionMapper::toDto);
+                .map(NotificacionConNombresDTO::toNotificacionDTO);
     }
 
+    /**
+     * Obtiene notificaciones por usuario (CON NOMBRES usando JOIN)
+     */
+    public Flux<NotificacionDTO> obtenerPorUsuario(Long userId) {
+        return notificacionRepository.findByUserIdWithNames(userId)
+                .map(NotificacionConNombresDTO::toNotificacionDTO);
+    }
+
+    /**
+     * Crea una nueva notificación
+     * Guarda con IDs y luego obtiene con nombres
+     */
     public Mono<NotificacionDTO> crear(NotificacionDTO dto) {
-        // Validaciones básicas
-        if (dto.getAsunto() == null || dto.getAsunto().isBlank()) {
-            return Mono.error(new InvalidInputException("El asunto de la notificación no puede estar vacío."));
-        }
-        if (dto.getMensaje() == null || dto.getMensaje().isBlank()) {
-            return Mono.error(new InvalidInputException("El mensaje de la notificación no puede estar vacío."));
-        }
-        if (dto.getPrioridad() == null || dto.getPrioridad().getId() == null) {
-            return Mono.error(new InvalidInputException("La prioridad de la notificación no puede ser nula."));
-        }
-        if (dto.getTipoNotificacion() == null || dto.getTipoNotificacion().getId() == null) {
-            return Mono.error(new InvalidInputException("El tipo de notificación no puede ser nulo."));
-        }
-        if (dto.getUserId() == null) {
-            return Mono.error(new InvalidInputException("El ID del usuario no puede ser nulo."));
-        }
+        validarNotificacionDTO(dto);
+        
         if (dto.getLeido() == null) {
-            dto.setLeido(false); // Por defecto no leído
+            dto.setLeido(false);
         }
 
-        // Crear entidad desde DTO usando solo IDs
         Notificacion notificacion = notificacionMapper.toEntity(dto);
 
-        // Guardar en R2DBC
         return notificacionRepository.save(notificacion)
-                .map(notificacionMapper::toDto);
+                .flatMap(saved -> notificacionRepository.findByIdWithNames(saved.getId()))
+                .map(NotificacionConNombresDTO::toNotificacionDTO);
     }
 
+    /**
+     * Actualiza una notificación existente
+     */
     public Mono<NotificacionDTO> actualizar(Long id, NotificacionDTO dto) {
         return notificacionRepository.findById(id)
                 .switchIfEmpty(Mono.error(new NotFoundException("No se encontró la notificación con ID: " + id)))
                 .flatMap(existente -> {
-                    // Validaciones básicas
-                    if (dto.getAsunto() == null || dto.getAsunto().isBlank()) {
-                        return Mono.error(new InvalidInputException("El asunto de la notificación no puede estar vacío."));
-                    }
-                    if (dto.getMensaje() == null || dto.getMensaje().isBlank()) {
-                        return Mono.error(new InvalidInputException("El mensaje de la notificación no puede estar vacío."));
-                    }
-                    if (dto.getPrioridad() == null || dto.getPrioridad().getId() == null) {
-                        return Mono.error(new InvalidInputException("La prioridad de la notificación no puede ser nula."));
-                    }
-                    if (dto.getTipoNotificacion() == null || dto.getTipoNotificacion().getId() == null) {
-                        return Mono.error(new InvalidInputException("El tipo de notificación no puede ser nulo."));
-                    }
-                    if (dto.getUserId() == null) {
-                        return Mono.error(new InvalidInputException("El ID del usuario no puede ser nulo."));
-                    }
-
-                    // Actualizar campos
+                    validarNotificacionDTO(dto);
+                    
                     existente.setAsunto(dto.getAsunto());
                     existente.setMensaje(dto.getMensaje());
                     existente.setLeido(dto.getLeido());
@@ -92,10 +83,14 @@ public class NotificacionService {
                     existente.setTipoNotificacionId(dto.getTipoNotificacion().getId());
 
                     return notificacionRepository.save(existente)
-                            .map(notificacionMapper::toDto);
+                            .flatMap(saved -> notificacionRepository.findByIdWithNames(saved.getId()))
+                            .map(NotificacionConNombresDTO::toNotificacionDTO);
                 });
     }
 
+    /**
+     * Elimina una notificación
+     */
     public Mono<Void> eliminar(Long id) {
         return notificacionRepository.existsById(id)
                 .flatMap(existe -> {
@@ -106,18 +101,38 @@ public class NotificacionService {
                 });
     }
 
-    public Flux<NotificacionDTO> obtenerPorUsuario(Long userId) {
-        return notificacionRepository.findByUserId(userId)
-                .map(notificacionMapper::toDto);
-    }
-
+    /**
+     * Marca una notificación como leída
+     */
     public Mono<NotificacionDTO> marcarComoLeida(Long id) {
         return notificacionRepository.findById(id)
                 .switchIfEmpty(Mono.error(new NotFoundException("No se encontró la notificación con ID: " + id)))
                 .flatMap(notificacion -> {
                     notificacion.setLeido(true);
                     return notificacionRepository.save(notificacion)
-                            .map(notificacionMapper::toDto);
+                            .flatMap(saved -> notificacionRepository.findByIdWithNames(saved.getId()))
+                            .map(NotificacionConNombresDTO::toNotificacionDTO);
                 });
+    }
+
+    /**
+     * Método auxiliar de validación
+     */
+    private void validarNotificacionDTO(NotificacionDTO dto) {
+        if (dto.getAsunto() == null || dto.getAsunto().isBlank()) {
+            throw new InvalidInputException("El asunto de la notificación no puede estar vacío.");
+        }
+        if (dto.getMensaje() == null || dto.getMensaje().isBlank()) {
+            throw new InvalidInputException("El mensaje de la notificación no puede estar vacío.");
+        }
+        if (dto.getPrioridad() == null || dto.getPrioridad().getId() == null) {
+            throw new InvalidInputException("La prioridad de la notificación no puede ser nula.");
+        }
+        if (dto.getTipoNotificacion() == null || dto.getTipoNotificacion().getId() == null) {
+            throw new InvalidInputException("El tipo de notificación no puede ser nulo.");
+        }
+        if (dto.getUserId() == null) {
+            throw new InvalidInputException("El ID del usuario no puede ser nulo.");
+        }
     }
 }

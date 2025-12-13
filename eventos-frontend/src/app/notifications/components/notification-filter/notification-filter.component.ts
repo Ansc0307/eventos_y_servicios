@@ -10,7 +10,7 @@ import { TipoNotificacion } from '../../../models/notifications/tipo-notificacio
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './notification-filter.component.html',
-  //styleUrls: ['./notification-filter.component.css']
+  styleUrls: ['./notification-filter.component.css']
 })
 export class NotificationFilterComponent implements OnInit {
   @Input() filtros: any;
@@ -20,12 +20,12 @@ export class NotificationFilterComponent implements OnInit {
   tipos: TipoNotificacion[] = [];
   
   estadoOpciones = [
-    { value: null, label: 'Todos' },
-    { value: true, label: 'Leídas' },
-    { value: false, label: 'No leídas' }
+    { value: null, label: 'Todos', icon: 'all_inbox' },
+    { value: true, label: 'Leídas', icon: 'mark_email_read' },
+    { value: false, label: 'No leídas', icon: 'mark_email_unread' }
   ];
 
-  mostrarFiltros = false;
+  mostrarPanelFiltros = false;
 
   constructor(private notificacionesService: NotificacionesService) {}
 
@@ -36,7 +36,7 @@ export class NotificationFilterComponent implements OnInit {
   cargarFiltros(): void {
     this.notificacionesService.getPrioridades().subscribe({
       next: (data) => {
-        this.prioridades = data;
+        this.prioridades = data || [];
       },
       error: (err) => {
         console.error('Error al cargar prioridades:', err);
@@ -45,7 +45,7 @@ export class NotificationFilterComponent implements OnInit {
 
     this.notificacionesService.getTiposNotificacion().subscribe({
       next: (data) => {
-        this.tipos = data;
+        this.tipos = data || [];
       },
       error: (err) => {
         console.error('Error al cargar tipos:', err);
@@ -66,21 +66,24 @@ export class NotificationFilterComponent implements OnInit {
     this.filtrosCambiados.emit(this.filtros);
   }
 
-  getPrioridadClass(nombre: string | undefined, activo: boolean): string {
-    if (activo) {
-      return 'bg-primary text-white';
-    }
-    
+  getPrioridadColor(nombre: string | undefined): string {
     const nombreLower = nombre?.toLowerCase();
     switch(nombreLower) {
-      case 'alta': case 'urgente':
-        return 'bg-red-500/10 text-red-700 dark:text-red-400 hover:bg-red-500/20';
-      case 'media': case 'normal':
-        return 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 hover:bg-yellow-500/20';
-      case 'baja':
-        return 'bg-green-500/10 text-green-700 dark:text-green-400 hover:bg-green-500/20';
-      default:
-        return 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600';
+      case 'alta': return 'border-red-500 text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20';
+      case 'media': return 'border-yellow-500 text-yellow-700 dark:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20';
+      case 'baja': return 'border-green-500 text-green-700 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20';
+      default: return 'border-slate-300 text-slate-700 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700';
+    }
+  }
+
+  getTipoIcon(nombre: string | undefined): string {
+    switch(nombre) {
+      case 'ALERTA': return 'warning';
+      case 'INFORMATIVA': return 'info';
+      case 'PROMOCION': return 'local_offer';
+      case 'SISTEMA': return 'settings';
+      case 'RECORDATORIO': return 'notifications';
+      default: return 'notifications';
     }
   }
 }

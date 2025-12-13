@@ -1,6 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Notificacion } from '../../../models/notifications/notification.model';
+import { Notificacion, TIPOS_NOTIFICACION_CONFIG, PRIORIDADES_CONFIG } from '../../../models/notifications/notification.model';
 
 @Component({
   selector: 'app-notification-item',
@@ -14,36 +14,14 @@ export class NotificationItemComponent {
   @Output() marcarComoLeida = new EventEmitter<number>();
   @Output() eliminar = new EventEmitter<number>();
 
-  getColorPorPrioridad(): string {
-    const prioridad = this.notificacion.prioridad.nombre?.toLowerCase();
-    switch(prioridad) {
-      case 'alta': case 'urgente':
-        return 'bg-red-500/10 text-red-500 ring-red-500/20';
-      case 'media': case 'normal':
-        return 'bg-yellow-500/10 text-yellow-500 ring-yellow-500/20';
-      case 'baja':
-        return 'bg-green-500/10 text-green-500 ring-green-500/20';
-      default:
-        return 'bg-slate-500/10 text-slate-500 ring-slate-500/20';
-    }
+  get tipoConfig() {
+    const tipoNombre = this.notificacion.tipoNotificacion.nombre || 'SISTEMA';
+    return TIPOS_NOTIFICACION_CONFIG[tipoNombre] || TIPOS_NOTIFICACION_CONFIG['SISTEMA'];
   }
 
-  getIconoTipo(): { icon: string; color: string } {
-    const tipo = this.notificacion.tipoNotificacion.nombre?.toLowerCase();
-    switch(tipo) {
-      case 'alerta':
-        return { icon: 'campaign', color: 'text-blue-500' };
-      case 'informacion':
-        return { icon: 'info', color: 'text-blue-500' };
-      case 'recordatorio':
-        return { icon: 'notifications', color: 'text-yellow-500' };
-      case 'promocion':
-        return { icon: 'local_offer', color: 'text-purple-500' };
-      case 'sistema':
-        return { icon: 'settings', color: 'text-slate-500' };
-      default:
-        return { icon: 'notifications', color: 'text-primary' };
-    }
+  get prioridadConfig() {
+    const prioridadNombre = this.notificacion.prioridad.nombre || 'MEDIA';
+    return PRIORIDADES_CONFIG[prioridadNombre] || PRIORIDADES_CONFIG['MEDIA'];
   }
 
   getTiempoTranscurrido(): string {
@@ -57,7 +35,7 @@ export class NotificationItemComponent {
     if (minutos < 1) {
       return 'Ahora mismo';
     } else if (minutos < 60) {
-      return `Hace ${minutos} minuto${minutos !== 1 ? 's' : ''}`;
+      return `Hace ${minutos} min`;
     } else if (horas < 24) {
       return `Hace ${horas} hora${horas !== 1 ? 's' : ''}`;
     } else if (dias === 1) {
@@ -75,7 +53,7 @@ export class NotificationItemComponent {
 
   getBackgroundClass(): string {
     return this.notificacion.leido 
-      ? 'bg-background-light dark:bg-background-dark hover:bg-black/5 dark:hover:bg-white/5' 
+      ? 'bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50' 
       : 'bg-primary/5 dark:bg-primary/10 hover:bg-primary/10 dark:hover:bg-primary/20';
   }
 }
