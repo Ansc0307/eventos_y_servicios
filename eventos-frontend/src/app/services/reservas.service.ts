@@ -42,6 +42,16 @@ export class ReservasService {
     return this.http.get<Reserva[]>(`${this.base}/solicitud/${idSolicitud}`);
   }
 
+  // Obtener reservas por proveedor (endpoint directo en backend)
+  getByProveedor(idProveedor: number): Observable<Reserva[]> {
+    return this.http.get<Reserva[]>(`${this.base}/proveedor/${idProveedor}`);
+  }
+
+  // Opcional: Obtener reservas por organizador (paridad con backend)
+  getByOrganizador(idOrganizador: number): Observable<Reserva[]> {
+    return this.http.get<Reserva[]>(`${this.base}/organizador/${idOrganizador}`);
+  }
+
   getSolicitudByReservaId(idReserva: number): Observable<Solicitud> {
     return this.http.get<Solicitud>(`${this.base}/${idReserva}/solicitud`).pipe(
       timeout(10000),

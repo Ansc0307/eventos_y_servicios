@@ -8,7 +8,7 @@ import { ReservasService } from '../services/reservas.service';
 import { NoDisponibilidadesService } from '../services/no-disponibilidades.service';
 import { Reserva } from '../models/reserva.model';
 import { Solicitud } from '../models/solicitud.model';
-import { forkJoin } from 'rxjs';
+// import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-proveedor-reservas-list',
@@ -346,6 +346,7 @@ import { forkJoin } from 'rxjs';
 export class ProveedorReservasListComponent implements OnInit {
   reservas: Reserva[] = [];
   solicitudes: Solicitud[] = [];
+  reservasFiltradas: Reserva[] = [];
   loading = true;
   error: string | null = null;
   userName = '';
@@ -359,11 +360,10 @@ export class ProveedorReservasListComponent implements OnInit {
   guardandoEstado = false;
   mostrarTooltip = false;
   tooltipId: number | null = null;
-
   // Filtros
   filtroFecha: 'futuro' | 'todas' = 'futuro';
   filtroEstado: string = '';
-  reservasFiltradas: Reserva[] = [];
+  
 
   get todasLasReservas(): Reserva[] {
     return this.reservas
@@ -386,37 +386,17 @@ export class ProveedorReservasListComponent implements OnInit {
       
       this.idProveedor = 1;
 
-      console.log('Cargando solicitudes para obtener reservas del proveedor:', this.idProveedor);
-      this.solicitudesService.getByProveedor(this.idProveedor).subscribe({
-        next: (solicitudes) => {
-          this.solicitudes = solicitudes;
-          if (solicitudes.length > 0) {
-            const reservaRequests = solicitudes.map(s => 
-              this.reservasService.getByIdSolicitud(s.idSolicitud)
-            );
-            
-            forkJoin(reservaRequests).subscribe({
-              next: (reservasArrays) => {
-                this.reservas = reservasArrays.flat();
-                this.aplicarFiltros();
-                this.loading = false;
-                this.cdr.detectChanges();
-              },
-              error: (err) => {
-                console.error('Error cargando reservas:', err);
-                this.error = 'Error al cargar las reservas';
-                this.loading = false;
-                this.cdr.detectChanges();
-              }
-            });
-          } else {
+      console.log('Cargando reservas del proveedor (endpoint directo):', this.idProveedor);
+      this.reservasService.getByProveedor(this.idProveedor).subscribe({
+        next: (reservas: Reserva[]) => {
+          this.reservas = Array.isArray(reservas) ? reservas : [];
+          this.aplicarFiltros();
             this.loading = false;
-            this.cdr.detectChanges();
-          }
+          this.cdr.detectChanges();
         },
-        error: (err) => {
-          console.error('Error cargando solicitudes:', err);
-          this.error = 'Error al cargar las solicitudes: ' + (err.message || err.statusText || 'Error desconocido');
+        error: (err: any) => {
+          console.error('Error cargando reservas del proveedor:', err);
+          this.error = 'Error al cargar las reservas del proveedor: ' + (err.message || err.statusText || 'Error desconocido');
           this.loading = false;
           this.cdr.detectChanges();
         }
