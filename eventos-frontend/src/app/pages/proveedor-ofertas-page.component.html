@@ -1,0 +1,28 @@
+
+<div class="px-4 sm:px-10 lg:px-20 py-8">
+
+  <h1 class="text-4xl font-black mb-6">Mis Ofertas</h1>
+
+  <!-- DEBUG: muestra conteo y JSON de ofertas >
+  <div class="mb-4 text-sm text-slate-600">
+    <div *ngIf="!loading">Ofertas cargadas: {{ ofertas.length }}</div>
+    <pre *ngIf="!loading" class="whitespace-pre-wrap max-h-40 overflow-auto text-xs bg-slate-50 p-2 rounded">{{ ofertas | json }}</pre>
+  </div-->
+
+  <div *ngIf="!loading && ofertas.length === 0" class="bg-yellow-50 p-4 rounded">
+    <p>No tienes ofertas creadas todavía.</p>
+  </div>
+
+  <div *ngIf="loading" class="flex items-center justify-center py-8">
+    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <app-oferta-card-proveedor
+    *ngFor="let oferta of ofertas"
+    [oferta]="oferta">
+    </app-oferta-card-proveedor>
+
+  </div>
+
+</div>

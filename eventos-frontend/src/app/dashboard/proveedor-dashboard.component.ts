@@ -9,12 +9,15 @@ import { Reserva } from '../models/reserva.model';
 import { forkJoin } from 'rxjs';
 import { SolicitudDetalleComponent } from '../components/solicitud-detalle/solicitud-detalle.component';
 import { ResponderSolicitudComponent } from '../components/solicitud-detalle/app-responder-solicitud';
+import { OfertasService } from '../services/ofertas.service';
+import { Oferta } from '../models/oferta.model';
+import { OfertaCardComponent } from '../components/oferta-card/oferta-card.component';
 
 
 @Component({
   selector: 'app-proveedor-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, SolicitudDetalleComponent, ResponderSolicitudComponent],
+  imports: [CommonModule, RouterLink, SolicitudDetalleComponent, ResponderSolicitudComponent, OfertaCardComponent],
 
   template: `
   <div class="font-display bg-background-light dark:bg-background-dark text-[#18181B] dark:text-gray-200 min-h-screen">
@@ -44,6 +47,13 @@ import { ResponderSolicitudComponent } from '../components/solicitud-detalle/app
               <a routerLink="/proveedor/reservas" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-primary/10 cursor-pointer">
                 <span class="material-symbols-outlined text-slate-600 dark:text-slate-300">event</span>
                 <p class="text-slate-600 dark:text-slate-300 text-sm font-medium leading-normal">Reservas</p>
+              </a>
+              <a routerLink="/proveedor/ofertas" 
+                class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-primary/10 cursor-pointer">
+                <span class="material-symbols-outlined text-slate-600 dark:text-slate-300">sell</span>
+                <p class="text-slate-600 dark:text-slate-300 text-sm font-medium leading-normal">
+                  Mis Ofertas
+                </p>
               </a>
               <div class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-primary/10 cursor-pointer">
                 <span class="material-symbols-outlined text-slate-600 dark:text-slate-300">person</span>
@@ -380,6 +390,7 @@ export class ProveedorDashboardComponent implements OnInit {
   error: string | null = null;
   userName = '';
   idProveedor = 1; // Por defecto
+  misOfertas: Oferta[] = [];
 
 
     ngOnInit(): void {
@@ -434,6 +445,14 @@ export class ProveedorDashboardComponent implements OnInit {
       this.loading = false;
       this.cdr.detectChanges();
     }
+    //MIS OFERTAS
+    this.ofertasService.getOfertasPorProveedor(this.idProveedor).subscribe({
+      next: (ofertas) => {
+        this.misOfertas = ofertas;  // Cambié 'ofertas' por 'misOfertas'
+        console.log('Ofertas del proveedor:', this.misOfertas);
+      },
+      error: (err) => console.error('Error cargando ofertas del proveedor', err)
+    });
   }
   // Estadísticas
   get solicitudesPendientes(): number {
@@ -491,6 +510,7 @@ export class ProveedorDashboardComponent implements OnInit {
     private keycloak: KeycloakService,
     private solicitudesService: SolicitudesService,
     private reservasService: ReservasService,
+    private ofertasService: OfertasService, 
     private cdr: ChangeDetectorRef
   ) {}
 
