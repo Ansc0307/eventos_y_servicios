@@ -112,37 +112,26 @@
       <!-- ============================
             SIDEBAR - ACCIONES
       ============================== -->
+      <!-- SIDEBAR -->
       <div class="sticky top-24 h-fit">
-        <div class="bg-white dark:bg-background-dark/50 rounded-xl border border-[#e7f1f3] dark:border-gray-800 p-5 flex flex-col gap-4">
+        <div class="bg-white rounded-xl border p-5 flex flex-col gap-4">
 
-          <h3 class="text-lg font-bold">Acciones</h3>
+          <h3 class="font-bold">Acciones</h3>
 
-          <!-- ACTIVO / VISIBILIDAD -->
-          <div class="flex items-center justify-between">
-            <span class="text-sm font-medium">Visibilidad de la Oferta</span>
-
-            <label class="relative inline-flex cursor-pointer items-center">
-              <input type="checkbox" formControlName="activo" class="peer sr-only">
-              <div class="h-6 w-11 bg-gray-200 rounded-full peer-checked:bg-primary after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:h-5 after:w-5 after:bg-white after:rounded-full after:transition-all peer-checked:after:translate-x-full"></div>
-            </label>
-          </div>
-
-          <hr class="border-[#e7f1f3] dark:border-gray-700"/>
-
-          <button (click)="crearOferta()"
-                  class="w-full h-11 bg-primary text-black font-bold rounded-lg hover:scale-105 transition">
-            Crear Oferta
+          <button (click)="guardar()"
+            class="h-11 bg-primary text-black font-bold rounded-lg">
+            Guardar Cambios
           </button>
 
-          <button type="button"
-                  class="w-full h-11 bg-gray-200 dark:bg-gray-700 rounded-lg font-bold hover:bg-gray-300 dark:hover:bg-gray-600">
+          <button (click)="cancelar()"
+            class="h-11 bg-gray-200 rounded-lg font-bold">
             Cancelar
           </button>
 
-          <hr class="border-[#e7f1f3] dark:border-gray-700"/>
+          <hr>
 
-          <button type="button" class="flex justify-center items-center gap-2 text-red-600 hover:text-red-800">
-            <span class="material-symbols-outlined text-lg">delete</span>
+          <button (click)="eliminar()"
+            class="flex items-center justify-center gap-2 text-red-600">
             Eliminar Oferta
           </button>
 

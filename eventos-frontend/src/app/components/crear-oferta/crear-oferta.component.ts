@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-
+import { Router } from '@angular/router';
 import { OfertasService } from '../../services/ofertas.service';
 import { CategoriasService } from '../../services/categorias.service';
 import { Categoria } from '../../models/categoria.model';
@@ -22,7 +22,8 @@ export class CrearOfertaComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private ofertasService: OfertasService,
-    private categoriasService: CategoriasService
+    private categoriasService: CategoriasService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -66,7 +67,7 @@ export class CrearOfertaComponent implements OnInit {
     }
   }
 
-  crearOferta() {
+crearOferta() {
     if (this.ofertaForm.invalid) {
       this.ofertaForm.markAllAsTouched();
       alert("Completa todos los campos obligatorios");
@@ -74,23 +75,48 @@ export class CrearOfertaComponent implements OnInit {
     }
 
     const nuevaOferta: Oferta = {
-      id: 0,
+      id: 0, // Se ignora al crear
       ...this.ofertaForm.value,
       urlsMedia: this.imagenes
     };
 
-    console.log("OFERTA A ENVIAR:", nuevaOferta);
-
     this.ofertasService.crearOferta(nuevaOferta).subscribe({
       next: () => {
         alert('Oferta creada con éxito');
-        this.ofertaForm.reset();
-        this.imagenes = [];
+        this.router.navigate(['/mis-ofertas']); // Redirigir al éxito
       },
       error: (err) => {
         console.error(err);
         alert("Ocurrió un error al crear la oferta");
       }
     });
+  } // <--- 3. AQUÍ SE CERRABA MAL LA LLAVE
+
+  // Botón "Guardar Cambios" del sidebar
+  guardar() {
+    // Reutilizamos la lógica de crearOferta
+    this.crearOferta();
   }
+
+  // Botón "Cancelar"
+  cancelar() {
+    this.router.navigate(['/mis-ofertas']); // O la ruta que prefieras
+  }
+
+  // Botón "Eliminar" (En contexto de crear, sería limpiar o descartar)
+  eliminar() {
+    if (!confirm('¿Estás seguro de descartar esta nueva oferta? Se perderán los datos.')) return;
+    
+    // Opción A: Limpiar formulario
+    this.ofertaForm.reset({
+      proveedorId: 1, 
+      estado: 'publicado', 
+      activo: true 
+    });
+    this.imagenes = [];
+    
+    // Opción B: Salir (si prefieres que eliminar te saque de la pantalla)
+    // this.cancelar();
+  }
+
 }
