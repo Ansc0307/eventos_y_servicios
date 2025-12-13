@@ -129,7 +129,7 @@ export class ResponderSolicitudComponent {
                     this.noDispService.create(payloadNoDisp).subscribe({
                       next: () => {
                         console.log('[ResponderSolicitud] No disponibilidad registrada correctamente');
-                        this.success = 'Solicitud aprobada, reserva confirmada y no disponibilidad registrada';
+                        this.success = 'Solicitud aprobada, reserva aprobada y no disponibilidad registrada';
                         this.updated.emit(solicitudActualizada);
                         this.loading = false;
                       },
