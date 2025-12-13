@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { KeycloakService } from 'keycloak-angular';
 import { ReservasService } from '../services/reservas.service';
+import { Solicitud } from '../models/solicitud.model';
 import { NoDisponibilidadesService } from '../services/no-disponibilidades.service';
 import { Reserva } from '../models/reserva.model';
 
@@ -76,7 +77,6 @@ import { Reserva } from '../models/reserva.model';
                 <select [(ngModel)]="filtroEstado" (change)="aplicarFiltros()"
                         class="px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm font-medium">
                   <option value="">Todos los Estados</option>
-                  <option value="PENDIENTE">Pendiente</option>
                   <option value="APROBADA">Aprobada</option>
                   <option value="CONFIRMADA">Confirmada</option>
                   <option value="CANCELADA">Cancelada</option>
@@ -134,6 +134,11 @@ import { Reserva } from '../models/reserva.model';
                         {{ getEstadoLabel(reserva.estado) }}
                       </span>
                     </td>
+                    <td class="p-6 text-right space-x-2">
+                      <button (click)="verDetalle(reserva)" class="text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary text-sm font-bold py-2 px-4 rounded-lg border border-slate-300 dark:border-slate-700">
+                        Ver Detalle
+                      </button>
+                    </td>
                   </tr>
                 </tbody>
               </table>
@@ -141,6 +146,113 @@ import { Reserva } from '../models/reserva.model';
           </div>
         </div>
       </main>
+    </div>
+  </div>
+  
+  <!-- Modal de Detalle -->
+  <div *ngIf="mostrarModal" (click)="cerrarModal()" 
+       class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div (click)="$event.stopPropagation()" 
+         class="bg-white dark:bg-slate-900 rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+      <!-- Header -->
+      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-primary/5">
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-3xl text-primary">event_note</span>
+          <div>
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Detalle de Reserva</h2>
+            <p class="text-sm text-slate-500 dark:text-slate-400">Información completa</p>
+          </div>
+        </div>
+        <button (click)="cerrarModal()" 
+                class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
+          <span class="material-symbols-outlined text-slate-600 dark:text-slate-300">close</span>
+        </button>
+      </div>
+
+      <!-- Content -->
+      <div class="flex-1 overflow-y-auto p-6">
+        <div *ngIf="reservaSeleccionada && solicitudSeleccionada" class="space-y-6">
+          <!-- Información de la Reserva -->
+          <div class="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-6 border border-slate-200 dark:border-slate-700">
+            <div class="flex items-center gap-2 mb-4">
+              <span class="material-symbols-outlined text-primary">event</span>
+              <h3 class="text-xl font-bold text-slate-900 dark:text-white">Información de la Reserva</h3>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <p class="text-sm font-semibold text-slate-500 dark:text-slate-400">ID Reserva</p>
+                <p class="text-base text-slate-900 dark:text-white">#{{ reservaSeleccionada.idReserva }}</p>
+              </div>
+              <div>
+                <p class="text-sm font-semibold text-slate-500 dark:text-slate-400">Estado</p>
+                <span [class]="'inline-flex items-center px-3 py-1 rounded-full text-sm font-medium mt-1 ' + getEstadoClass(reservaSeleccionada.estado)">
+                  {{ getEstadoLabel(reservaSeleccionada.estado) }}
+                </span>
+              </div>
+              <div>
+                <p class="text-sm font-semibold text-slate-500 dark:text-slate-400">Fecha de Inicio</p>
+                <p class="text-base text-slate-900 dark:text-white">{{ formatDate(reservaSeleccionada.fechaReservaInicio) }}</p>
+              </div>
+              <div>
+                <p class="text-sm font-semibold text-slate-500 dark:text-slate-400">Fecha de Fin</p>
+                <p class="text-base text-slate-900 dark:text-white">{{ formatDate(reservaSeleccionada.fechaReservaFin) }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Información de la Solicitud -->
+          <div class="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-6 border border-slate-200 dark:border-slate-700">
+            <div class="flex items-center gap-2 mb-4">
+              <span class="material-symbols-outlined text-primary">description</span>
+              <h3 class="text-xl font-bold text-slate-900 dark:text-white">Información de la Solicitud</h3>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <p class="text-sm font-semibold text-slate-500 dark:text-slate-400">ID Solicitud</p>
+                <p class="text-base text-slate-900 dark:text-white">#{{ solicitudSeleccionada.idSolicitud }}</p>
+              </div>
+              <div>
+                <p class="text-sm font-semibold text-slate-500 dark:text-slate-400">Estado Solicitud</p>
+                <span [class]="'inline-flex items-center px-3 py-1 rounded-full text-sm font-medium mt-1 ' + getEstadoClass(solicitudSeleccionada.estadoSolicitud)">
+                  {{ getEstadoLabel(solicitudSeleccionada.estadoSolicitud) }}
+                </span>
+              </div>
+              <div>
+                <p class="text-sm font-semibold text-slate-500 dark:text-slate-400">Fecha de Solicitud</p>
+                <p class="text-base text-slate-900 dark:text-white">{{ formatDate(solicitudSeleccionada.fechaSolicitud) }}</p>
+              </div>
+              <div>
+                <p class="text-sm font-semibold text-slate-500 dark:text-slate-400">ID Organizador</p>
+                <p class="text-base text-slate-900 dark:text-white">#{{ solicitudSeleccionada.idOrganizador }}</p>
+              </div>
+              <div>
+                <p class="text-sm font-semibold text-slate-500 dark:text-slate-400">ID Proveedor</p>
+                <p class="text-base text-slate-900 dark:text-white">#{{ solicitudSeleccionada.idProovedor }}</p>
+              </div>
+              <div>
+                <p class="text-sm font-semibold text-slate-500 dark:text-slate-400">ID Oferta</p>
+                <p class="text-base text-slate-900 dark:text-white">#{{ solicitudSeleccionada.idOferta }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Loading del modal -->
+        <div *ngIf="loadingDetalle" class="flex items-center justify-center py-12">
+          <div class="text-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+            <p class="mt-4 text-gray-600 dark:text-gray-400">Cargando detalles...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/30">
+        <button (click)="cerrarModal()" 
+                class="px-6 py-2.5 rounded-lg text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 font-semibold transition-colors">
+          Cerrar
+        </button>
+      </div>
     </div>
   </div>
   `
@@ -154,6 +266,10 @@ export class OrganizadorReservasListComponent implements OnInit {
   idOrganizador = 14;
   filtroFecha: 'futuro' | 'todas' = 'futuro';
   filtroEstado: string = '';
+  mostrarModal = false;
+  loadingDetalle = false;
+  reservaSeleccionada: Reserva | null = null;
+  solicitudSeleccionada: Solicitud | null = null;
 
   get todasLasReservas(): Reserva[] {
     return this.reservas.sort((a, b) => new Date(b.fechaReservaInicio).getTime() - new Date(a.fechaReservaInicio).getTime());
@@ -175,7 +291,9 @@ export class OrganizadorReservasListComponent implements OnInit {
 
       this.reservasService.getByOrganizador(this.idOrganizador).subscribe({
         next: (reservas: Reserva[]) => {
-          this.reservas = Array.isArray(reservas) ? reservas : [];
+          // Excluir reservas en estado PENDIENTE
+          const filtradas = (Array.isArray(reservas) ? reservas : []).filter(r => (r.estado || '').toUpperCase() !== 'PENDIENTE');
+          this.reservas = filtradas;
           this.aplicarFiltros();
           this.loading = false;
           this.cdr.detectChanges();
@@ -249,5 +367,30 @@ export class OrganizadorReservasListComponent implements OnInit {
       const cumpleEstado = !this.filtroEstado || reserva.estado?.toUpperCase() === this.filtroEstado.toUpperCase();
       return cumpleFecha && cumpleEstado;
     });
+  }
+
+  verDetalle(reserva: Reserva): void {
+    this.reservaSeleccionada = reserva;
+    this.loadingDetalle = true;
+    this.mostrarModal = true;
+
+    this.reservasService.getSolicitudByReservaId(reserva.idReserva).subscribe({
+      next: (solicitud: Solicitud) => {
+        this.solicitudSeleccionada = solicitud;
+        this.loadingDetalle = false;
+        this.cdr.detectChanges();
+      },
+      error: (err: any) => {
+        console.error('Error cargando solicitud:', err);
+        this.loadingDetalle = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  cerrarModal(): void {
+    this.mostrarModal = false;
+    this.reservaSeleccionada = null;
+    this.solicitudSeleccionada = null;
   }
 }
