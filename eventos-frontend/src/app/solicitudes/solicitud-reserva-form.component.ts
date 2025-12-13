@@ -393,15 +393,31 @@ isSelected(date: Date): boolean {
 
     // Formato para el backend (ISO string, que el backend puede parsear a LocalDateTime)
     // El backend de Java espera 'yyyy-MM-ddTHH:mm:ss', vamos a asegurarnos de que el formato sea limpio.
+
+// ... dentro de submit()
+
+    // -------------------------------------------------------------------
+    // 🆕 MODIFICACIÓN: Formato de fecha para que el backend la interprete como hora local
+    // -------------------------------------------------------------------
     const formatLocalDateTime = (date: Date) => {
-      const d = new Date(date);
+      // Usamos los métodos LOCAL (getMonth(), getDate(), etc.) para construir la cadena
+      // sin que JavaScript la convierta a UTC.
       const pad = (n: number) => n.toString().padStart(2, '0');
-      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+      
+      return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
     };
 
     const inicioFormatted = formatLocalDateTime(startDateTime);
     const finFormatted = formatLocalDateTime(endDateTime);
 
+    // -------------------------------------------------------------------
+    // 🆕 MODIFICACIÓN: FECHA DE CREACIÓN DE SOLICITUD
+    // -------------------------------------------------------------------
+    // Usar el formato local para el momento de la creación (ahora)
+    const nowLocalFormatted = formatLocalDateTime(new Date());
+
+
+    
     // -------------------------------------------------------------------
     // 2. 🆕 NUEVA: Validación de Reservas Conflictivas (con el backend)
     // -------------------------------------------------------------------
@@ -428,11 +444,22 @@ isSelected(date: Date): boolean {
   // -------------------------------------------------------------------
   // 🆕 NUEVO: Método helper para encapsular la creación
   // -------------------------------------------------------------------
+ 
+
+
+// Reemplazar la línea de fechaSolicitud en el payload
   private createSolicitudAndReserva(inicioFormatted: string, finFormatted: string) {
+    
+    // ⚠️ IMPORTANTE: Volver a calcular la hora de creación aquí para evitar errores
+    // usando la misma lógica de formateo sin conversión a UTC.
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    const now = new Date();
+    const nowLocalFormatted = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+    
     // Create solicitud
     const solicitudPayload = {
-      fechaSolicitud: new Date().toISOString(),
-      idOrganizador: 14, // Usar IDs estáticos/mockeados
+      fechaSolicitud: nowLocalFormatted, // ✅ USAMOS EL FORMATO LOCAL
+      idOrganizador: 14, 
       idProovedor: 1, // Usar IDs estáticos/mockeados
       idOferta: 1, // Usar IDs estáticos/mockeados (asumimos que la restricción es por oferta)
       estadoSolicitud: 'PENDIENTE'
