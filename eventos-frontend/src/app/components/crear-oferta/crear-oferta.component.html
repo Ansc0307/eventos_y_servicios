@@ -1,0 +1,154 @@
+<div class="flex flex-col min-h-screen bg-background-light dark:bg-background-dark text-[#0d191b] dark:text-gray-200">
+
+  <!-- Encabezado -->
+  <header class="flex items-center justify-between border-b border-[#e7f1f3] dark:border-gray-800 px-6 py-4 bg-background-light dark:bg-background-dark sticky top-0 z-10">
+    <h2 class="text-xl font-bold">Plataforma de Eventos</h2>
+
+    <button (click)="crearOferta()"
+      class="rounded-lg h-10 px-4 bg-primary text-black font-bold hover:scale-105 transition">
+      Guardar Oferta
+    </button>
+  </header>
+
+  <main class="flex justify-center py-8 px-4">
+    <div class="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+      <!-- ============================
+            FORMULARIO PRINCIPAL
+      ============================== -->
+      <form [formGroup]="ofertaForm" class="lg:col-span-2 flex flex-col gap-8">
+
+        <!-- INFO BÁSICA -->
+        <div class="bg-white dark:bg-background-dark/50 rounded-xl border border-[#e7f1f3] dark:border-gray-800">
+          <h2 class="text-lg font-bold p-5 border-b border-[#e7f1f3] dark:border-gray-800">Información Básica</h2>
+
+          <div class="p-5 grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            <!-- TÍTULO -->
+            <div class="md:col-span-2">
+              <label class="flex flex-col gap-2">
+                <span class="text-sm font-medium">Título de la Oferta</span>
+                <input formControlName="titulo"
+                       placeholder="Ej: Salón de Conferencias 'El Gran Roble'"
+                       class="h-12 rounded-lg border border-[#cfe3e7] dark:border-gray-700 bg-background-light dark:bg-gray-800 px-4 focus:border-primary outline-none"/>
+              </label>
+            </div>
+
+            <!-- DESCRIPCIÓN -->
+            <div class="md:col-span-2">
+              <label class="flex flex-col gap-2">
+                <span class="text-sm font-medium">Descripción</span>
+                <textarea formControlName="descripcion"
+                          placeholder="Describe las características, capacidad y amenidades..."
+                          class="min-h-36 rounded-lg border border-[#cfe3e7] dark:border-gray-700 bg-background-light dark:bg-gray-800 p-4 focus:border-primary outline-none"></textarea>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- IMÁGENES -->
+        <div class="bg-white dark:bg-background-dark/50 rounded-xl border border-[#e7f1f3] dark:border-gray-800">
+          <h2 class="text-lg font-bold p-5 border-b">Imágenes</h2>
+
+          <div class="p-5">
+            <!-- UPLOADER -->
+            <label class="flex flex-col items-center justify-center w-full p-6 border-2 border-dashed rounded-lg cursor-pointer border-[#cfe3e7] dark:border-gray-700 hover:bg-primary/10 dark:hover:bg-primary/20 transition">
+              <span class="material-symbols-outlined text-4xl text-[#4c8d9a]">upload_file</span>
+              <p class="mt-2 text-sm"><strong>Haz clic para subir</strong> o arrastra y suelta</p>
+              <input type="file" multiple (change)="onImageAdd($event)" class="hidden"/>
+            </label>
+
+            <!-- PREVIEW DE IMÁGENES -->
+            <div class="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+              <div *ngFor="let img of imagenes; let i = index" class="relative group aspect-square">
+                <div class="w-full h-full bg-cover bg-center rounded-lg"
+                     [style.background-image]="'url(' + img + ')'"></div>
+
+                <button type="button"
+                        (click)="imagenes.splice(i,1)"
+                        class="absolute top-2 right-2 size-6 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+                  <span class="material-symbols-outlined text-white text-base">close</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CATEGORÍA Y PRECIOS -->
+        <div class="bg-white dark:bg-background-dark/50 rounded-xl border border-[#e7f1f3] dark:border-gray-800">
+          <h2 class="text-lg font-bold p-5 border-b">Categoría y Precios</h2>
+
+          <div class="p-5 grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            <!-- CATEGORÍA -->
+            <div>
+              <label class="flex flex-col gap-2">
+                <span class="text-sm font-medium">Categoría</span>
+                <select formControlName="idCategoria"
+                        class="h-12 rounded-lg border border-[#cfe3e7] dark:border-gray-700 bg-background-light dark:bg-gray-800 px-4">
+                  <option value="" disabled>Selecciona una categoría</option>
+                  <option *ngFor="let c of categorias" [value]="c.idCategoria">
+                    {{ c.detalle }}
+                  </option>
+                </select>
+              </label>
+            </div>
+
+            <!-- PRECIO BASE -->
+            <div>
+              <label class="flex flex-col gap-2">
+                <span class="text-sm font-medium">Precio Base ($)</span>
+                <input formControlName="precioBase"
+                       type="number"
+                       placeholder="Ej: 500"
+                       class="h-12 rounded-lg border border-[#cfe3e7] dark:border-gray-700 bg-background-light dark:bg-gray-800 px-4"/>
+              </label>
+            </div>
+          </div>
+        </div>
+
+      </form>
+
+      <!-- ============================
+            SIDEBAR - ACCIONES
+      ============================== -->
+      <div class="sticky top-24 h-fit">
+        <div class="bg-white dark:bg-background-dark/50 rounded-xl border border-[#e7f1f3] dark:border-gray-800 p-5 flex flex-col gap-4">
+
+          <h3 class="text-lg font-bold">Acciones</h3>
+
+          <!-- ACTIVO / VISIBILIDAD -->
+          <div class="flex items-center justify-between">
+            <span class="text-sm font-medium">Visibilidad de la Oferta</span>
+
+            <label class="relative inline-flex cursor-pointer items-center">
+              <input type="checkbox" formControlName="activo" class="peer sr-only">
+              <div class="h-6 w-11 bg-gray-200 rounded-full peer-checked:bg-primary after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:h-5 after:w-5 after:bg-white after:rounded-full after:transition-all peer-checked:after:translate-x-full"></div>
+            </label>
+          </div>
+
+          <hr class="border-[#e7f1f3] dark:border-gray-700"/>
+
+          <button (click)="crearOferta()"
+                  class="w-full h-11 bg-primary text-black font-bold rounded-lg hover:scale-105 transition">
+            Crear Oferta
+          </button>
+
+          <button type="button"
+                  class="w-full h-11 bg-gray-200 dark:bg-gray-700 rounded-lg font-bold hover:bg-gray-300 dark:hover:bg-gray-600">
+            Cancelar
+          </button>
+
+          <hr class="border-[#e7f1f3] dark:border-gray-700"/>
+
+          <button type="button" class="flex justify-center items-center gap-2 text-red-600 hover:text-red-800">
+            <span class="material-symbols-outlined text-lg">delete</span>
+            Eliminar Oferta
+          </button>
+
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>

@@ -22,7 +22,7 @@ interface CalendarDay {
   <div class="font-display bg-background-light dark:bg-background-dark text-[#18181B] dark:text-gray-200 min-h-screen">
   <div class="relative flex min-h-screen w-full">
 
-    <!-- ✅ ASIDE REUTILIZADO -->
+    <!-- ASIDE REUTILIZADO -->
     <aside class="flex h-screen w-64 flex-col border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 sticky top-0">
       <div class="flex h-full flex-col justify-between p-4">
         <div class="flex flex-col gap-4">
@@ -166,9 +166,16 @@ interface CalendarDay {
                   <p class="text-xs italic" *ngIf="nd.motivo">{{ nd.motivo }}</p>
                 </div>
 
-                <button (click)="eliminarNoDisponibilidad(nd.idNoDisponibilidad)">
-                  <span class="material-symbols-outlined text-xl">delete</span>
-                </button>
+               <button *ngIf="!nd.idReserva"
+        (click)="eliminarNoDisponibilidad(nd.idNoDisponibilidad)">
+  <span class="material-symbols-outlined text-xl">delete</span>
+</button>
+
+<!-- Si tiene reserva → mostramos un ícono bloqueado -->
+<span *ngIf="nd.idReserva"
+      class="material-symbols-outlined text-xl text-gray-400 cursor-not-allowed">
+  lock
+</span>
 
               </div>
             </div>

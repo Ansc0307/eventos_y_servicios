@@ -1,0 +1,13 @@
+<div class="flex flex-col gap-3 group cursor-pointer pb-3" (click)="openDetalle()">
+
+  <div class="w-full bg-center bg-cover aspect-video rounded-xl overflow-hidden"
+       [style.backgroundImage]="(oferta && oferta.urlsMedia && oferta.urlsMedia.length) ? 'url(' + oferta.urlsMedia[0] + ')' : ''">
+  </div>
+
+  <div class="flex flex-col gap-1 px-1">
+    <p class="text-lg font-bold">{{ oferta?.titulo }}</p>
+    <p class="text-sm text-text-muted-light">{{ oferta?.descripcion }}</p>
+    <p class="text-primary font-bold text-lg">Bs. {{ oferta?.precioBase }}</p>
+  </div>
+
+</div>

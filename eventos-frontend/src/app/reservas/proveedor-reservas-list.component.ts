@@ -1,5 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { KeycloakService } from 'keycloak-angular';
 import { SolicitudesService } from '../services/solicitudes.service';
@@ -7,12 +8,15 @@ import { ReservasService } from '../services/reservas.service';
 import { NoDisponibilidadesService } from '../services/no-disponibilidades.service';
 import { Reserva } from '../models/reserva.model';
 import { Solicitud } from '../models/solicitud.model';
-import { forkJoin } from 'rxjs';
+
+import { Oferta } from '../models/oferta.model';
+import { OfertasService } from '../services/ofertas.service';
+// import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-proveedor-reservas-list',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   template: `
   <div class="font-display bg-background-light dark:bg-background-dark text-[#18181B] dark:text-gray-200 min-h-screen">
     <div class="relative flex min-h-screen w-full">
@@ -60,6 +64,41 @@ import { forkJoin } from 'rxjs';
         </header>
 
         <div class="p-10">
+          <!-- Filtros -->
+          <div class="mb-6 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6">
+            <div class="flex flex-wrap items-center gap-4">
+              <!-- Botones de Fecha -->
+              <div class="flex gap-2">
+                <button (click)="filtroFecha = 'futuro'; aplicarFiltros()" 
+                        [class]="'px-4 py-2 rounded-lg text-sm font-semibold transition-colors ' + (filtroFecha === 'futuro' ? 'bg-primary text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700')">
+                  Solo Futuras
+                </button>
+                <button (click)="filtroFecha = 'todas'; aplicarFiltros()" 
+                        [class]="'px-4 py-2 rounded-lg text-sm font-semibold transition-colors ' + (filtroFecha === 'todas' ? 'bg-primary text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700')">
+                  Ver Todas
+                </button>
+              </div>
+
+              <!-- Selector de Estado -->
+              <div class="flex items-center gap-2">
+                <label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Filtrar por Estado:</label>
+                <select [(ngModel)]="filtroEstado" (change)="aplicarFiltros()"
+                        class="px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm font-medium">
+                  <option value="">Todos los Estados</option>
+                  <option value="PENDIENTE">Pendiente</option>
+                  <option value="APROBADA">Aprobada</option>
+                  <option value="CONFIRMADA">Confirmada</option>
+                  <option value="CANCELADA">Cancelada</option>
+                </select>
+              </div>
+
+              <!-- Info del filtro -->
+              <div class="text-sm text-slate-600 dark:text-slate-400 ml-auto">
+                Mostrando <span class="font-semibold">{{ reservasFiltradas.length }}</span> de {{ todasLasReservas.length }} reservas
+              </div>
+            </div>
+          </div>
+
           <!-- Loading -->
           <div *ngIf="loading" class="flex items-center justify-center py-12">
             <div class="text-center">
@@ -81,8 +120,14 @@ import { forkJoin } from 'rxjs';
               <p class="mt-4 text-slate-500 dark:text-slate-400">No tienes reservas registradas</p>
             </div>
 
+            <!-- Sin reservas después del filtro -->
+            <div *ngIf="todasLasReservas.length > 0 && reservasFiltradas.length === 0" class="text-center py-12">
+              <span class="material-symbols-outlined text-6xl text-slate-300 dark:text-slate-600">filter_list_off</span>
+              <p class="mt-4 text-slate-500 dark:text-slate-400">No hay reservas que coincidan con los filtros</p>
+            </div>
+
             <!-- Con reservas -->
-            <div *ngIf="todasLasReservas.length > 0" class="overflow-x-auto">
+            <div *ngIf="todasLasReservas.length > 0 && reservasFiltradas.length > 0" class="overflow-x-auto">
               <table class="w-full text-left">
                 <thead class="border-b border-slate-200 dark:border-slate-800">
                   <tr>
@@ -95,7 +140,7 @@ import { forkJoin } from 'rxjs';
                   </tr>
                 </thead>
                 <tbody>
-                  <tr *ngFor="let reserva of todasLasReservas" 
+                  <tr *ngFor="let reserva of reservasFiltradas" 
                       class="border-b border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50">
                     <td class="p-6 text-sm font-medium text-slate-800 dark:text-slate-100">#{{ reserva.idReserva }}</td>
                     <td class="p-6 text-sm text-slate-600 dark:text-slate-300">#{{ reserva.idSolicitud }}</td>
@@ -106,7 +151,18 @@ import { forkJoin } from 'rxjs';
                         {{ getEstadoLabel(reserva.estado) }}
                       </span>
                     </td>
-                    <td class="p-6 text-right space-x-2 flex items-center justify-end">
+                    <td class="p-6 text-right space-x-2 flex items-center justify-end relative">
+                      <div *ngIf="isPendiente(reserva.estado)" class="relative group">
+                        <button (mouseenter)="mostrarTooltipHelp(reserva.idReserva)" (mouseleave)="ocultarTooltipHelp()" class="inline-flex items-center justify-center text-orange-600 dark:text-orange-400 h-10 w-10 rounded-lg border border-orange-300 dark:border-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors cursor-help">
+                          <span class="material-symbols-outlined">help</span>
+                        </button>
+                        <!-- Tooltip flotante -->
+                        <div *ngIf="mostrarTooltip && tooltipId === reserva.idReserva" class="absolute bottom-full left-0 mb-2 px-3 py-2 bg-orange-600 text-white text-xs rounded-lg whitespace-nowrap z-50 shadow-lg">
+                          Solo se puede cambiar el estado de la solicitud
+                          <!-- Flecha del tooltip -->
+                          <div class="absolute top-full left-3 w-2 h-2 bg-orange-600 transform rotate-45"></div>
+                        </div>
+                      </div>
                       <button *ngIf="isEditable(reserva.estado)" (click)="abrirEditar(reserva)" class="inline-flex items-center justify-center text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 h-10 w-10 rounded-lg border border-blue-300 dark:border-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
                         <span class="material-symbols-outlined">edit</span>
                       </button>
@@ -174,6 +230,49 @@ import { forkJoin } from 'rxjs';
                 
               </div>
             </div>
+             <!-- INFORMACIÓN OFERTA -->
+          <div *ngIf="solicitudSeleccionada?.idOferta"
+               class="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-6 border border-slate-200 dark:border-slate-700">
+
+            <div class="flex items-center gap-2 mb-4">
+              <span class="material-symbols-outlined text-primary">local_offer</span>
+              <h3 class="text-xl font-bold text-slate-900 dark:text-white">Información de la Oferta</h3>
+            </div>
+
+            <div *ngIf="loadingOferta" class="flex items-center gap-3">
+              <div class="animate-spin h-5 w-5 border-b-2 border-primary rounded-full"></div>
+              <span>Cargando oferta...</span>
+            </div>
+
+            <div *ngIf="errorOferta" class="text-red-600">
+              {{ errorOferta }}
+            </div>
+
+            <div *ngIf="oferta" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <p class="text-sm font-semibold text-slate-500">ID Oferta</p>
+                <p>#{{ oferta.id }}</p>
+              </div>
+
+              <div>
+                <p class="text-sm font-semibold text-slate-500">Título</p>
+                <p class="font-medium text-primary">{{ oferta.titulo }}</p>
+              </div>
+
+              <div>
+                <p class="text-sm font-semibold text-slate-500">Precio Base</p>
+                <p>{{ oferta.precioBase | currency }}</p>
+              </div>
+
+              <div>
+                <p class="text-sm font-semibold text-slate-500">Estado Oferta</p>
+                <span class="inline-flex px-3 py-1 rounded-full text-sm font-medium mt-1"
+                      [ngClass]="getEstadoClass(oferta.estado)">
+                  {{ getEstadoLabel(oferta.estado) }}
+                </span>
+              </div>
+            </div>
+          </div>
 
             <!-- Información de la Solicitud -->
             <div class="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-6 border border-slate-200 dark:border-slate-700">
@@ -256,11 +355,11 @@ import { forkJoin } from 'rxjs';
           <div>
             <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Nuevo Estado</label>
             <div class="flex gap-3">
-              <button *ngIf="canConfirm(reservaSeleccionada?.estado || '')" (click)="nuevoEstado = 'CONFIRMADA'"
+              <button (click)="nuevoEstado = 'CONFIRMADA'"
                       [class]="'px-4 py-2 rounded-lg border text-sm font-semibold ' + (nuevoEstado === 'CONFIRMADA' ? 'bg-green-100 border-green-300 text-green-800' : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200')">
                 Confirmada
               </button>
-              <button *ngIf="canCancel(reservaSeleccionada?.estado || '')" (click)="nuevoEstado = 'CANCELADA'"
+              <button (click)="nuevoEstado = 'CANCELADA'"
                       [class]="'px-4 py-2 rounded-lg border text-sm font-semibold ' + (nuevoEstado === 'CANCELADA' ? 'bg-red-100 border-red-300 text-red-800' : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200')">
                 Cancelada
               </button>
@@ -293,6 +392,7 @@ import { forkJoin } from 'rxjs';
 export class ProveedorReservasListComponent implements OnInit {
   reservas: Reserva[] = [];
   solicitudes: Solicitud[] = [];
+  reservasFiltradas: Reserva[] = [];
   loading = true;
   error: string | null = null;
   userName = '';
@@ -304,20 +404,30 @@ export class ProveedorReservasListComponent implements OnInit {
   mostrarEditar = false;
   nuevoEstado: 'CONFIRMADA' | 'CANCELADA' | '' = '';
   guardandoEstado = false;
+  mostrarTooltip = false;
+  tooltipId: number | null = null;
+  // Filtros
+  filtroFecha: 'futuro' | 'todas' = 'futuro';
+  filtroEstado: string = '';
+    oferta: Oferta | null = null;
+  loadingOferta = false;
+  errorOferta: string | null = null;
 
   get todasLasReservas(): Reserva[] {
     return this.reservas
       .sort((a, b) => new Date(b.fechaReservaInicio).getTime() - new Date(a.fechaReservaInicio).getTime());
   }
 
-  constructor(
-    private router: Router,
-    private keycloak: KeycloakService,
-    private solicitudesService: SolicitudesService,
-    private reservasService: ReservasService,
-    private cdr: ChangeDetectorRef,
-    private noDispService: NoDisponibilidadesService
-  ) {}
+ constructor(
+    private router: Router,
+    private keycloak: KeycloakService,
+    private solicitudesService: SolicitudesService,
+    private reservasService: ReservasService,
+    private cdr: ChangeDetectorRef,
+    private noDispService: NoDisponibilidadesService,
+    // AÑADIR ESTA LÍNEA
+    private ofertasService: OfertasService 
+  ) {}
 
   ngOnInit(): void {
     try {
@@ -326,36 +436,17 @@ export class ProveedorReservasListComponent implements OnInit {
       
       this.idProveedor = 1;
 
-      console.log('Cargando solicitudes para obtener reservas del proveedor:', this.idProveedor);
-      this.solicitudesService.getByProveedor(this.idProveedor).subscribe({
-        next: (solicitudes) => {
-          this.solicitudes = solicitudes;
-          if (solicitudes.length > 0) {
-            const reservaRequests = solicitudes.map(s => 
-              this.reservasService.getByIdSolicitud(s.idSolicitud)
-            );
-            
-            forkJoin(reservaRequests).subscribe({
-              next: (reservasArrays) => {
-                this.reservas = reservasArrays.flat();
-                this.loading = false;
-                this.cdr.detectChanges();
-              },
-              error: (err) => {
-                console.error('Error cargando reservas:', err);
-                this.error = 'Error al cargar las reservas';
-                this.loading = false;
-                this.cdr.detectChanges();
-              }
-            });
-          } else {
+      console.log('Cargando reservas del proveedor (endpoint directo):', this.idProveedor);
+      this.reservasService.getByProveedor(this.idProveedor).subscribe({
+        next: (reservas: Reserva[]) => {
+          this.reservas = Array.isArray(reservas) ? reservas : [];
+          this.aplicarFiltros();
             this.loading = false;
-            this.cdr.detectChanges();
-          }
+          this.cdr.detectChanges();
         },
-        error: (err) => {
-          console.error('Error cargando solicitudes:', err);
-          this.error = 'Error al cargar las solicitudes: ' + (err.message || err.statusText || 'Error desconocido');
+        error: (err: any) => {
+          console.error('Error cargando reservas del proveedor:', err);
+          this.error = 'Error al cargar las reservas del proveedor: ' + (err.message || err.statusText || 'Error desconocido');
           this.loading = false;
           this.cdr.detectChanges();
         }
@@ -370,6 +461,24 @@ export class ProveedorReservasListComponent implements OnInit {
 
   volverDashboard(): void {
     this.router.navigate(['/dashboard/proveedor']);
+  }
+
+cargarOferta(idOferta: number) {
+    this.loadingOferta = true;
+    this.errorOferta = null;
+
+    this.ofertasService.getOfertaById(idOferta).subscribe({
+      next: (data) => {
+        this.oferta = data;
+        this.loadingOferta = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.errorOferta = 'No se pudo cargar la oferta';
+        this.loadingOferta = false;
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   getEstadoClass(estado: string): string {
@@ -430,35 +539,37 @@ export class ProveedorReservasListComponent implements OnInit {
     });
   }
 
-  verDetalle(reserva: Reserva): void {
-    console.log('verDetalle llamado con reserva:', reserva);
-    this.reservaSeleccionada = reserva;
-    this.loadingDetalle = true;
-    this.mostrarModal = true;
-    console.log('mostrarModal = true');
-    
-    // Cargar la solicitud asociada desde el endpoint de reservas
-    console.log('Cargando solicitud del servidor usando endpoint de reservas, ID reserva:', reserva.idReserva);
-    this.reservasService.getSolicitudByReservaId(reserva.idReserva).subscribe({
-      next: (solicitud) => {
-        console.log('Solicitud cargada del servidor:', solicitud);
-        this.solicitudSeleccionada = solicitud;
-        this.loadingDetalle = false;
-        this.cdr.detectChanges();
-      },
-      error: (err) => {
-        console.error('Error cargando solicitud:', err);
-        // Intentar con el método alternativo si falla
-        const solicitudMemoria = this.solicitudes.find(s => s.idSolicitud === reserva.idSolicitud);
-        if (solicitudMemoria) {
-          console.log('Usando solicitud de memoria como fallback');
-          this.solicitudSeleccionada = solicitudMemoria;
-        }
-        this.loadingDetalle = false;
-        this.cdr.detectChanges();
-      }
-    });
-  }
+ verDetalle(reserva: Reserva): void {
+    console.log('verDetalle llamado con reserva:', reserva);
+    this.reservaSeleccionada = reserva;
+    this.loadingDetalle = true;
+    this.mostrarModal = true;
+    // AÑADIR ESTAS LÍNEAS PARA LIMPIAR EL ESTADO DE OFERTA
+    this.oferta = null;
+    this.errorOferta = null;
+    
+    console.log('mostrarModal = true');
+    
+    // Cargar la solicitud asociada desde el endpoint de reservas
+    console.log('Cargando solicitud del servidor usando endpoint de reservas, ID reserva:', reserva.idReserva);
+    this.reservasService.getSolicitudByReservaId(reserva.idReserva).subscribe({
+      next: (solicitud) => {
+        console.log('Solicitud cargada del servidor:', solicitud);
+        this.solicitudSeleccionada = solicitud;
+
+        // AÑADIR ESTA LÓGICA PARA CARGAR LA OFERTA
+        if (solicitud.idOferta) {
+          this.cargarOferta(solicitud.idOferta);
+        }
+
+        this.loadingDetalle = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        // ... (el resto del código de error)
+      }
+    });
+  }
 
   cerrarModal(): void {
     this.mostrarModal = false;
@@ -478,10 +589,43 @@ export class ProveedorReservasListComponent implements OnInit {
     this.reservaSeleccionada = null;
   }
 
-  // Mostrar botón Editar solo para estados PENDIENTE o CONFIRMADA
+  // Mostrar botón de ayuda para PENDIENTE
+  isPendiente(estado: string): boolean {
+    return (estado || '').toUpperCase() === 'PENDIENTE';
+  }
+
+  mostrarTooltipHelp(id: number): void {
+    this.mostrarTooltip = true;
+    this.tooltipId = id;
+  }
+
+  ocultarTooltipHelp(): void {
+    this.mostrarTooltip = false;
+    this.tooltipId = null;
+  }
+
+  // Mostrar botón Editar solo para APROBADA
   isEditable(estado: string): boolean {
-    const e = (estado || '').toUpperCase();
-    return e === 'PENDIENTE' || e === 'CONFIRMADA';
+    return (estado || '').toUpperCase() === 'APROBADA';
+  }
+
+  // Aplicar filtros de fecha y estado
+  aplicarFiltros(): void {
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+
+    this.reservasFiltradas = this.todasLasReservas.filter((reserva) => {
+      // Filtro por fecha
+      const fechaInicio = new Date(reserva.fechaReservaInicio);
+      fechaInicio.setHours(0, 0, 0, 0);
+      
+      const cumpleFecha = this.filtroFecha === 'todas' || fechaInicio >= hoy;
+
+      // Filtro por estado
+      const cumpleEstado = !this.filtroEstado || reserva.estado?.toUpperCase() === this.filtroEstado.toUpperCase();
+
+      return cumpleFecha && cumpleEstado;
+    });
   }
 
   // Permitir confirmar solo cuando está PENDIENTE
@@ -514,6 +658,7 @@ export class ProveedorReservasListComponent implements OnInit {
                 this.noDispService.delete(noDisp.idNoDisponibilidad).subscribe({
                   next: () => {
                     this.guardandoEstado = false;
+                    this.aplicarFiltros();
                     this.cerrarEditar();
                     this.cdr.detectChanges();
                   },
@@ -526,6 +671,7 @@ export class ProveedorReservasListComponent implements OnInit {
               } else {
                 // No hay no disponibilidad asociada, continuar
                 this.guardandoEstado = false;
+                this.aplicarFiltros();
                 this.cerrarEditar();
                 this.cdr.detectChanges();
               }
@@ -539,6 +685,7 @@ export class ProveedorReservasListComponent implements OnInit {
           });
         } else {
           this.guardandoEstado = false;
+          this.aplicarFiltros();
           this.cerrarEditar();
           this.cdr.detectChanges();
         }

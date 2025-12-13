@@ -1,0 +1,483 @@
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { KeycloakService } from 'keycloak-angular';
+import { Router, RouterLink } from '@angular/router';
+import { SolicitudesService } from '../services/solicitudes.service';
+import { ReservasService } from '../services/reservas.service';
+import { OfertasService } from '../services/ofertas.service'; // 🟢 Importar OfertasService
+import { Solicitud } from '../models/solicitud.model';
+import { Oferta } from '../models/oferta.model'; // 🟢 Importar el modelo Oferta
+import { FormsModule } from '@angular/forms';
+import { finalize, timeout } from 'rxjs/operators';
+import { forkJoin } from 'rxjs'; // 🟢 Importar forkJoin para llamadas paralelas
+
+
+@Component({
+  selector: 'app-organizador-solicitudes-list',
+  standalone: true,
+  imports: [CommonModule, FormsModule,RouterLink],
+  template: `
+  <div class="font-display bg-background-light dark:bg-background-dark text-[#18181B] dark:text-gray-200 min-h-screen">
+  <div class="relative flex min-h-screen w-full">
+    <aside class="flex h-screen w-64 flex-col border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 sticky top-0">
+      <div class="flex h-full flex-col justify-between p-4">
+        <div class="flex flex-col gap-4">
+          <div class="flex items-center gap-4 text-slate-900 dark:text-white px-3 py-2">
+            <span class="material-symbols-outlined text-3xl text-primary">hub</span>
+            <h2 class="text-lg font-bold tracking-[-0.015em]">EvenPro</h2>
+          </div>
+          <nav class="flex flex-col gap-2 mt-4">
+            <a (click)="volverDashboard()" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-primary/10 cursor-pointer text-slate-600 dark:text-slate-300">
+              <span class="material-symbols-outlined">dashboard</span>
+              <p class="text-sm font-medium">Dashboard</p>
+            </a>
+            <div class="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/20">
+              <span class="material-symbols-outlined text-slate-900 dark:text-white">description</span>
+              <p class="text-slate-900 dark:text-white text-sm font-medium">Solicitudes</p>
+            </div>
+          </nav>
+        </div>
+        <div class="flex flex-col gap-4">
+          <div class="flex gap-3 items-center">
+            <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAYQ3Xv_YuY339LzWOL4jYfKwpp_Xk9EQPeGlaPTZUaCbWibigjj_YB-aGxvhwg8F6DZMvP78IzouOQH3-QD04rKwZu0qAV4ksMNwLhpVskYFEt4FmVucm_mFLxLxPTX8hDHUjR_Z9oMgFc_G87oiDiH7JpnVMSiQivqyiCyL3FHFneBsNk31-5d9q8uvRmqI_l6FgX35MdysNRvagVfmucr0CWN1v_HLjU_aiWNcTSeh51R5rwoZnxazDlwLlmCDHhNO9UufJdhm1M');"></div>
+            <div class="flex flex-col">
+              <h1 class="text-slate-900 dark:text-white text-base font-medium leading-normal">{{ userName }}</h1>
+              <p class="text-primary/80 dark:text-primary/70 text-sm font-normal leading-normal">Organizador Verificado</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="flex-1">
+      <header class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 px-10 py-6 bg-white dark:bg-slate-900">
+        <div class="flex items-center gap-4">
+          <button (click)="volverDashboard()" class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
+            <span class="material-symbols-outlined text-slate-600 dark:text-slate-300">arrow_back</span>
+          </button>
+          <div>
+            <h1 class="text-3xl font-black text-slate-900 dark:text-white">Todas mis Solicitudes</h1>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Gestiona todas tus solicitudes</p>
+          </div>
+        </div>
+      </header>
+
+      <div class="p-10">
+        <div class="mb-6 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6">
+          <div class="flex flex-wrap items-center gap-4">
+            <div class="flex gap-2">
+              <button (click)="filtroFecha = 'futuro'; aplicarFiltros()" 
+                      [class]="'px-4 py-2 rounded-lg text-sm font-semibold transition-colors ' + (filtroFecha === 'futuro' ? 'bg-primary text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700')">
+                Solo Futuras
+              </button>
+              <button (click)="filtroFecha = 'todas'; aplicarFiltros()" 
+                      [class]="'px-4 py-2 rounded-lg text-sm font-semibold transition-colors ' + (filtroFecha === 'todas' ? 'bg-primary text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700')">
+                Ver Todas
+              </button>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Filtrar por Estado:</label>
+              <select [(ngModel)]="filtroEstado" (change)="aplicarFiltros()"
+                      class="px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm font-medium">
+                <option value="">Todos los Estados</option>
+                <option value="PENDIENTE">Pendiente</option>
+                <option value="APROBADA">Aprobada</option>
+                <option value="RECHAZADA">Rechazada</option>
+              </select>
+            </div>
+
+            <div class="text-sm text-slate-600 dark:text-slate-400 ml-auto">
+              Mostrando <span class="font-semibold">{{ solicitudesFiltradas.length }}</span> de {{ solicitudes.length }} solicitudes
+            </div>
+          </div>
+        </div>
+        <div *ngIf="loading" class="flex items-center justify-center py-12">
+          <div class="text-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+            <p class="mt-4 text-gray-600 dark:text-gray-400">Cargando solicitudes...</p>
+          </div>
+        </div>
+
+        <div *ngIf="error && !loading" class="bg-red-100 dark:bg-red-900/50 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-400 px-4 py-3 rounded mb-4">
+          {{ error }}
+        </div>
+
+        <div *ngIf="!loading && !error" class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-x-auto">
+          <table class="w-full text-left">
+            <thead class="border-b border-slate-200 dark:border-slate-800">
+              <tr>
+                <th class="p-6 text-sm font-semibold text-slate-500 dark:text-slate-400">ID Solicitud</th>
+                <th class="p-6 text-sm font-semibold text-slate-500 dark:text-slate-400">Fecha</th>
+                <th class="p-6 text-sm font-semibold text-slate-500 dark:text-slate-400">Estado</th>
+                <th class="p-6 text-sm font-semibold text-slate-500 dark:text-slate-400">Organizador</th>
+                <th class="p-6 text-sm font-semibold text-slate-500 dark:text-slate-400">Proveedor</th>
+                <th class="p-6 text-sm font-semibold text-slate-500 dark:text-slate-400">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let s of solicitudesFiltradas" class="border-b border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                <td class="p-6 text-sm font-medium text-slate-800 dark:text-slate-100">#{{ s.idSolicitud }}</td>
+                <td class="p-6 text-sm text-slate-600 dark:text-slate-300">{{ formatDate(s.fechaSolicitud) }}</td>
+                <td class="p-6 text-sm">
+                  <span [class]="'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ' + getEstadoClass(s.estadoSolicitud)">
+                    {{ getEstadoLabel(s.estadoSolicitud) }}
+                  </span>
+                </td>
+                <td class="p-6 text-sm text-slate-600 dark:text-slate-300">#{{ s.idOrganizador }}</td>
+                <td class="p-6 text-sm text-slate-600 dark:text-slate-300">#{{ s.idProovedor }}</td>
+                <td class="p-6 text-sm">
+                  <button (click)="verDetalle(s)" class="px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-semibold hover:bg-primary/90">
+                    Ver Detalle
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div *ngIf="mostrarModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div class="w-full max-w-3xl bg-white dark:bg-slate-900 rounded-xl shadow-lg border border-slate-200 dark:border-slate-800">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800">
+              <h2 class="text-xl font-bold text-slate-900 dark:text-white">Detalle de Solicitud</h2>
+              <button (click)="cerrarModal()" class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
+                <span class="material-symbols-outlined text-slate-600 dark:text-slate-300">close</span>
+              </button>
+            </div>
+
+            <div class="p-6">
+              <div *ngIf="loadingDetalle" class="flex items-center justify-center py-6">
+                <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
+              </div>
+
+              <div *ngIf="errorDetalle && !loadingDetalle" class="mb-4 bg-red-100 dark:bg-red-900/40 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded">
+                {{ errorDetalle }}
+              </div>
+
+              <div *ngIf="!loadingDetalle">
+                
+                <div class="mb-6">
+                  <h3 class="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-3">Solicitud</h3>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span class="text-slate-500 dark:text-slate-400">ID:</span>
+                      <span class="ml-2 font-medium">#{{ solicitudSeleccionada?.idSolicitud }}</span>
+                    </div>
+                    <div>
+                      <span class="text-slate-500 dark:text-slate-400">Fecha:</span>
+                      <span class="ml-2 font-medium">{{ formatDateLong(solicitudSeleccionada?.fechaSolicitud || '') }}</span>
+                    </div>
+                    <div>
+                      <span class="text-slate-500 dark:text-slate-400">Estado:</span>
+                      <span class="ml-2">
+                        <span [class]="'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ' + getEstadoClass(solicitudSeleccionada?.estadoSolicitud || '')">
+                          {{ getEstadoLabel(solicitudSeleccionada?.estadoSolicitud || '') }}
+                        </span>
+                      </span>
+                    </div>
+                    <div>
+                      <span class="text-slate-500 dark:text-slate-400">Organizador:</span>
+                      <span class="ml-2 font-medium">#{{ solicitudSeleccionada?.idOrganizador }}</span>
+                    </div>
+                    <div>
+                      <span class="text-slate-500 dark:text-slate-400">Proveedor:</span>
+                      <span class="ml-2 font-medium">#{{ solicitudSeleccionada?.idProovedor }}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div *ngIf="solicitudSeleccionada?.idOferta" class="mb-6">
+                  <h3 class="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-3">Oferta Asociada</h3>
+                  
+                  <div *ngIf="loadingOferta" class="flex items-center justify-center py-3">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                  </div>
+                  
+                  <div *ngIf="ofertaAsociada" class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span class="text-slate-500 dark:text-slate-400">ID Oferta:</span>
+                      <span class="ml-2 font-medium">#{{ ofertaAsociada.id }}</span>
+                    </div>
+                    <div class="md:col-span-2">
+                      <span class="text-slate-500 dark:text-slate-400">Título:</span>
+                      <a class="ml-2 font-medium text-primary cursor-pointer" 
+                            [routerLink]="['/oferta', ofertaAsociada.id]">
+                          {{ ofertaAsociada.titulo }}
+                      </a>
+                    </div>
+                  </div>
+                  
+                  <div *ngIf="errorOferta && !loadingOferta" class="mb-4 bg-red-100 dark:bg-red-900/40 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded">
+                    {{ errorOferta }}
+                  </div>
+                </div>
+
+
+                <div>
+                  <h3 class="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-3">Reserva Asociada</h3>
+                  <div *ngIf="reservaAsociada; else sinReserva" class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span class="text-slate-500 dark:text-slate-400">ID Reserva:</span>
+                      <span class="ml-2 font-medium">#{{ reservaAsociada?.idReserva }}</span>
+                    </div>
+                    <div>
+                      <span class="text-slate-500 dark:text-slate-400">Estado:</span>
+                      <span class="ml-2">
+                        <span [class]="'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ' + getEstadoClass(reservaAsociada?.estadoReserva || '')">
+                          {{ getEstadoLabel(reservaAsociada?.estadoReserva || '') || 'No informado' }}
+                        </span>
+                      </span>
+                    </div>
+                    <div>
+                      <span class="text-slate-500 dark:text-slate-400">Fecha Inicio:</span>
+                      <span class="ml-2 font-medium">{{ reservaAsociada?.fechaReservaInicio ? formatDateLong(reservaAsociada.fechaReservaInicio) : 'No informado' }}</span>
+                    </div>
+                    <div>
+                      <span class="text-slate-500 dark:text-slate-400">Fecha Fin:</span>
+                      <span class="ml-2 font-medium">{{ reservaAsociada?.fechaReservaFin ? formatDateLong(reservaAsociada.fechaReservaFin) : 'No informado' }}</span>
+                    </div>
+                    <div>
+                      <span class="text-slate-500 dark:text-slate-400">ID Solicitud:</span>
+                      <span class="ml-2 font-medium">{{ reservaAsociada?.idSolicitud ? ('#' + reservaAsociada.idSolicitud) : 'No informado' }}</span>
+                    </div>
+                    <div>
+                      <span class="text-slate-500 dark:text-slate-400">Proveedor:</span>
+                      <span class="ml-2 font-medium">{{ reservaAsociada?.idProveedor ? ('#' + reservaAsociada.idProveedor) : 'No informado' }}</span>
+                    </div>
+                    <div>
+                      <span class="text-slate-500 dark:text-slate-400">Organizador:</span>
+                      <span class="ml-2 font-medium">{{ reservaAsociada?.idOrganizador ? ('#' + reservaAsociada.idOrganizador) : 'No informado' }}</span>
+                    </div>
+                    <div>
+                      <span class="text-slate-500 dark:text-slate-400">Creación:</span>
+                      <span class="ml-2 font-medium">{{ reservaAsociada?.fechaCreacion ? formatDateLong(reservaAsociada.fechaCreacion) : 'No informado' }}</span>
+                    </div>
+                    <div>
+                      <span class="text-slate-500 dark:text-slate-400">Actualización:</span>
+                      <span class="ml-2 font-medium">{{ reservaAsociada?.fechaActualizacion ? formatDateLong(reservaAsociada.fechaActualizacion) : 'No informado' }}</span>
+                    </div>
+                  </div>
+                  <ng-template #sinReserva>
+                    <p class="text-sm text-slate-600 dark:text-slate-400">No hay una reserva asociada a esta solicitud.</p>
+                  </ng-template>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex justify-end gap-3 px-6 py-4 border-t border-slate-200 dark:border-slate-800">
+              <button (click)="cerrarModal()" class="px-4 py-2 rounded-lg text-sm font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700">Cerrar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+  `
+})
+export class OrganizadorSolicitudesListComponent implements OnInit {
+  solicitudes: Solicitud[] = [];
+  solicitudesFiltradas: Solicitud[] = [];
+  loading = true;
+  error: string | null = null;
+  userName = '';
+  idOrganizador = 14;
+  filtroFecha: 'futuro' | 'todas' = 'futuro';
+  filtroEstado: string = '';
+  mostrarModal = false;
+  loadingDetalle = false;
+  errorDetalle: string | null = null;
+  solicitudSeleccionada: Solicitud | null = null;
+  reservaAsociada: any = null;
+
+  ofertaAsociada: Oferta | null = null;
+    loadingOferta = false;
+    errorOferta: string | null = null;
+
+  constructor(
+        private router: Router,
+        private keycloak: KeycloakService,
+        private solicitudesService: SolicitudesService,
+        private reservasService: ReservasService,
+        private ofertasService: OfertasService, // 🟢 Inyectar OfertasService
+        private cdr: ChangeDetectorRef
+    ) {}
+
+  ngOnInit(): void {
+    try {
+      const tokenParsed = this.keycloak.getKeycloakInstance().tokenParsed;
+      this.userName = tokenParsed?.['preferred_username'] || tokenParsed?.['name'] || 'Organizador';
+      this.idOrganizador = 14;
+
+      this.solicitudesService.getByOrganizador(this.idOrganizador).subscribe({
+        next: (solicitudes: Solicitud[]) => {
+          this.solicitudes = Array.isArray(solicitudes) ? solicitudes : [];
+          this.aplicarFiltros();
+          this.loading = false;
+          this.cdr.detectChanges();
+        },
+        error: (err: any) => {
+          console.error('Error cargando solicitudes del organizador:', err);
+          this.error = 'Error al cargar las solicitudes del organizador: ' + (err.message || err.statusText || 'Error desconocido');
+          this.loading = false;
+          this.cdr.detectChanges();
+        }
+      });
+    } catch (err) {
+      console.error('Error en ngOnInit:', err);
+      this.error = 'Error al inicializar';
+      this.loading = false;
+      this.cdr.detectChanges();
+    }
+  }
+
+  volverDashboard(): void {
+    this.router.navigate(['/dashboard/organizador']);
+  }
+
+  getEstadoClass(estado: string): string {
+    const estadoUpper = estado?.toUpperCase() || '';
+    switch (estadoUpper) {
+      case 'PENDIENTE':
+        return 'bg-orange-100 text-orange-800';
+      case 'EN_NEGOCIACION':
+        return 'bg-blue-100 text-blue-800';
+      case 'APROBADA':
+      case 'CONFIRMADA':
+        return 'bg-green-100 text-green-800';
+      case 'RECHAZADA':
+      case 'CANCELADA':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  }
+
+  getEstadoLabel(estado: string): string {
+    const estadoUpper = estado?.toUpperCase() || '';
+    switch (estadoUpper) {
+      case 'PENDIENTE':
+        return 'Pendiente';
+      case 'EN_NEGOCIACION':
+        return 'En Negociación';
+      case 'APROBADA':
+        return 'Aprobada';
+      case 'CONFIRMADA':
+        return 'Confirmada';
+      case 'RECHAZADA':
+        return 'Rechazada';
+      case 'CANCELADA':
+        return 'Cancelada';
+      default:
+        return estado || 'Desconocido';
+    }
+  }
+
+  formatDate(dateString: string): string {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('es-ES', { 
+      day: '2-digit', 
+      month: '2-digit',
+      year: 'numeric'
+    });
+  }
+
+  formatDateLong(dateString: string): string {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('es-ES', { 
+      day: '2-digit', 
+      month: 'long',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+
+  aplicarFiltros(): void {
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+
+    this.solicitudesFiltradas = this.solicitudes
+      .sort((a, b) => new Date(b.fechaSolicitud).getTime() - new Date(a.fechaSolicitud).getTime())
+      .filter((s) => {
+        const fecha = new Date(s.fechaSolicitud);
+        fecha.setHours(0, 0, 0, 0);
+        const cumpleFecha = this.filtroFecha === 'todas' || fecha >= hoy;
+        const cumpleEstado = !this.filtroEstado || s.estadoSolicitud?.toUpperCase() === this.filtroEstado.toUpperCase();
+        return cumpleFecha && cumpleEstado;
+      });
+  }
+
+verDetalle(solicitud: Solicitud): void {
+        this.solicitudSeleccionada = solicitud;
+        this.mostrarModal = true;
+        this.errorDetalle = null;
+        this.reservaAsociada = null;
+        this.ofertaAsociada = null; // Reiniciar la oferta
+
+        // 🟢 PREPARAR LLAMADAS
+        const calls: any = {
+            reserva: this.reservasService.getByIdSolicitud(solicitud.idSolicitud).pipe(timeout(10000)),
+        };
+
+        // Si la solicitud tiene idOferta, añadir la llamada para obtener la oferta
+        if (solicitud.idOferta) {
+            calls.oferta = this.ofertasService.getOfertaById(solicitud.idOferta).pipe(timeout(10000));
+        }
+
+        this.loadingDetalle = true;
+        this.loadingOferta = !!solicitud.idOferta; // Solo cargar si hay ID de oferta
+
+        // 🟢 Ejecutar llamadas
+        forkJoin(calls).pipe(
+            finalize(() => {
+                this.loadingDetalle = false;
+                this.loadingOferta = false;
+                this.cdr.detectChanges();
+            })
+        ).subscribe({
+            next: (results: any) => {
+                // 1. Manejo de Reserva
+                const reservas = results.reserva;
+                if (Array.isArray(reservas) && reservas.length > 0) {
+                    const r: any = reservas[0];
+                    // Normaliza nombres de campos (lo que ya tenías)
+                    this.reservaAsociada = { 
+                        ...r,
+                        estadoReserva: r.estado || r.estadoReserva || '',
+                        fechaReservaInicio: r.fechaReservaInicio || r.fechaReserva || '',
+                        fechaReservaFin: r.fechaReservaFin || r.fechaReserva || '',
+                        fechaCreacion: r.fechaCreacion || '',
+                        fechaActualizacion: r.fechaActualizacion || '',
+                        idSolicitud: r.idSolicitud || solicitud.idSolicitud,
+                        idProveedor: r.idProveedor || r.idProovedor || solicitud.idProovedor || '',
+                        idOrganizador: r.idOrganizador || r.id_organizador || solicitud.idOrganizador || ''
+                    };
+                }
+
+                // 2. Manejo de Oferta
+                if (results.oferta) {
+                    this.ofertaAsociada = results.oferta;
+                }
+            },
+            error: (err: any) => {
+                console.error('Error cargando detalles del modal:', err);
+                // Determinar el error según qué llamada falló
+                if (err && err.name === 'TimeoutError') {
+                    this.errorDetalle = 'Tiempo de espera agotado al cargar detalles.';
+                } else {
+                    this.errorDetalle = 'Ocurrió un error al cargar los detalles.';
+                }
+            }
+        });
+    }
+
+  cerrarModal(): void {
+        this.mostrarModal = false;
+        this.solicitudSeleccionada = null;
+        this.reservaAsociada = null;
+        this.ofertaAsociada = null; // 🟢 Limpiar oferta
+        this.errorOferta = null;
+        this.loadingOferta = false;
+    }
+}

@@ -13,22 +13,28 @@ import { SolicitudesListComponent } from './solicitudes/solicitudes-list.compone
 import { NoDisponibilidadesListComponent } from './NoDisponibilidad/NoDisponibilidad-list.component';
 import { ProveedorReservasListComponent } from './reservas/proveedor-reservas-list.component';
 import { ProveedorSolicitudesListComponent } from './solicitudes/proveedor-solicitudes-list.component';
+import { OrganizadorReservasListComponent } from './reservas/organizador-reservas-list.component';
+import { OrganizadorSolicitudesListComponent } from './solicitudes/organizador-solicitudes-list.component';
 import { CalendarioDetalladoComponent } from './NoDisponibilidad/calendario_disponibilidad_prov';
+
 import { authGuard } from './auth/auth.guard';
 import { LandingComponent } from './auth/landing/landing.component';
+import { SolicitudReservaFormComponent } from './solicitudes/solicitud-reserva-form.component';
+import { OfertasPageComponent } from './pages/ofertas-page.component';
+import { ProveedorOfertasPageComponent } from './pages/proveedor-ofertas-page.component';
 
 export const routes: Routes = [
   // Ruta pública inicial
   { path: '', component: LandingComponent },
 
-  // Ruta pública: registro (se consume /usuarios/auth/register)
+  // Ruta pública: registro (consume /usuarios/auth/register)
   {
     path: 'registro',
     loadComponent: () =>
       import('./auth/registro/registro.component').then((m) => m.RegistroComponent)
   },
 
-  // Rutas privadas (antes estaban implícitamente protegidas por login-required)
+  // Rutas privadas
   { path: 'dashboard', component: RoleDashboardComponent, canActivate: [authGuard] },
   {
     path: 'dashboard/organizador',
@@ -43,6 +49,8 @@ export const routes: Routes = [
   { path: 'proveedor/reservas', component: ProveedorReservasListComponent, canActivate: [authGuard] },
   { path: 'proveedor/solicitudes', component: ProveedorSolicitudesListComponent, canActivate: [authGuard] },
   { path: 'proveedor/no-disponibilidades', component: CalendarioDetalladoComponent, canActivate: [authGuard] },
+  { path: 'reservas/organizador', component: OrganizadorReservasListComponent, canActivate: [authGuard] },
+  { path: 'solicitudes/organizador', component: OrganizadorSolicitudesListComponent, canActivate: [authGuard] },
   // Ruta legacy previa
   { path: 'dashboard/legacy', component: DashboardComponent, canActivate: [authGuard] },
 
@@ -77,8 +85,32 @@ export const routes: Routes = [
 
   {
     path: 'ofertas',
-    loadComponent: () => import('./ofertas/oferta-list.component').then(m => m.OfertaListComponent),
-    canActivate: [authGuard]
+    canActivate: [authGuard],
+    children: [
+      { path: '', component: OfertasPageComponent, canActivate: [authGuard] },
+      {
+        path: ':id',
+        canActivate: [authGuard],
+        loadComponent: () =>
+          import('./pages/oferta-detalle.component').then((m) => m.OfertaDetalleComponent)
+      }
+    ]
+  },
+
+  {
+    path: 'proveedor/ofertas/crear',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./components/crear-oferta/crear-oferta.component').then(
+        (m) => m.CrearOfertaComponent
+      )
+  },
+  { path: 'proveedor/ofertas', component: ProveedorOfertasPageComponent, canActivate: [authGuard] },
+  {
+    path: 'proveedor/ofertas/editar/:id',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./pages/oferta-editar.component').then((m) => m.OfertaEditarComponent)
   },
 //   { 
 //     path: 'ofertas', 
@@ -87,5 +119,6 @@ export const routes: Routes = [
 //   { 
 //     path: 'notificaciones', 
 //     loadChildren: () => import('./notificaciones/notificaciones.module').then(m => m.NotificacionesModule) 
-//   }
+//   },
+  { path: 'solicitud-reserva', component: SolicitudReservaFormComponent, canActivate: [authGuard] }
 ];

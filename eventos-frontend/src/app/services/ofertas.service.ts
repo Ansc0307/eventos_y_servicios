@@ -1,43 +1,91 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { Oferta } from '../models/oferta.model';
 
-@Injectable({ providedIn: 'root' })
+@Injectable({
+  providedIn: 'root'
+})
 export class OfertasService {
 
-  private baseOfertas = '/ofertas/ofertas';
-  private baseCategorias = '/ofertas/categorias';
+  // Use a relative path so the Angular dev server proxy can forward requests
+  private baseUrl = '/ofertas/ofertas';
 
   constructor(private http: HttpClient) {}
 
-  // === OFERTAS ===
-  getAll(): Observable<Oferta[]> {
-    return this.http.get<Oferta[]>(this.baseOfertas);
+  getOfertas(): Observable<Oferta[]> {
+    // Backend returns a different shape; map it to our front-end model
+    return this.http.get<any[]>(this.baseUrl).pipe(
+      map((items) =>
+        items.map((it) => ({
+          id: it.idOfertas ?? it.id,
+          proveedorId: it.proveedorId,
+          titulo: it.titulo,
+          idCategoria: it.categoria?.idCategoria ?? it.idCategoria ?? it.idCategoria,
+          descripcion: it.descripcion,
+          precioBase: it.precioBase,
+          estado: it.estado,
+          activo: it.activo,
+          urlsMedia: (it.medias || it.urlsMedia || []).map((m: any) => m.url ?? m)
+        } as Oferta))
+      )
+    );
   }
 
-  getById(id: number): Observable<Oferta> {
-    return this.http.get<Oferta>(`${this.baseOfertas}/${id}`);
-  }
+ getOfertaById(id: number): Observable<Oferta> {
+  return this.http.get<any>(`${this.baseUrl}/${id}`).pipe(
+    map((it) => {
+      const categoria = it.categoria || it.idCategoria || null;
 
-  create(payload: Partial<Oferta>): Observable<Oferta> {
-    return this.http.post<Oferta>(this.baseOfertas, payload);
-  }
+      // medias puede venir así:
+      // [{ url: "xxx" }] o ["xxx"] o null
+      const medias = it.medias ?? [];
+      const urlsMedia = medias.map((m: any) => m.url ?? m);
 
-  update(id: number, payload: Partial<Oferta>): Observable<Oferta> {
-    return this.http.put<Oferta>(`${this.baseOfertas}/${id}`, payload);
-  }
+      return {
+        id: it.idOfertas ?? it.id,
+        proveedorId: it.proveedorId,
+        titulo: it.titulo,
+        idCategoria: categoria?.idCategoria ?? categoria ?? null,
+        categoria,
+        descripcion: it.descripcion,
+        precioBase: it.precioBase,
+        estado: it.estado,
+        activo: it.activo,
+        medias,
+        descuentos: it.descuentos ?? [],
+        urlsMedia
+      } as Oferta;
+    })
+  );
+}
+crearOferta(oferta: any): Observable<Oferta> {
+  return this.http.post<any>(this.baseUrl, oferta).pipe(
+    map((it) => ({
+      id: it.idOfertas ?? it.id,
+      proveedorId: it.proveedorId,
+      titulo: it.titulo,
+      idCategoria: it.categoria?.idCategoria ?? it.idCategoria ?? null,
+      descripcion: it.descripcion,
+      precioBase: it.precioBase,
+      estado: it.estado,
+      activo: it.activo,
+      urlsMedia: (it.medias || it.urlsMedia || []).map((m: any) => m.url ?? m)
+    } as Oferta))
+  );
+}
+getOfertasPorProveedor(proveedorId: number): Observable<Oferta[]> {
+  return this.getOfertas().pipe(
+    map(ofertas => ofertas.filter(o => o.proveedorId === proveedorId))
+  );
+}
+editarOferta(id: number, data: any) {
+  return this.http.put(`${this.baseUrl}/${id}`, data);
+}
 
-  delete(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.baseOfertas}/${id}`);
-  }
+deleteOferta(id: number) {
+  return this.http.delete(`${this.baseUrl}/${id}`);
+}
 
-  // === CATEGORÍAS ===
-  getCategorias(): Observable<any[]> {
-    return this.http.get<any[]>(this.baseCategorias);
-  }
-
-  createCategoria(payload: any): Observable<any> {
-    return this.http.post<any>(this.baseCategorias, payload);
-  }
 }

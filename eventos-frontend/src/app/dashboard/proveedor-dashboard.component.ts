@@ -9,12 +9,15 @@ import { Reserva } from '../models/reserva.model';
 import { forkJoin } from 'rxjs';
 import { SolicitudDetalleComponent } from '../components/solicitud-detalle/solicitud-detalle.component';
 import { ResponderSolicitudComponent } from '../components/solicitud-detalle/app-responder-solicitud';
+import { OfertasService } from '../services/ofertas.service';
+import { Oferta } from '../models/oferta.model';
+import { OfertaCardComponent } from '../components/oferta-card/oferta-card.component';
 
 
 @Component({
   selector: 'app-proveedor-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, SolicitudDetalleComponent, ResponderSolicitudComponent],
+  imports: [CommonModule, RouterLink, SolicitudDetalleComponent, ResponderSolicitudComponent, OfertaCardComponent],
 
   template: `
   <div class="font-display bg-background-light dark:bg-background-dark text-[#18181B] dark:text-gray-200 min-h-screen">
@@ -44,6 +47,13 @@ import { ResponderSolicitudComponent } from '../components/solicitud-detalle/app
               <a routerLink="/proveedor/reservas" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-primary/10 cursor-pointer">
                 <span class="material-symbols-outlined text-slate-600 dark:text-slate-300">event</span>
                 <p class="text-slate-600 dark:text-slate-300 text-sm font-medium leading-normal">Reservas</p>
+              </a>
+              <a routerLink="/proveedor/ofertas" 
+                class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-primary/10 cursor-pointer">
+                <span class="material-symbols-outlined text-slate-600 dark:text-slate-300">sell</span>
+                <p class="text-slate-600 dark:text-slate-300 text-sm font-medium leading-normal">
+                  Mis Ofertas
+                </p>
               </a>
               <div class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-primary/10 cursor-pointer">
                 <span class="material-symbols-outlined text-slate-600 dark:text-slate-300">person</span>
@@ -99,7 +109,9 @@ import { ResponderSolicitudComponent } from '../components/solicitud-detalle/app
             <div *ngIf="!loading && !error">
               <div class="flex flex-wrap justify-between gap-3 items-center">
                 <p class="text-slate-900 dark:text-white text-4xl font-black leading-tight tracking-[-0.033em] min-w-72">Dashboard</p>
-                <button class="bg-primary text-white font-bold py-2.5 px-6 rounded-lg flex items-center gap-2">
+                <button 
+                  routerLink="/proveedor/ofertas/crear"
+                  class="bg-primary text-white font-bold py-2.5 px-6 rounded-lg flex items-center gap-2">
                   <span class="material-symbols-outlined">add_circle</span>
                   Crear Nueva Oferta
                 </button>
@@ -250,6 +262,7 @@ import { ResponderSolicitudComponent } from '../components/solicitud-detalle/app
   <app-solicitud-detalle 
   *ngIf="modalVisible" 
   [solicitud]="selectedSolicitud" 
+  [reserva]="selectedReserva"
   (close)="cerrarModal()">
 </app-solicitud-detalle>
 <app-responder-solicitud
@@ -311,6 +324,51 @@ import { ResponderSolicitudComponent } from '../components/solicitud-detalle/app
               </div>
             </div>
           </div>
+
+  <!-- INFORMACIÓN OFERTA -->
+          <div *ngIf="solicitudSeleccionada?.idOferta"
+               class="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-6 border border-slate-200 dark:border-slate-700">
+
+            <div class="flex items-center gap-2 mb-4">
+              <span class="material-symbols-outlined text-primary">local_offer</span>
+              <h3 class="text-xl font-bold text-slate-900 dark:text-white">Información de la Oferta</h3>
+            </div>
+
+            <div *ngIf="loadingOferta" class="flex items-center gap-3">
+              <div class="animate-spin h-5 w-5 border-b-2 border-primary rounded-full"></div>
+              <span>Cargando oferta...</span>
+            </div>
+
+            <div *ngIf="errorOferta" class="text-red-600">
+              {{ errorOferta }}
+            </div>
+
+            <div *ngIf="oferta" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <p class="text-sm font-semibold text-slate-500">ID Oferta</p>
+                <p>#{{ oferta.id }}</p>
+              </div>
+
+              <div>
+                <p class="text-sm font-semibold text-slate-500">Título</p>
+                <p class="font-medium text-primary">{{ oferta.titulo }}</p>
+              </div>
+
+              <div>
+                <p class="text-sm font-semibold text-slate-500">Precio Base</p>
+                <p>{{ oferta.precioBase | currency }}</p>
+              </div>
+
+              <div>
+                <p class="text-sm font-semibold text-slate-500">Estado Oferta</p>
+                <span class="inline-flex px-3 py-1 rounded-full text-sm font-medium mt-1"
+                      [ngClass]="getEstadoClass(oferta.estado)">
+                  {{ getEstadoLabel(oferta.estado) }}
+                </span>
+              </div>
+            </div>
+          </div>
+
 
           <!-- Información de la Solicitud -->
           <div class="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-6 border border-slate-200 dark:border-slate-700">
@@ -377,7 +435,10 @@ export class ProveedorDashboardComponent implements OnInit {
   error: string | null = null;
   userName = '';
   idProveedor = 1; // Por defecto
-
+  misOfertas: Oferta[] = [];
+oferta: Oferta | null = null;
+  loadingOferta = false;
+  errorOferta: string | null = null;
 
     ngOnInit(): void {
     try {
@@ -387,40 +448,28 @@ export class ProveedorDashboardComponent implements OnInit {
       
       this.idProveedor = 1;
 
-      // Cargar solicitudes del proveedor
-      console.log('Cargando solicitudes para proveedor:', this.idProveedor);
-      this.solicitudesService.getByProveedor(this.idProveedor).subscribe({
-        //this.solicitudesService.getAll().subscribe({
-        next: (solicitudes) => {
-          console.log('Solicitudes recibidas:', solicitudes);
-          this.solicitudes = solicitudes;
-          
-          // Cargar reservas para cada solicitud
-          if (solicitudes.length > 0) {
-            const reservaRequests = solicitudes.map(s => 
-              this.reservasService.getByIdSolicitud(s.idSolicitud)
-            );
-            
-            forkJoin(reservaRequests).subscribe({
-              next: (reservasArrays) => {
-                this.reservas = reservasArrays.flat();
-                this.loading = false;
-                this.cdr.detectChanges();
-              },
-              error: (err) => {
-                console.error('Error cargando reservas:', err);
-                this.loading = false;
-                this.cdr.detectChanges();
-              }
-            });
-          } else {
-            this.loading = false;
-            this.cdr.detectChanges();
-          }
+      // Cargar reservas del proveedor directamente (nuevo endpoint)
+      console.log('Cargando reservas del proveedor en dashboard (endpoint directo):', this.idProveedor);
+      this.reservasService.getByProveedor(this.idProveedor).subscribe({
+        next: (reservas) => {
+          this.reservas = Array.isArray(reservas) ? reservas : [];
+          // Opcional: cargar solicitudes del proveedor para métricas del dashboard
+          this.solicitudesService.getByProveedor(this.idProveedor).subscribe({
+            next: (solicitudes) => {
+              this.solicitudes = Array.isArray(solicitudes) ? solicitudes : [];
+              this.loading = false;
+              this.cdr.detectChanges();
+            },
+            error: () => {
+              // Si falla la carga de solicitudes, seguimos mostrando reservas
+              this.loading = false;
+              this.cdr.detectChanges();
+            }
+          });
         },
         error: (err) => {
-          console.error('Error cargando solicitudes:', err);
-          this.error = 'Error al cargar las solicitudes: ' + (err.message || err.statusText || 'Error desconocido');
+          console.error('Error cargando reservas del proveedor en dashboard:', err);
+          this.error = 'Error al cargar las reservas: ' + (err.message || err.statusText || 'Error desconocido');
           this.loading = false;
           this.cdr.detectChanges();
         }
@@ -431,6 +480,14 @@ export class ProveedorDashboardComponent implements OnInit {
       this.loading = false;
       this.cdr.detectChanges();
     }
+    //MIS OFERTAS
+    this.ofertasService.getOfertasPorProveedor(this.idProveedor).subscribe({
+      next: (ofertas) => {
+        this.misOfertas = ofertas;  // Cambié 'ofertas' por 'misOfertas'
+        console.log('Ofertas del proveedor:', this.misOfertas);
+      },
+      error: (err) => console.error('Error cargando ofertas del proveedor', err)
+    });
   }
   // Estadísticas
   get solicitudesPendientes(): number {
@@ -456,11 +513,11 @@ export class ProveedorDashboardComponent implements OnInit {
     return 0;
   }
 
-  // Las 3 solicitudes pendientes más antiguas (ordenadas por fecha ascendente)
+  // Las 3 solicitudes pendientes más recientes (ordenadas por fecha descendente)
   get nuevasSolicitudes(): Solicitud[] {
     return this.solicitudes
       .filter(s => s.estadoSolicitud?.toUpperCase() === 'PENDIENTE')
-      .sort((a, b) => new Date(a.fechaSolicitud).getTime() - new Date(b.fechaSolicitud).getTime())
+      .sort((a, b) => new Date(b.fechaSolicitud).getTime() - new Date(a.fechaSolicitud).getTime())
       .slice(0, 3);
   }
 
@@ -488,8 +545,28 @@ export class ProveedorDashboardComponent implements OnInit {
     private keycloak: KeycloakService,
     private solicitudesService: SolicitudesService,
     private reservasService: ReservasService,
+    private ofertasService: OfertasService, 
     private cdr: ChangeDetectorRef
   ) {}
+
+
+cargarOferta(idOferta: number) {
+    this.loadingOferta = true;
+    this.errorOferta = null;
+
+    this.ofertasService.getOfertaById(idOferta).subscribe({
+      next: (data) => {
+        this.oferta = data;
+        this.loadingOferta = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.errorOferta = 'No se pudo cargar la oferta';
+        this.loadingOferta = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
 
 
 
@@ -554,15 +631,19 @@ export class ProveedorDashboardComponent implements OnInit {
   // Modal
 modalVisible = false;
 selectedSolicitud: Solicitud | null = null;
+selectedReserva: Reserva | null = null;
 
 verDetalle(solicitud: Solicitud) {
   this.selectedSolicitud = solicitud;
+  // Buscar reserva asociada
+  this.selectedReserva = this.reservas.find(r => r.idSolicitud === solicitud.idSolicitud) || null;
   this.modalVisible = true;
 }
 
 cerrarModal() {
   this.modalVisible = false;
   this.selectedSolicitud = null;
+  this.selectedReserva = null;
 }
 
 modalResponderVisible = false;
@@ -591,31 +672,52 @@ reservaSeleccionada: Reserva | null = null;
 solicitudSeleccionada: Solicitud | null = null;
 
 verDetalleReserva(reserva: Reserva) {
-  this.reservaSeleccionada = reserva;
-  this.loadingDetalle = true;
-  this.mostrarModal = true;
-  // Cargar solicitud asociada vía endpoint de reservas
-  this.reservasService.getSolicitudByReservaId(reserva.idReserva).subscribe({
-    next: (solicitud) => {
-      this.solicitudSeleccionada = solicitud;
-      this.loadingDetalle = false;
-      this.cdr.detectChanges();
-    },
-    error: (err) => {
-      console.error('Error cargando solicitud de reserva en dashboard:', err);
-      // Fallback: buscar en solicitudes cargadas
-      const s = this.solicitudes.find(x => x.idSolicitud === reserva.idSolicitud);
-      if (s) this.solicitudSeleccionada = s;
-      this.loadingDetalle = false;
-      this.cdr.detectChanges();
-    }
-  });
+  this.reservaSeleccionada = reserva;
+  this.loadingDetalle = true;
+  this.mostrarModal = true;
+  
+  // [NUEVO] Limpiar la información previa de la oferta
+  this.oferta = null;
+  this.errorOferta = null;
+
+  // Cargar solicitud asociada vía endpoint de reservas
+  this.reservasService.getSolicitudByReservaId(reserva.idReserva).subscribe({
+    next: (solicitud) => {
+      this.solicitudSeleccionada = solicitud;
+
+      // [NUEVO] Llamar a cargarOferta si existe un idOferta
+      if (solicitud.idOferta) {
+        this.cargarOferta(solicitud.idOferta);
+      }
+
+      this.loadingDetalle = false;
+      this.cdr.detectChanges();
+    },
+    error: (err) => {
+      console.error('Error cargando solicitud de reserva en dashboard:', err);
+      // Fallback: buscar en solicitudes cargadas
+      const s = this.solicitudes.find(x => x.idSolicitud === reserva.idSolicitud);
+      if (s) {
+        this.solicitudSeleccionada = s;
+        // [NUEVO] Si encuentra la solicitud en el fallback, también intenta cargar la oferta
+        if (s.idOferta) {
+          this.cargarOferta(s.idOferta);
+        }
+      }
+            
+      this.loadingDetalle = false;
+      this.cdr.detectChanges();
+    }
+  });
 }
 
 cerrarModalReserva() {
-  this.mostrarModal = false;
-  this.reservaSeleccionada = null;
-  this.solicitudSeleccionada = null;
+  this.mostrarModal = false;
+  this.reservaSeleccionada = null;
+  this.solicitudSeleccionada = null;
+  // [NUEVO] Limpiar el estado de la oferta
+  this.oferta = null; 
+  this.errorOferta = null;
 }
 
 
