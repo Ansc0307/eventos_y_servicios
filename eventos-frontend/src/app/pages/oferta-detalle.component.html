@@ -1,0 +1,112 @@
+<main class="px-4 sm:px-10 lg:px-20 py-8" *ngIf="oferta">
+  <div class="layout-content-container flex flex-col max-w-7xl mx-auto gap-8">
+    
+    <div class="flex flex-wrap gap-2">
+      <a class="text-[#4c8d9a] dark:text-gray-400 text-sm font-medium leading-normal" routerLink="/home">Home</a>
+      <span class="text-[#4c8d9a] dark:text-gray-400 text-sm font-medium leading-normal">/</span>
+      <a class="text-[#4c8d9a] dark:text-gray-400 text-sm font-medium leading-normal" routerLink="/mis-ofertas">Mis Ofertas</a>
+      <span class="text-[#4c8d9a] dark:text-gray-400 text-sm font-medium leading-normal">/</span>
+      <span class="text-[#0d191b] dark:text-gray-200 text-sm font-medium leading-normal">{{ oferta.titulo }}</span>
+    </div>
+    
+    <div class="flex flex-wrap justify-between gap-3">
+      <div class="flex min-w-72 flex-col gap-2">
+        <p class="text-[#0d191b] dark:text-white text-4xl font-black leading-tight tracking-[-0.033em]">{{ oferta.titulo }}</p>
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-[#4c8d9a] dark:text-gray-400 text-lg">location_on</span>
+          <p class="text-[#4c8d9a] dark:text-gray-400 text-base font-normal leading-normal">
+            {{ oferta.ubicacion || 'Ubicación Desconocida' }}
+          </p>
+        </div>
+      </div>
+      <div class="flex items-center gap-4">
+        <button class="flex items-center justify-center gap-2 rounded-lg h-10 px-4 bg-primary/20 text-[#0d191b] dark:text-gray-100 dark:bg-primary/30 text-sm font-bold">
+          <span class="material-symbols-outlined">share</span>
+          <span>Compartir</span>
+        </button>
+        <button class="flex items-center justify-center gap-2 rounded-lg h-10 px-4 bg-primary/20 text-[#0d191b] dark:text-gray-100 dark:bg-primary/30 text-sm font-bold">
+          <span class="material-symbols-outlined">favorite_border</span>
+          <span>Guardar</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 mt-10">
+
+  <!-- IMÁGENES (mantienen tamaño) -->
+  <div class="lg:col-span-9">
+    <div class="grid grid-cols-4 grid-rows-2 gap-4 h-[500px]">
+      <div class="col-span-4 md:col-span-2 row-span-2 rounded-xl overflow-hidden">
+        <div class="w-full h-full bg-center bg-no-repeat bg-cover"
+             [style.background-image]="'url(' + mainImage + ')'">
+        </div>
+      </div>
+
+      <ng-container *ngFor="let img of images.slice(1, 5); let i = index">
+        <div class="hidden md:block rounded-xl overflow-hidden"
+             [ngClass]="{'hidden': i >= 4}">
+          <div class="w-full h-full bg-center bg-no-repeat bg-cover"
+               [style.background-image]="'url(' + img + ')'">
+          </div>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+
+  <!-- ACERCA DE ESTE ESPACIO -->
+  <div class="lg:col-span-3">
+    <div class="border-b border-gray-200 dark:border-gray-800 pb-8">
+      <h3 class="text-2xl font-bold text-[#0d191b] dark:text-white mb-4">
+        Acerca de este espacio
+      </h3>
+      <p class="text-gray-600 dark:text-gray-300 leading-relaxed">
+        {{ oferta.descripcion }}
+      </p>
+      <p class="text-gray-500 mt-2">
+        Categoría: {{ oferta.categoria?.detalle || 'Sin categoría' }}
+      </p>
+    </div>
+  </div>
+
+</div>
+
+    
+    <div class="mt-10">
+      <h3 class="text-2xl font-bold text-[#0d191b] dark:text-white mb-6">Reservar Espacio</h3>
+      <app-solicitud-reserva-form
+        *ngIf="oferta && idOfertaActual! > 0"
+        [idOferta]="idOfertaActual"
+      ></app-solicitud-reserva-form>
+    </div>
+    <div> 
+
+    </div>
+  </div>
+</main>
+
+<!--
+      <div class="border-t border-gray-200 dark:border-gray-800 mt-12 pt-12">
+        <h3 class="text-2xl font-bold text-[#0d191b] dark:text-white mb-6">Opiniones de Clientes</h3>
+        <div class="flex flex-wrap gap-x-8 gap-y-6">
+          <div class="flex flex-col gap-2">
+            <div class="flex items-center gap-3">
+              <p class="text-[#0d191b] dark:text-white text-4xl font-black leading-tight tracking-[-0.033em]">4.8</p>
+              <div class="flex flex-col">
+                <div class="flex gap-0.5">
+                  <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">star</span>
+                  <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">star</span>
+                  <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">star</span>
+                  <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">star</span>
+                  <span class="material-symbols-outlined text-primary">star_half</span>
+                </div>
+                <p class="text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">Basado en 124 reviews</p>
+              </div>
+            </div>
+          </div>
+          <div class="grid min-w-[200px] max-w-[400px] flex-1 grid-cols-[20px_1fr_40px] items-center gap-y-3">
+            <p class="text-[#0d191b] dark:text-gray-200 text-sm font-normal leading-normal">5</p>
+            <div class="flex h-2 flex-1 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700"><div class="rounded-full bg-primary" style="width: 70%;"></div></div>
+            <p class="text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal text-right">70%</p>
+          </div>
+        </div>
+      </div>-->

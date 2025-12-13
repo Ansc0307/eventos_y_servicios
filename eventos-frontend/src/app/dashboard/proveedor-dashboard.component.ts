@@ -99,7 +99,9 @@ import { ResponderSolicitudComponent } from '../components/solicitud-detalle/app
             <div *ngIf="!loading && !error">
               <div class="flex flex-wrap justify-between gap-3 items-center">
                 <p class="text-slate-900 dark:text-white text-4xl font-black leading-tight tracking-[-0.033em] min-w-72">Dashboard</p>
-                <button class="bg-primary text-white font-bold py-2.5 px-6 rounded-lg flex items-center gap-2">
+                <button 
+                  routerLink="/proveedor/ofertas/crear"
+                  class="bg-primary text-white font-bold py-2.5 px-6 rounded-lg flex items-center gap-2">
                   <span class="material-symbols-outlined">add_circle</span>
                   Crear Nueva Oferta
                 </button>
@@ -250,6 +252,7 @@ import { ResponderSolicitudComponent } from '../components/solicitud-detalle/app
   <app-solicitud-detalle 
   *ngIf="modalVisible" 
   [solicitud]="selectedSolicitud" 
+  [reserva]="selectedReserva"
   (close)="cerrarModal()">
 </app-solicitud-detalle>
 <app-responder-solicitud
@@ -387,40 +390,28 @@ export class ProveedorDashboardComponent implements OnInit {
       
       this.idProveedor = 1;
 
-      // Cargar solicitudes del proveedor
-      console.log('Cargando solicitudes para proveedor:', this.idProveedor);
-      this.solicitudesService.getByProveedor(this.idProveedor).subscribe({
-        //this.solicitudesService.getAll().subscribe({
-        next: (solicitudes) => {
-          console.log('Solicitudes recibidas:', solicitudes);
-          this.solicitudes = solicitudes;
-          
-          // Cargar reservas para cada solicitud
-          if (solicitudes.length > 0) {
-            const reservaRequests = solicitudes.map(s => 
-              this.reservasService.getByIdSolicitud(s.idSolicitud)
-            );
-            
-            forkJoin(reservaRequests).subscribe({
-              next: (reservasArrays) => {
-                this.reservas = reservasArrays.flat();
-                this.loading = false;
-                this.cdr.detectChanges();
-              },
-              error: (err) => {
-                console.error('Error cargando reservas:', err);
-                this.loading = false;
-                this.cdr.detectChanges();
-              }
-            });
-          } else {
-            this.loading = false;
-            this.cdr.detectChanges();
-          }
+      // Cargar reservas del proveedor directamente (nuevo endpoint)
+      console.log('Cargando reservas del proveedor en dashboard (endpoint directo):', this.idProveedor);
+      this.reservasService.getByProveedor(this.idProveedor).subscribe({
+        next: (reservas) => {
+          this.reservas = Array.isArray(reservas) ? reservas : [];
+          // Opcional: cargar solicitudes del proveedor para métricas del dashboard
+          this.solicitudesService.getByProveedor(this.idProveedor).subscribe({
+            next: (solicitudes) => {
+              this.solicitudes = Array.isArray(solicitudes) ? solicitudes : [];
+              this.loading = false;
+              this.cdr.detectChanges();
+            },
+            error: () => {
+              // Si falla la carga de solicitudes, seguimos mostrando reservas
+              this.loading = false;
+              this.cdr.detectChanges();
+            }
+          });
         },
         error: (err) => {
-          console.error('Error cargando solicitudes:', err);
-          this.error = 'Error al cargar las solicitudes: ' + (err.message || err.statusText || 'Error desconocido');
+          console.error('Error cargando reservas del proveedor en dashboard:', err);
+          this.error = 'Error al cargar las reservas: ' + (err.message || err.statusText || 'Error desconocido');
           this.loading = false;
           this.cdr.detectChanges();
         }
@@ -456,11 +447,11 @@ export class ProveedorDashboardComponent implements OnInit {
     return 0;
   }
 
-  // Las 3 solicitudes pendientes más antiguas (ordenadas por fecha ascendente)
+  // Las 3 solicitudes pendientes más recientes (ordenadas por fecha descendente)
   get nuevasSolicitudes(): Solicitud[] {
     return this.solicitudes
       .filter(s => s.estadoSolicitud?.toUpperCase() === 'PENDIENTE')
-      .sort((a, b) => new Date(a.fechaSolicitud).getTime() - new Date(b.fechaSolicitud).getTime())
+      .sort((a, b) => new Date(b.fechaSolicitud).getTime() - new Date(a.fechaSolicitud).getTime())
       .slice(0, 3);
   }
 
@@ -554,15 +545,19 @@ export class ProveedorDashboardComponent implements OnInit {
   // Modal
 modalVisible = false;
 selectedSolicitud: Solicitud | null = null;
+selectedReserva: Reserva | null = null;
 
 verDetalle(solicitud: Solicitud) {
   this.selectedSolicitud = solicitud;
+  // Buscar reserva asociada
+  this.selectedReserva = this.reservas.find(r => r.idSolicitud === solicitud.idSolicitud) || null;
   this.modalVisible = true;
 }
 
 cerrarModal() {
   this.modalVisible = false;
   this.selectedSolicitud = null;
+  this.selectedReserva = null;
 }
 
 modalResponderVisible = false;

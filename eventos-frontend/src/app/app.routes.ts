@@ -16,7 +16,13 @@ import { SolicitudesListComponent } from './solicitudes/solicitudes-list.compone
 import { NoDisponibilidadesListComponent } from './NoDisponibilidad/NoDisponibilidad-list.component';
 import { ProveedorReservasListComponent } from './reservas/proveedor-reservas-list.component';
 import { ProveedorSolicitudesListComponent } from './solicitudes/proveedor-solicitudes-list.component';
+import { OrganizadorReservasListComponent } from './reservas/organizador-reservas-list.component';
+import { OrganizadorSolicitudesListComponent } from './solicitudes/organizador-solicitudes-list.component';
 import { CalendarioDetalladoComponent } from './NoDisponibilidad/calendario_disponibilidad_prov';
+import { SolicitudReservaFormComponent } from './solicitudes/solicitud-reserva-form.component';
+import { OfertasPageComponent } from './pages/ofertas-page.component';
+import { OfertaDetalleComponent } from './pages/oferta-detalle.component';
+//import { OfertaDetailComponent } from './pages/oferta-detail.component';
 
 export const routes: Routes = [
   { path: '', component: RoleDashboardComponent },
@@ -25,6 +31,8 @@ export const routes: Routes = [
   { path: 'dashboard/proveedor', component: ProveedorDashboardComponent },
   { path: 'proveedor/reservas', component: ProveedorReservasListComponent },
   { path: 'proveedor/solicitudes', component: ProveedorSolicitudesListComponent },
+  { path: 'reservas/organizador', component: OrganizadorReservasListComponent },
+  { path: 'solicitudes/organizador', component: OrganizadorSolicitudesListComponent },
    { path: 'proveedor/no-disponibilidades', component: CalendarioDetalladoComponent },
   // Ruta legacy previa
   { path: 'dashboard/legacy', component: DashboardComponent },
@@ -58,13 +66,28 @@ export const routes: Routes = [
     component: NoDisponibilidadesListComponent 
   },
 
-  { path: 'ofertas', loadComponent: () => import('./ofertas/oferta-list.component').then(m => m.OfertaListComponent) },
-//   { 
-//     path: 'ofertas', 
-//     loadChildren: () => import('./ofertas/ofertas.module').then(m => m.OfertasModule) 
-//   },
+{
+  path: 'ofertas',
+  children: [
+    { path: '', component: OfertasPageComponent },
+    {
+      path: ':id',
+      loadComponent: () =>
+        import('./pages/oferta-detalle.component').then(m => m.OfertaDetalleComponent)
+    }
+  ]
+},
+
+{
+  path: 'proveedor/ofertas/crear',
+  loadComponent: () =>
+    import('./components/crear-oferta/crear-oferta.component')
+      .then(m => m.CrearOfertaComponent)
+},
+
 //   { 
 //     path: 'notificaciones', 
 //     loadChildren: () => import('./notificaciones/notificaciones.module').then(m => m.NotificacionesModule) 
-//   }
+//   },
+  { path: 'solicitud-reserva', component: SolicitudReservaFormComponent }
 ];
