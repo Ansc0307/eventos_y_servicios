@@ -10,9 +10,8 @@ import { Categoria } from '../../models/categoria.model';
   templateUrl: './categoria-filter.component.html'
 })
 export class CategoriaFilterComponent {
-  @Input() categorias: any[] = [];
-    @Input() selected: number | null = null;
+  @Input() categorias: Categoria[] = [];
+  @Input() selected: number | null = null;
 
-    @Output() select = new EventEmitter<number>();
-
+  @Output() select = new EventEmitter<number>();
 }

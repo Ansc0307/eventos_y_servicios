@@ -75,4 +75,17 @@ crearOferta(oferta: any): Observable<Oferta> {
     } as Oferta))
   );
 }
+getOfertasPorProveedor(proveedorId: number): Observable<Oferta[]> {
+  return this.getOfertas().pipe(
+    map(ofertas => ofertas.filter(o => o.proveedorId === proveedorId))
+  );
+}
+editarOferta(id: number, data: any) {
+  return this.http.put(`${this.baseUrl}/${id}`, data);
+}
+
+deleteOferta(id: number) {
+  return this.http.delete(`${this.baseUrl}/${id}`);
+}
+
 }

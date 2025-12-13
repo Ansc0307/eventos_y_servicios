@@ -1,0 +1,101 @@
+<div class="flex flex-col min-h-screen bg-background-light text-[#0d191b]">
+
+  <!-- HEADER -->
+  <header class="flex items-center justify-between border-b px-6 py-4 sticky top-0 bg-white z-10">
+    <h2 class="text-xl font-bold">Editar Oferta</h2>
+
+    <button (click)="guardar()"
+      class="rounded-lg h-10 px-4 bg-primary text-black font-bold hover:scale-105 transition">
+      Guardar Cambios
+    </button>
+  </header>
+
+  <main class="flex justify-center py-8 px-4">
+    <div class="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+      <!-- FORM -->
+      <form [formGroup]="form" class="lg:col-span-2 flex flex-col gap-8">
+
+        <!-- INFO -->
+        <div class="bg-white rounded-xl border">
+          <h2 class="text-lg font-bold p-5 border-b">Información Básica</h2>
+          <div class="p-5 grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            <div class="md:col-span-2">
+              <label class="flex flex-col gap-2">
+                <span>Título</span>
+                <input formControlName="titulo"
+                  class="h-12 rounded-lg border px-4"/>
+              </label>
+            </div>
+
+            <div class="md:col-span-2">
+              <label class="flex flex-col gap-2">
+                <span>Descripción</span>
+                <textarea formControlName="descripcion"
+                  class="min-h-32 rounded-lg border p-4"></textarea>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- CATEGORÍA / PRECIO -->
+        <div class="bg-white rounded-xl border">
+          <h2 class="text-lg font-bold p-5 border-b">Categoría y Precio</h2>
+
+          <div class="p-5 grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            <div>
+              <label class="flex flex-col gap-2">
+                <span>Categoría</span>
+                <select formControlName="idCategoria"
+                  class="h-12 rounded-lg border px-4">
+                  <option value="">Seleccionar</option>
+                  <option *ngFor="let c of categorias" [value]="c.idCategoria">
+                    {{ c.detalle }}
+                  </option>
+                </select>
+              </label>
+            </div>
+
+            <div>
+              <label class="flex flex-col gap-2">
+                <span>Precio Base</span>
+                <input type="number" formControlName="precioBase"
+                  class="h-12 rounded-lg border px-4"/>
+              </label>
+            </div>
+
+          </div>
+        </div>
+
+      </form>
+
+      <!-- SIDEBAR -->
+      <div class="sticky top-24 h-fit">
+        <div class="bg-white rounded-xl border p-5 flex flex-col gap-4">
+
+          <h3 class="font-bold">Acciones</h3>
+
+          <button (click)="guardar()"
+            class="h-11 bg-primary text-black font-bold rounded-lg">
+            Guardar Cambios
+          </button>
+
+          <button (click)="cancelar()"
+            class="h-11 bg-gray-200 rounded-lg font-bold">
+            Cancelar
+          </button>
+
+          <hr>
+
+          <button (click)="eliminar()"
+            class="flex items-center justify-center gap-2 text-red-600">
+            Eliminar Oferta
+          </button>
+
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
