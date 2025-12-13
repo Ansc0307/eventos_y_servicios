@@ -30,13 +30,13 @@ import { forkJoin } from 'rxjs';
                 <span class="material-symbols-outlined">dashboard</span>
                 <p class="text-sm font-medium">Dashboard</p>
               </a>
-              <a class="flex items-center gap-3 px-3 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg" href="#">
-                <span class="material-symbols-outlined">calendar_month</span>
-                <p class="text-sm font-medium">Mis Eventos</p>
+              <a class="flex items-center gap-3 px-3 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg" (click)="verMisSolicitudes()">
+                <span class="material-symbols-outlined">description</span>
+                <p class="text-sm font-medium">Mis Solicitudes</p>
               </a>
-              <a class="flex items-center gap-3 px-3 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg" href="#">
-                <span class="material-symbols-outlined">mail</span>
-                <p class="text-sm font-medium">Mensajes</p>
+              <a class="flex items-center gap-3 px-3 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg" (click)="verMisReservas()">
+                <span class="material-symbols-outlined">event</span>
+                <p class="text-sm font-medium">Mis Reservas</p>
               </a>
               <a class="flex items-center gap-3 px-3 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg" href="#">
                 <span class="material-symbols-outlined">settings</span>
@@ -326,5 +326,14 @@ export class OrganizadorDashboardComponent implements OnInit {
 
   buscarOfertas() {
     this.router.navigate(['/solicitud-reserva']);
+  }
+
+  // Navegación a listados completos
+  verMisSolicitudes(): void {
+    this.router.navigate(['/solicitudes/organizador']);
+  }
+
+  verMisReservas(): void {
+    this.router.navigate(['/reservas/organizador']);
   }
 }
