@@ -70,29 +70,18 @@ import { ChangeDetectorRef } from '@angular/core';
                             <p class="text-[#0d191b] dark:text-gray-300 text-base font-medium leading-normal pb-2">Hora de fin</p>
                             <input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#0d191b] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-[#cfe3e7] dark:border-gray-600 bg-white dark:bg-gray-800 focus:border-primary h-14 p-[15px] text-base font-normal leading-normal" type="time" [(ngModel)]="endTime" />
                         </label>
-                    </div>
-                    <h2 class="text-[#0d191b] dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] pt-4">Número de asistentes</h2>
-                    <div class="flex flex-col">
-                        <div class="relative flex items-center max-w-[200px]">
-                            <button class="flex-shrink-0 bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 hover:bg-gray-200 inline-flex items-center justify-center border border-gray-300 dark:border-gray-600 rounded-l-lg h-14 w-14 focus:ring-gray-100 dark:focus:ring-gray-700 focus:ring-2 focus:outline-none" type="button" (click)="decrementAttendees()">
-                                <span class="material-symbols-outlined text-xl text-[#0d191b] dark:text-white">remove</span>
-                            </button>
-                            <input class="flex-shrink-0 text-gray-900 dark:text-white border-x-0 border-gray-300 dark:border-gray-600 h-14 text-center text-base font-medium w-full bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary/50" type="number" [(ngModel)]="attendees" min="1" />
-                            <button class="flex-shrink-0 bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 hover:bg-gray-200 inline-flex items-center justify-center border border-gray-300 dark:border-gray-600 rounded-r-lg h-14 w-14 focus:ring-gray-100 dark:focus:ring-gray-700 focus:ring-2 focus:outline-none" type="button" (click)="incrementAttendees()">
-                                <span class="material-symbols-outlined text-xl text-[#0d191b] dark:text-white">add</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="border-t border-gray-200 dark:border-gray-700 mt-8 pt-6 flex justify-end">
-                <button class="flex items-center justify-center rounded-lg bg-primary px-6 py-3 text-base font-bold text-[#0d191b] transition-all hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 dark:focus:ring-offset-background-dark" (click)="submit()" [disabled]="loading">
-                    Enviar Solicitud
-                </button>
-            </div>
+                    
+                   </div>
+                
+            <div class="border-t border-gray-200 dark:border-gray-700 mt-8 pt-6 flex justify-center">
+    <button class="flex items-center justify-center rounded-lg bg-primary w-full px-6 py-3 text-lg font-bold text-white transition-all hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 dark:focus:ring-offset-background-dark" (click)="submit()" [disabled]="loading">
+        Enviar Solicitud
+    </button>
+</div>
             <div *ngIf="error" class="text-red-500 mt-4">{{ error }}</div>
         </div>
-        
+        </div>
+            </div>
         <div class="flex flex-col items-center justify-center text-center p-8" *ngIf="showConfirmation">
             <div class="flex h-20 w-20 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/50 mb-4">
                 <span class="material-symbols-outlined text-5xl text-green-500 dark:text-green-400">check_circle</span>
