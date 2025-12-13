@@ -21,8 +21,8 @@ import { OrganizadorSolicitudesListComponent } from './solicitudes/organizador-s
 import { CalendarioDetalladoComponent } from './NoDisponibilidad/calendario_disponibilidad_prov';
 import { SolicitudReservaFormComponent } from './solicitudes/solicitud-reserva-form.component';
 import { OfertasPageComponent } from './pages/ofertas-page.component';
-import { OfertaDetalleComponent } from './pages/oferta-detalle.component';
-//import { OfertaDetailComponent } from './pages/oferta-detail.component';
+import { ProveedorOfertasPageComponent } from './pages/proveedor-ofertas-page.component';
+
 
 export const routes: Routes = [
   { path: '', component: RoleDashboardComponent },
@@ -84,6 +84,14 @@ export const routes: Routes = [
     import('./components/crear-oferta/crear-oferta.component')
       .then(m => m.CrearOfertaComponent)
 },
+{ path: 'proveedor/ofertas', component: ProveedorOfertasPageComponent },
+{
+  path: 'proveedor/ofertas/editar/:id',
+  loadComponent: () =>
+    import('./pages/oferta-editar.component')
+      .then(m => m.OfertaEditarComponent)
+},
+
 
 //   { 
 //     path: 'notificaciones', 
