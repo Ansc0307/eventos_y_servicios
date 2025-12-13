@@ -48,7 +48,7 @@ public class ReservaController {
     }
 
     // ============================================================
-    // 🔹 GET por ID
+    //  GET por ID
     // ============================================================
     @Operation(summary = "Obtener una reserva por ID", description = "Devuelve la información de una reserva específica")
     @ApiResponses({
@@ -67,7 +67,7 @@ public class ReservaController {
     }
 
     // ============================================================
-    // 🔹 POST Crear Reserva
+    //  POST Crear Reserva
     // ============================================================
     @Operation(summary = "Crear una nueva reserva", description = "Crea y almacena una nueva reserva en la base de datos")
     @ApiResponses({
@@ -84,7 +84,7 @@ public class ReservaController {
     }
 
     // ============================================================
-    // 🔹 PUT Actualizar Reserva
+    //  PUT Actualizar Reserva
     // ============================================================
     @Operation(summary = "Actualizar una reserva existente", description = "Actualiza los datos de una reserva existente")
     @ApiResponses({
@@ -107,7 +107,7 @@ public class ReservaController {
     }
 
     // ============================================================
-    // 🔹 DELETE Eliminar Reserva
+    //  DELETE Eliminar Reserva
     // ============================================================
     @Operation(summary = "Eliminar una reserva", description = "Elimina una reserva por su ID")
     @ApiResponses({
@@ -124,7 +124,7 @@ public class ReservaController {
     }
 
     // ============================================================
-    // 🔹 GET Todas las reservas
+    //  GET Todas las reservas
     // ============================================================
     @Operation(summary = "Listar todas las reservas", description = "Devuelve la lista completa de reservas")
     @ApiResponses({
@@ -142,7 +142,7 @@ public class ReservaController {
     }
 
     // ============================================================
-    // 🔹 GET Reservas por estado
+    //  GET Reservas por estado
     // ============================================================
     @Operation(summary = "Buscar reservas por estado", description = "Devuelve todas las reservas con un estado específico")
     @ApiResponses({
@@ -160,7 +160,7 @@ public class ReservaController {
     }
 
     // ============================================================
-    // 🔹 GET Reservas por ID de solicitud
+    //  GET Reservas por ID de solicitud
     // ============================================================
     @Operation(summary = "Buscar reservas por ID de solicitud", description = "Obtiene las reservas asociadas a una solicitud específica")
     @ApiResponses({
@@ -178,7 +178,7 @@ public class ReservaController {
     }
 
     // ============================================================
-    // 🔹 GET Reservas en rango
+    //  GET Reservas en rango
     // ============================================================
     @Operation(summary = "Buscar reservas por rango de fechas", description = "Obtiene las reservas dentro de un rango de tiempo")
     @ApiResponses({
@@ -205,7 +205,7 @@ public class ReservaController {
     }
 
     // ============================================================
-    // 🔹 GET Reservas conflictivas (JPQL)
+    //  GET Reservas conflictivas (JPQL)
     // ============================================================
     @Operation(summary = "Buscar reservas conflictivas", description = "Devuelve las reservas que se solapan con un rango dado")
     @ApiResponses({
@@ -232,7 +232,7 @@ public class ReservaController {
     }
 
     // ============================================================
-    // 🔹 GET Reservas conflictivas (Native)
+    //  GET Reservas conflictivas (Native)
     // ============================================================
     @Operation(summary = "Buscar reservas conflictivas (consulta nativa)", description = "Devuelve las reservas conflictivas usando SQL nativo")
     @ApiResponses({
@@ -259,7 +259,7 @@ public class ReservaController {
     }
 
     // ============================================================
-    // 🔹 GET No Disponibilidad asociada
+    // GET No Disponibilidad asociada
     // ============================================================
     @Operation(summary = "Obtener no disponibilidad asociada a una reserva")
     @ApiResponses({
@@ -284,7 +284,7 @@ public class ReservaController {
     }
 
     // ============================================================
-    // 🔹 GET Solicitud asociada
+    // GET Solicitud asociada
     // ============================================================
     @Operation(summary = "Obtener solicitud asociada a una reserva")
     @ApiResponses({
@@ -306,5 +306,43 @@ public class ReservaController {
         if (reservaService.getById(id) == null)
             throw new ReservaNotFoundException(String.valueOf(id), "Reserva no encontrada: " + id);
         return ResponseEntity.ok(reservaService.hasSolicitud(id));
+    }
+
+    // ============================================================
+    // GET Reservas por Proveedor
+    // ============================================================
+    @Operation(summary = "Obtener reservas de un proveedor específico", 
+               description = "Devuelve todas las reservas cuya solicitud asociada pertenece a un proveedor específico")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Reservas encontradas exitosamente"),
+            @ApiResponse(responseCode = "404", description = "No se encontraron reservas para este proveedor")
+    })
+    @GetMapping("/proveedor/{idProveedor}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<ReservaDTO>> obtenerPorProveedor(
+            @Parameter(description = "ID del proveedor", example = "1") @PathVariable Integer idProveedor) {
+        List<ReservaDTO> reservas = reservaService.getByIdProveedor(idProveedor).stream()
+                .map(ReservaMapper::toDTO)
+                .toList();
+        return ResponseEntity.ok(reservas);
+    }
+
+    // ============================================================
+    // GET Reservas por Organizador
+    // ============================================================
+    @Operation(summary = "Obtener reservas de un organizador específico", 
+               description = "Devuelve todas las reservas cuya solicitud asociada pertenece a un organizador específico")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Reservas encontradas exitosamente"),
+            @ApiResponse(responseCode = "404", description = "No se encontraron reservas para este organizador")
+    })
+    @GetMapping("/organizador/{idOrganizador}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<ReservaDTO>> obtenerPorOrganizador(
+            @Parameter(description = "ID del organizador", example = "1") @PathVariable Integer idOrganizador) {
+        List<ReservaDTO> reservas = reservaService.getByIdOrganizador(idOrganizador).stream()
+                .map(ReservaMapper::toDTO)
+                .toList();
+        return ResponseEntity.ok(reservas);
     }
 }

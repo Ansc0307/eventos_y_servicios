@@ -1,3 +1,5 @@
+import { Descuento } from './descuento.model';
+
 export interface Oferta {
   id: number;
   proveedorId: number;
@@ -8,4 +10,5 @@ export interface Oferta {
   estado: string;
   activo: boolean;
   urlsMedia: string[];
+  descuentos?: Descuento[];
 }

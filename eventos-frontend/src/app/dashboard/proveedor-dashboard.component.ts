@@ -401,40 +401,28 @@ export class ProveedorDashboardComponent implements OnInit {
       
       this.idProveedor = 1;
 
-      // Cargar solicitudes del proveedor
-      console.log('Cargando solicitudes para proveedor:', this.idProveedor);
-      this.solicitudesService.getByProveedor(this.idProveedor).subscribe({
-        //this.solicitudesService.getAll().subscribe({
-        next: (solicitudes) => {
-          console.log('Solicitudes recibidas:', solicitudes);
-          this.solicitudes = solicitudes;
-          
-          // Cargar reservas para cada solicitud
-          if (solicitudes.length > 0) {
-            const reservaRequests = solicitudes.map(s => 
-              this.reservasService.getByIdSolicitud(s.idSolicitud)
-            );
-            
-            forkJoin(reservaRequests).subscribe({
-              next: (reservasArrays) => {
-                this.reservas = reservasArrays.flat();
-                this.loading = false;
-                this.cdr.detectChanges();
-              },
-              error: (err) => {
-                console.error('Error cargando reservas:', err);
-                this.loading = false;
-                this.cdr.detectChanges();
-              }
-            });
-          } else {
-            this.loading = false;
-            this.cdr.detectChanges();
-          }
+      // Cargar reservas del proveedor directamente (nuevo endpoint)
+      console.log('Cargando reservas del proveedor en dashboard (endpoint directo):', this.idProveedor);
+      this.reservasService.getByProveedor(this.idProveedor).subscribe({
+        next: (reservas) => {
+          this.reservas = Array.isArray(reservas) ? reservas : [];
+          // Opcional: cargar solicitudes del proveedor para métricas del dashboard
+          this.solicitudesService.getByProveedor(this.idProveedor).subscribe({
+            next: (solicitudes) => {
+              this.solicitudes = Array.isArray(solicitudes) ? solicitudes : [];
+              this.loading = false;
+              this.cdr.detectChanges();
+            },
+            error: () => {
+              // Si falla la carga de solicitudes, seguimos mostrando reservas
+              this.loading = false;
+              this.cdr.detectChanges();
+            }
+          });
         },
         error: (err) => {
-          console.error('Error cargando solicitudes:', err);
-          this.error = 'Error al cargar las solicitudes: ' + (err.message || err.statusText || 'Error desconocido');
+          console.error('Error cargando reservas del proveedor en dashboard:', err);
+          this.error = 'Error al cargar las reservas: ' + (err.message || err.statusText || 'Error desconocido');
           this.loading = false;
           this.cdr.detectChanges();
         }
