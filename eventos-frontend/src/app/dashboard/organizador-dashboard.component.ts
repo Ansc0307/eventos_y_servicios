@@ -239,49 +239,28 @@ export class OrganizadorDashboardComponent implements OnInit {
       // Por ahora usamos un ID fijo. TODO: Obtener del backend según el usuario autenticado
       this.idOrganizador = 14;
 
-      // Cargar solicitudes del organizador
-      console.log('Cargando solicitudes para organizador:', this.idOrganizador);
-      this.solicitudesService.getByOrganizador(this.idOrganizador).subscribe({
-        next: (solicitudes) => {
-          console.log('Solicitudes recibidas:', solicitudes);
-          this.solicitudes = solicitudes;
-          
-          // Cargar reservas para cada solicitud
-          if (solicitudes.length > 0) {
-            console.log('Cargando reservas para', solicitudes.length, 'solicitudes');
-            const reservaRequests = solicitudes.map(s => 
-              this.reservasService.getByIdSolicitud(s.idSolicitud)
-            );
-            
-            forkJoin(reservaRequests).subscribe({
-              next: (reservasArrays) => {
-                console.log('Reservas recibidas (arrays):', reservasArrays);
-                this.reservas = reservasArrays.flat();
-                console.log('Reservas después de flat():', this.reservas);
-                console.log('Número de reservas:', this.reservas.length);
-                console.log('Reservas confirmadas:', this.reservasConfirmadas);
-                console.log('Próximas reservas:', this.proximasReservas);
-                this.loading = false;
-                this.cdr.detectChanges();
-                console.log('Estado después de cargar reservas - loading:', this.loading);
-              },
-              error: (err) => {
-                console.error('Error cargando reservas:', err);
-                this.error = 'Error al cargar las reservas: ' + (err.message || err.statusText || 'Error desconocido');
-                this.loading = false;
-                this.cdr.detectChanges();
-              }
-            });
-          } else {
-            console.log('No hay solicitudes, finalizando carga');
-            this.loading = false;
-            this.cdr.detectChanges();
-            console.log('Estado después de no encontrar solicitudes - loading:', this.loading);
-          }
+      // Cargar reservas del organizador directamente (nuevo endpoint)
+      console.log('Cargando reservas del organizador en dashboard (endpoint directo):', this.idOrganizador);
+      this.reservasService.getByOrganizador(this.idOrganizador).subscribe({
+        next: (reservas) => {
+          this.reservas = Array.isArray(reservas) ? reservas : [];
+          // Opcional: cargar solicitudes del organizador para métricas del dashboard
+          this.solicitudesService.getByOrganizador(this.idOrganizador).subscribe({
+            next: (solicitudes) => {
+              this.solicitudes = Array.isArray(solicitudes) ? solicitudes : [];
+              this.loading = false;
+              this.cdr.detectChanges();
+            },
+            error: () => {
+              // Si falla la carga de solicitudes, seguimos mostrando reservas
+              this.loading = false;
+              this.cdr.detectChanges();
+            }
+          });
         },
         error: (err) => {
-          console.error('Error cargando solicitudes:', err);
-          this.error = 'Error al cargar las solicitudes: ' + (err.message || err.statusText || 'Error desconocido');
+          console.error('Error cargando reservas del organizador en dashboard:', err);
+          this.error = 'Error al cargar las reservas: ' + (err.message || err.statusText || 'Error desconocido');
           this.loading = false;
           this.cdr.detectChanges();
         }
