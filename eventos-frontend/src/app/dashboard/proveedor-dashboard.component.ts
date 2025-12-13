@@ -130,10 +130,7 @@ import { OfertaCardComponent } from '../components/oferta-card/oferta-card.compo
                   <p class="text-slate-600 dark:text-slate-300 text-base font-medium leading-normal">Mensajes Sin Leer</p>
                   <p class="text-slate-900 dark:text-white tracking-light text-3xl font-bold leading-tight">{{ mensajesSinLeer }}</p>
                 </div>
-                <div class="flex flex-col gap-2 rounded-xl p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-                  <p class="text-slate-600 dark:text-slate-300 text-base font-medium leading-normal">Ingresos del Mes</p>
-                  <p class="text-slate-900 dark:text-white tracking-light text-3xl font-bold leading-tight">{{ ingresosDelMes === 0 ? '$0' : '$' + ingresosDelMes.toLocaleString() }}</p>
-                </div>
+               
               </div>
 
             <div class="mt-8 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
@@ -147,10 +144,7 @@ import { OfertaCardComponent } from '../components/oferta-card/oferta-card.compo
                           [class]="'flex flex-col items-center justify-center border-b-[3px] pb-[13px] pt-4 ' + (activeTab === 'reservas' ? 'border-b-primary text-slate-900 dark:text-white' : 'border-b-transparent text-slate-500 dark:text-slate-400')">
                     <p class="text-sm font-bold leading-normal tracking-[0.015em]">Proximas Reservas</p>
                   </button>
-                  <button (click)="setActiveTab('historial')" 
-                          [class]="'flex flex-col items-center justify-center border-b-[3px] pb-[13px] pt-4 ' + (activeTab === 'historial' ? 'border-b-primary text-slate-900 dark:text-white' : 'border-b-transparent text-slate-500 dark:text-slate-400')">
-                    <p class="text-sm font-bold leading-normal tracking-[0.015em]">Historial</p>
-                  </button>
+                  
                 </div>
               </div>
 
@@ -245,13 +239,7 @@ import { OfertaCardComponent } from '../components/oferta-card/oferta-card.compo
                 </table>
               </div>
 
-              <!-- Tab Historial -->
-              <div *ngIf="activeTab === 'historial'" class="overflow-x-auto">
-                <div class="text-center py-12">
-                  <span class="material-symbols-outlined text-6xl text-slate-300 dark:text-slate-600">history</span>
-                  <p class="mt-4 text-slate-500 dark:text-slate-400">Historial en desarrollo</p>
-                </div>
-              </div>
+              
             </div>
             </div>
           </div>
