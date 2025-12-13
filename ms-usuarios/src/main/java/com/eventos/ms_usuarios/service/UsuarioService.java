@@ -51,6 +51,7 @@ public class UsuarioService {
     Usuario guardado = usuarioRepository.save(usuario);
     UsuarioDto res = new UsuarioDto();
     res.setId(guardado.getId());
+    res.setKeycloakId(guardado.getKeycloakId());
     res.setNombre(guardado.getNombre());
     res.setEmail(guardado.getEmail());
     res.setTelefono(guardado.getTelefono());
@@ -67,6 +68,7 @@ public class UsuarioService {
         .orElseThrow(() -> new RecursoNoEncontradoException("Usuario", id));
     UsuarioDto res = new UsuarioDto();
     res.setId(u.getId());
+    res.setKeycloakId(u.getKeycloakId());
     res.setNombre(u.getNombre());
     res.setEmail(u.getEmail());
     res.setTelefono(u.getTelefono());
@@ -83,6 +85,7 @@ public class UsuarioService {
         .map(u -> {
           UsuarioDto d = new UsuarioDto();
           d.setId(u.getId());
+          d.setKeycloakId(u.getKeycloakId());
           d.setNombre(u.getNombre());
           d.setEmail(u.getEmail());
           d.setTelefono(u.getTelefono());
@@ -101,6 +104,7 @@ public class UsuarioService {
         .map(u -> {
           UsuarioDto d = new UsuarioDto();
           d.setId(u.getId());
+          d.setKeycloakId(u.getKeycloakId());
           d.setNombre(u.getNombre());
           d.setEmail(u.getEmail());
           d.setTelefono(u.getTelefono());
@@ -118,6 +122,7 @@ public class UsuarioService {
         .map(u -> {
           UsuarioDto d = new UsuarioDto();
           d.setId(u.getId());
+          d.setKeycloakId(u.getKeycloakId());
           d.setNombre(u.getNombre());
           d.setEmail(u.getEmail());
           d.setTelefono(u.getTelefono());
@@ -166,6 +171,7 @@ public class UsuarioService {
         .map(u -> {
           UsuarioDto d = new UsuarioDto();
           d.setId(u.getId());
+          d.setKeycloakId(u.getKeycloakId());
           d.setNombre(u.getNombre());
           d.setEmail(u.getEmail());
           d.setTelefono(u.getTelefono());
@@ -183,6 +189,7 @@ public class UsuarioService {
         .map(u -> {
           UsuarioDto d = new UsuarioDto();
           d.setId(u.getId());
+          d.setKeycloakId(u.getKeycloakId());
           d.setNombre(u.getNombre());
           d.setEmail(u.getEmail());
           d.setTelefono(u.getTelefono());
@@ -214,6 +221,7 @@ public class UsuarioService {
     }
     UsuarioDto d = new UsuarioDto();
     d.setId(u.getId());
+    d.setKeycloakId(u.getKeycloakId());
     d.setNombre(u.getNombre());
     d.setEmail(u.getEmail());
     d.setTelefono(u.getTelefono());
@@ -240,6 +248,7 @@ public class UsuarioService {
     Usuario guardado = usuarioRepository.save(u);
     UsuarioDto d = new UsuarioDto();
     d.setId(guardado.getId());
+    d.setKeycloakId(guardado.getKeycloakId());
     d.setNombre(guardado.getNombre());
     d.setEmail(guardado.getEmail());
     d.setTelefono(guardado.getTelefono());

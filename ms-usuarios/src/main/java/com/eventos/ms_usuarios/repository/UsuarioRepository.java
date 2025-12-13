@@ -15,6 +15,9 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
   // Derived query: buscar por email
   Optional<Usuario> findByEmail(String email);
 
+  // Derived query: buscar por Keycloak subject (sub)
+  Optional<Usuario> findByKeycloakId(String keycloakId);
+
   // Derived query: verificar existencia por email
   boolean existsByEmail(String email);
 

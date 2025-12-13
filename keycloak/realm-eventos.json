@@ -22,6 +22,27 @@
       "attributes": {
         "pkce.code.challenge.method": "S256"
       }
+    },
+    {
+      "clientId": "angular-app",
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "redirectUris": ["http://localhost:4200/", "http://localhost:4200/*"],
+      "webOrigins": ["http://localhost:4200"],
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      }
+    },
+    {
+      "clientId": "ms-usuarios-admin",
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "secret": "voD3W2NqkVlU1heUwTVQZUdgaerNqFSE",
+      "serviceAccountsEnabled": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false
     }
   ],
   "users": [
@@ -54,6 +75,15 @@
       "lastName": "Uno",
       "credentials": [ { "type": "password", "value": "Prov12345", "temporary": false } ],
       "realmRoles": ["PROVEEDOR"]
+    },
+    {
+      "username": "service-account-ms-usuarios-admin",
+      "enabled": true,
+      "emailVerified": true,
+      "serviceAccountClientId": "ms-usuarios-admin",
+      "clientRoles": {
+        "realm-management": ["realm-admin"]
+      }
     }
   ]
 }

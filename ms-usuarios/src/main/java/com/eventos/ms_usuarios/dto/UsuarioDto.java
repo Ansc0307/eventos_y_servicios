@@ -8,6 +8,8 @@ import java.time.Instant;
 public class UsuarioDto {
   @Schema(description = "Identificador único", example = "1")
   private Long id;
+  @Schema(description = "Identificador del usuario en Keycloak (sub)", example = "150b6ac9-d103-48bf-bc99-3de763dbd78b")
+  private String keycloakId;
   @Schema(description = "Nombre completo", example = "Juan Pérez")
   private String nombre;
   @Schema(description = "Correo electrónico", example = "juan.perez@example.com")
@@ -41,6 +43,14 @@ public class UsuarioDto {
 
   public void setId(Long id) {
     this.id = id;
+  }
+
+  public String getKeycloakId() {
+    return keycloakId;
+  }
+
+  public void setKeycloakId(String keycloakId) {
+    this.keycloakId = keycloakId;
   }
 
   public String getNombre() {

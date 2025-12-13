@@ -17,7 +17,7 @@ services:
     networks:
       - eventos-net
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/realms/eventos/.well-known/openid-configuration"]
+      test: ["CMD-SHELL", "bash -c ': > /dev/tcp/localhost/8080'"]
       interval: 10s
       timeout: 5s
       retries: 6
@@ -47,12 +47,10 @@ services:
     depends_on:
       eureka-server:
         condition: service_healthy
+    env_file:
+      - ./.env
     environment:
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
-      CONFIG_SERVER_USER: ${CONFIG_SERVER_USER}
-      CONFIG_SERVER_PASSWORD: ${CONFIG_SERVER_PASSWORD}
-      CONFIG_GIT_URI: ${CONFIG_GIT_URI}
-      ENCRYPT_KEY: ${ENCRYPT_KEY}
     networks:
       - eventos-net
     # Ya no montamos config-repo local, el backend ahora es Git
@@ -153,12 +151,22 @@ services:
         condition: service_healthy
       eureka-server:
         condition: service_healthy
+      keycloak:
+        condition: service_healthy
+    env_file:
+      - ./.env
     environment:
       DB_URL: jdbc:postgresql://usuarios-db:5432/usuarios_eventos_db
       DB_USERNAME: postgres
       DB_PASSWORD: admin
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      EUREKA_INSTANCE_HOSTNAME: ms-usuarios
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/eventos/protocol/openid-connect/certs
+      KEYCLOAK_BASE_URL: http://keycloak:8080
+      KEYCLOAK_REALM: eventos
+      KEYCLOAK_ADMIN_CLIENT_ID: ms-usuarios-admin
+      KEYCLOAK_FRONTEND_CLIENT_ID: angular-app
+      KEYCLOAK_VERIFY_EMAIL_REDIRECT_URI: http://localhost:4200/
     # ports:
     #   - "8081:8081"
     networks:
@@ -215,11 +223,9 @@ services:
         condition: service_healthy
       eureka-server:
         condition: service_healthy
+    env_file:
+      - ./.env
     environment:
-      #config-server para ms-notifications
-      CONFIG_SERVER_USER: ${CONFIG_SERVER_USER}
-      CONFIG_SERVER_PASSWORD: ${CONFIG_SERVER_PASSWORD}
-
       SPRING_PROFILES_ACTIVE: docker
       SPRING_R2DBC_URL: r2dbc:postgresql://notifications-db:5432/notifications_db
       SPRING_R2DBC_USERNAME: postgres
@@ -241,12 +247,11 @@ services:
       - "8080:8080"
     networks:
       - eventos-net
+    env_file:
+      - ./.env
     environment:
-      #config-server para ms-notifications
-      CONFIG_SERVER_USER: ${CONFIG_SERVER_USER}
-      CONFIG_SERVER_PASSWORD: ${CONFIG_SERVER_PASSWORD}
       #https
-      SSL_KEYSTORE_PASSWORD: ${SSL_KEYSTORE_PASSWORD}
+      SSL_KEYSTORE_PASSWORD: ${SSL_KEYSTORE_PASSWORD:-}
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
     depends_on:
       eureka-server:
