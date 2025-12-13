@@ -7,7 +7,7 @@ import { CategoriasService } from '../services/categorias.service';
 import { OfertasService } from '../services/ofertas.service';
 import { OfertaCardComponent } from '../components/oferta-card/oferta-card.component';
 import { CategoriaFilterComponent } from '../components/categoria-filter/categoria-filter.component';
-
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-ofertas-page',
@@ -15,6 +15,7 @@ import { CategoriaFilterComponent } from '../components/categoria-filter/categor
   templateUrl: './ofertas-page.component.html',
   imports: [
     CommonModule,
+    FormsModule,
     CategoriaFilterComponent,  // <-- AGREGAR ESTO
     OfertaCardComponent
   ]
@@ -25,6 +26,9 @@ export class OfertasPageComponent implements OnInit {
   ofertasOriginales: Oferta[] = []; // 🔹 TODAS
   ofertas: Oferta[] = [];           
   selectedCategory: number | null = null;
+  precioMin: number | null = null;
+  precioMax: number | null = null;
+
 
   constructor(
     private categoriasService: CategoriasService,
@@ -67,18 +71,29 @@ export class OfertasPageComponent implements OnInit {
 }
 aplicarFiltros() {
 
-  // Si no hay categoría, mostrar todo
-  if (this.selectedCategory === null) {
-    this.ofertas = [...this.ofertasOriginales];
-    return;
-  }
+  this.ofertas = this.ofertasOriginales.filter(o => {
 
-  this.ofertas = this.ofertasOriginales.filter(
-    o => o.idCategoria === this.selectedCategory
-  );
+    const cumpleCategoria =
+      this.selectedCategory === null ||
+      o.idCategoria === this.selectedCategory;
+
+    const cumpleMin =
+      this.precioMin === null ||
+      o.precioBase >= this.precioMin;
+
+    const cumpleMax =
+      this.precioMax === null ||
+      o.precioBase <= this.precioMax;
+
+    return cumpleCategoria && cumpleMin && cumpleMax;
+  });
 }
+
 limpiarFiltros() {
   this.selectedCategory = null;
+  this.precioMin = null;
+  this.precioMax = null;
   this.ofertas = [...this.ofertasOriginales];
 }
+
 }
