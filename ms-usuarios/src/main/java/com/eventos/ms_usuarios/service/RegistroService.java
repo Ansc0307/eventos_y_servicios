@@ -44,8 +44,29 @@ public class RegistroService {
     String username = dto.getEmail().trim().toLowerCase();
     String email = dto.getEmail().trim();
 
-    String firstName = dto.getNombre();
-    String lastName = "";
+    String nombre = dto.getNombre() == null ? "" : dto.getNombre().trim();
+    // Keycloak suele pedir UPDATE_PROFILE si faltan firstName/lastName.
+    // Como solo tenemos un campo "nombre", lo mapeamos de forma simple:
+    // - si hay espacios: firstName=primer token, lastName=resto
+    // - si no: firstName=nombre, lastName=nombre
+    String firstName;
+    String lastName;
+    if (nombre.isBlank()) {
+      firstName = "Usuario";
+      lastName = "";
+    } else {
+      int idx = nombre.indexOf(' ');
+      if (idx > 0) {
+        firstName = nombre.substring(0, idx).trim();
+        lastName = nombre.substring(idx + 1).trim();
+        if (lastName.isBlank()) {
+          lastName = firstName;
+        }
+      } else {
+        firstName = nombre;
+        lastName = nombre;
+      }
+    }
 
     String keycloakUserId = null;
 
