@@ -1,9 +1,11 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, timeout, catchError, throwError } from 'rxjs';
+//import { Observable, timeout, catchError, throwError } from 'rxjs';
 import { Reserva } from '../models/reserva.model';
 import { Solicitud } from '../models/solicitud.model';
 import { NoDisponibilidad } from '../models/NoDisponibilidad.model';
+
+import { Observable, timeout, catchError, throwError, switchMap, of, EMPTY } from 'rxjs'; // 👈 AGREGAR switchMap, of, EMPTY
 
 @Injectable({ providedIn: 'root' })
 export class ReservasService {
@@ -59,4 +61,61 @@ export class ReservasService {
       })
     );
   }
+
+
+
+  // ----------------------------------------------------------------------------------
+  // 🆕 NUEVO: Método para buscar y eliminar reserva por ID de Solicitud (Encadenado)
+  // ----------------------------------------------------------------------------------
+  eliminarPorSolicitud(idSolicitud: number): Observable<void> {
+    // 1. Buscar reservas por idSolicitud
+    return this.getByIdSolicitud(idSolicitud).pipe(
+      switchMap(reservas => {
+        console.log('[ReservasService] Reservas encontradas para eliminar:', reservas);
+        
+        if (reservas.length > 0) {
+          // 2. Si se encuentra, eliminar la primera reserva asociada
+          const idReservaAEliminar = reservas[0].idReserva;
+          console.log('[ReservasService] Eliminando reserva ID:', idReservaAEliminar);
+          return this.delete(idReservaAEliminar); // Devuelve el Observable de DELETE
+        }
+        
+        // Si no hay reservas, completar sin error
+        console.log('[ReservasService] No se encontró reserva asociada. Terminando.');
+        return EMPTY; 
+      }),
+      catchError(err => {
+        // Si el DELETE devuelve 404, puede que ya haya sido eliminada.
+        // Solo relanzamos si es un error inesperado.
+        if (err.status === 404) {
+          console.warn('[ReservasService] Intento de eliminar reserva falló con 404 (probablemente ya no existe).', err);
+          return EMPTY; // Tratar como éxito para el flujo de rechazo
+        }
+        return throwError(() => err);
+      })
+    );
+  }
+// ----------------------------------------------------------------------------------
+  // 🆕 NUEVO: Obtener reservas conflictivas por rango de fechas
+  // ----------------------------------------------------------------------------------
+  getReservasConflictivas(inicio: string, fin: string): Observable<Reserva[]> {
+    // El backend espera ISO_LOCAL_DATE_TIME (yyyy-MM-ddTHH:mm:ss).
+    // Asumimos que las fechas 'inicio' y 'fin' que le pasaremos ya vienen en el formato correcto (ISO string).
+    return this.http.get<Reserva[]>(`${this.base}/conflictivas`, {
+      params: {
+        inicio: inicio,
+        fin: fin
+      }
+    });
+  }
+
+// ... (código existente de ReservasService)
+
+// ----------------------------------------------------------------------------------
+// 🆕 NUEVO: Obtener todas las reservas (para bloquear fechas en el calendario)
+// ----------------------------------------------------------------------------------
+getTodasLasReservas(): Observable<Reserva[]> {
+  return this.http.get<Reserva[]>(this.base); // Usamos el endpoint GET /v1/reservas
+}
+
 }
