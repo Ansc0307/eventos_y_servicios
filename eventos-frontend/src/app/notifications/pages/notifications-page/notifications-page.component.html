@@ -97,4 +97,15 @@
       </div>
     </div>
   </main>
+
+  <!-- Modal para nueva notificación -->
+  <app-modal-notificacion 
+    *ngIf="mostrarModalNuevaNotificacion"
+    [titulo]="'Crear Nueva Notificación'"
+    [prioridades]="prioridades"
+    [tipos]="tipos"
+    [loading]="creandoNotificacion"
+    (cerrar)="cerrarModalNuevaNotificacion()"
+    (guardar)="crearNotificacion($event)">
+  </app-modal-notificacion>
 </div>

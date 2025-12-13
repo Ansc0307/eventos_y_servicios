@@ -2,7 +2,6 @@ import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject, takeUntil } from 'rxjs';
 import { NotificacionesService } from '../../../services/notificaciones.service';
-import { ModalService } from '../../../services/modal.service';
 import { Notificacion, NotificacionCreate } from '../../../models/notifications/notification.model';
 import { Prioridad } from '../../../models/notifications/prioridad.model';
 import { TipoNotificacion } from '../../../models/notifications/tipo-notificacion.model';
@@ -10,6 +9,7 @@ import { NotificationItemComponent } from '../../components/notification-item/no
 import { NotificationFilterComponent } from '../../components/notification-filter/notification-filter.component';
 import { LoaderComponent } from '../../components/loader/loader.component';
 import { EmptyStateComponent } from '../../components/empty-state/empty-state.component';
+import { ModalNotificacionComponent } from '../../components/modal-notification/modal-notification.component';
 
 @Component({
   selector: 'app-notifications-page',
@@ -19,7 +19,8 @@ import { EmptyStateComponent } from '../../components/empty-state/empty-state.co
     NotificationItemComponent, 
     NotificationFilterComponent,
     LoaderComponent,
-    EmptyStateComponent
+    EmptyStateComponent,
+    ModalNotificacionComponent 
   ],
   templateUrl: './notifications-page.component.html',
   //styleUrls: ['./notifications-page.component.css']
@@ -29,6 +30,10 @@ export class NotificationsPageComponent implements OnInit, OnDestroy {
   filteredNotificaciones: Notificacion[] = [];
   isLoading: boolean = true;
   error: string | null = null;
+  
+  // Para el modal personalizado
+  mostrarModalNuevaNotificacion: boolean = false;
+  creandoNotificacion: boolean = false;
   
   // Datos para modales
   prioridades: Prioridad[] = [];
@@ -45,7 +50,6 @@ export class NotificationsPageComponent implements OnInit, OnDestroy {
 
   constructor(
     private notificacionesService: NotificacionesService,
-    private modalService: ModalService,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -62,7 +66,7 @@ export class NotificationsPageComponent implements OnInit, OnDestroy {
   cargarNotificaciones(): void {
     this.isLoading = true;
     this.error = null;
-    this.cdr.detectChanges(); // Forzar detección de cambios inicial
+    this.cdr.detectChanges();
     
     console.log('Cargando notificaciones...');
     
@@ -75,7 +79,6 @@ export class NotificationsPageComponent implements OnInit, OnDestroy {
           this.aplicarFiltros();
           this.isLoading = false;
           this.cdr.detectChanges();
-          console.log('isLoading después de cargar:', this.isLoading);
         },
         error: (err) => {
           console.error('Error al cargar notificaciones:', err);
@@ -152,7 +155,6 @@ export class NotificationsPageComponent implements OnInit, OnDestroy {
     
     this.filteredNotificaciones = filtradas;
     this.cdr.detectChanges();
-    console.log('Filtros aplicados. Total:', this.notificaciones.length, 'Filtradas:', filtradas.length);
   }
 
   recargarNotificaciones(): void {
@@ -164,7 +166,6 @@ export class NotificationsPageComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
-          // Actualizar localmente
           const index = this.notificaciones.findIndex(n => n.id === id);
           if (index !== -1) {
             this.notificaciones[index].leido = true;
@@ -173,6 +174,7 @@ export class NotificationsPageComponent implements OnInit, OnDestroy {
         },
         error: (err) => {
           console.error('Error al marcar como leída:', err);
+          this.mostrarSweetAlert('error', 'Error', 'No se pudo marcar como leída');
         }
       });
   }
@@ -181,110 +183,153 @@ export class NotificationsPageComponent implements OnInit, OnDestroy {
     const noLeidas = this.notificaciones.filter(n => !n.leido);
     
     if (noLeidas.length === 0) {
+      this.mostrarSweetAlert('info', 'Información', 'No hay notificaciones por marcar como leídas');
       return;
     }
 
-    // Contador para saber cuándo todas han sido procesadas
-    let procesadas = 0;
-    
-    noLeidas.forEach(notificacion => {
-      this.notificacionesService.marcarComoLeida(notificacion.id)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: () => {
-            notificacion.leido = true;
-            procesadas++;
-            
-            // Cuando todas han sido procesadas, actualizar la vista
-            if (procesadas === noLeidas.length) {
-              this.aplicarFiltros();
-            }
-          },
-          error: (err) => {
-            console.error(`Error al marcar ${notificacion.id} como leída:`, err);
-            procesadas++;
-            
-            if (procesadas === noLeidas.length) {
-              this.aplicarFiltros();
-            }
-          }
+    // Mostrar confirmación
+    this.mostrarSweetAlertConfirm(
+      '¿Marcar todas como leídas?',
+      `Se marcarán ${noLeidas.length} notificaciones como leídas`,
+      'question'
+    ).then((result) => {
+      if (result.isConfirmed) {
+        let procesadas = 0;
+        const total = noLeidas.length;
+        
+        noLeidas.forEach(notificacion => {
+          this.notificacionesService.marcarComoLeida(notificacion.id)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+              next: () => {
+                notificacion.leido = true;
+                procesadas++;
+                
+                if (procesadas === total) {
+                  this.aplicarFiltros();
+                  this.mostrarSweetAlert('success', '¡Éxito!', `Se marcaron ${total} notificaciones como leídas`);
+                }
+              },
+              error: (err) => {
+                console.error(`Error al marcar ${notificacion.id} como leída:`, err);
+                procesadas++;
+                
+                if (procesadas === total) {
+                  this.aplicarFiltros();
+                }
+              }
+            });
         });
+      }
     });
   }
 
   onEliminarNotificacion(id: number): void {
-    if (confirm('¿Estás seguro de que deseas eliminar esta notificación?')) {
-      this.notificacionesService.eliminarNotificacion(id)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: () => {
-            this.notificaciones = this.notificaciones.filter(n => n.id !== id);
-            this.aplicarFiltros();
-          },
-          error: (err) => {
-            console.error('Error al eliminar notificación:', err);
-          }
-        });
-    }
-  }
-
-  onCrearNotificacion(): void {
-    if (this.prioridades.length === 0 || this.tipos.length === 0) {
-      alert('Cargando datos, por favor espera...');
-      return;
-    }
-
-    const campos = [
-      {
-        name: 'asunto',
-        label: 'Asunto',
-        type: 'text' as const,
-        required: true
-      },
-      {
-        name: 'mensaje',
-        label: 'Mensaje',
-        type: 'textarea' as const,
-        required: true
-      },
-      {
-        name: 'prioridadId',
-        label: 'Prioridad',
-        type: 'select' as const,
-        required: true,
-        options: this.prioridades.map(p => ({ id: p.id, nombre: p.nombre }))
-      },
-      {
-        name: 'tipoId',
-        label: 'Tipo',
-        type: 'select' as const,
-        required: true,
-        options: this.tipos.map(t => ({ id: t.id, nombre: t.nombre }))
-      }
-    ];
-
-    this.modalService.abrirModal('Crear Nueva Notificación', campos, 'Crear').then(resultado => {
-      if (resultado) {
-        const nuevaNotificacion: NotificacionCreate = {
-          asunto: resultado.asunto,
-          mensaje: resultado.mensaje,
-          userId: 1,
-          prioridad: { id: parseInt(resultado.prioridadId) },
-          tipoNotificacion: { id: parseInt(resultado.tipoId) }
-        };
-
-        this.notificacionesService.crearNotificacion(nuevaNotificacion)
+    this.mostrarSweetAlertConfirm(
+      '¿Eliminar notificación?',
+      'Esta acción no se puede deshacer',
+      'warning',
+      'Sí, eliminar',
+      'Cancelar'
+    ).then((result) => {
+      if (result.isConfirmed) {
+        this.notificacionesService.eliminarNotificacion(id)
           .pipe(takeUntil(this.destroy$))
           .subscribe({
-            next: (notificacionCreada) => {
-              this.notificaciones.unshift(notificacionCreada);
+            next: () => {
+              this.notificaciones = this.notificaciones.filter(n => n.id !== id);
               this.aplicarFiltros();
+              this.mostrarSweetAlert('success', '¡Eliminada!', 'La notificación fue eliminada');
             },
             error: (err) => {
-              console.error('Error al crear notificación:', err);
+              console.error('Error al eliminar notificación:', err);
+              this.mostrarSweetAlert('error', 'Error', 'No se pudo eliminar la notificación');
             }
           });
       }
+    });
+  }
+
+  // ========== MÉTODOS PARA EL MODAL PERSONALIZADO ==========
+
+  onCrearNotificacion(): void {
+    if (this.prioridades.length === 0 || this.tipos.length === 0) {
+      this.mostrarSweetAlert('warning', 'Espera', 'Cargando datos, por favor espera...');
+      return;
+    }
+    
+    this.mostrarModalNuevaNotificacion = true;
+    this.cdr.detectChanges();
+  }
+
+  cerrarModalNuevaNotificacion(): void {
+    this.mostrarModalNuevaNotificacion = false;
+    this.creandoNotificacion = false;
+    this.cdr.detectChanges();
+  }
+
+  crearNotificacion(formData: any): void {
+    this.creandoNotificacion = true;
+    this.cdr.detectChanges();
+
+    const nuevaNotificacion: NotificacionCreate = {
+      asunto: formData.asunto,
+      mensaje: formData.mensaje,
+      userId: 1, // TODO: Obtener del servicio de autenticación
+      prioridad: { id: formData.prioridadId },
+      tipoNotificacion: { id: formData.tipoId }
+    };
+
+    this.notificacionesService.crearNotificacion(nuevaNotificacion)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (notificacionCreada) => {
+          this.notificaciones.unshift(notificacionCreada);
+          this.aplicarFiltros();
+          this.cerrarModalNuevaNotificacion();
+          this.mostrarSweetAlert('success', '¡Creada!', 'La notificación fue creada exitosamente');
+        },
+        error: (err) => {
+          console.error('Error al crear notificación:', err);
+          this.creandoNotificacion = false;
+          this.cdr.detectChanges();
+          this.mostrarSweetAlert('error', 'Error', 'No se pudo crear la notificación');
+        }
+      });
+  }
+
+  // ========== MÉTODOS PARA SWEETALERT2 ==========
+
+  private mostrarSweetAlert(icon: 'success' | 'error' | 'warning' | 'info', title: string, text: string): void {
+    import('sweetalert2').then(Swal => {
+      Swal.default.fire({
+        icon,
+        title,
+        text,
+        timer: icon === 'success' ? 2000 : 3000,
+        showConfirmButton: icon !== 'success'
+      });
+    });
+  }
+
+  private mostrarSweetAlertConfirm(
+    title: string, 
+    text: string, 
+    icon: 'warning' | 'question' | 'info' = 'warning',
+    confirmButtonText: string = 'Confirmar',
+    cancelButtonText: string = 'Cancelar'
+  ): Promise<any> {
+    return import('sweetalert2').then(Swal => {
+      return Swal.default.fire({
+        title,
+        text,
+        icon,
+        showCancelButton: true,
+        confirmButtonText,
+        cancelButtonText,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33'
+      });
     });
   }
 

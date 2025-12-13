@@ -26,8 +26,8 @@ export class NotificacionesService {
     
     return this.http.get<Notificacion[]>(url).pipe(
       tap({
-        next: (data) => console.log('✅ Respuesta recibida:', data),
-        error: (err) => console.error('❌ Error en la petición:', err)
+        next: (data) => console.log('SRespuesta recibida:', data),
+        error: (err) => console.error('Error en la petición:', err)
       })
     );
 }
