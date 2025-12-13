@@ -71,14 +71,8 @@ import { forkJoin } from 'rxjs';
         <div class="mb-6 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6">
           <div class="flex flex-wrap items-center gap-4">
             
-            <div class="flex items-center gap-2">
-              <label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Filtrar por Mes:</label>
-              <select [(ngModel)]="mesSeleccionado" (change)="filtrarPorMes()"
-                      class="px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm font-medium">
-                <option [ngValue]="0">Todos los Meses</option>
-                <option *ngFor="let m of meses" [ngValue]="m.value">{{ m.name }}</option>
-              </select>
-            </div>
+          
+            
             
             <div class="flex items-center gap-2">
               <label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Filtrar por Estado:</label>
@@ -242,63 +236,63 @@ import { forkJoin } from 'rxjs';
                     </div>
                   </div>
 
-                  <div>
-                    <h3 class="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-3">Reserva Asociada</h3>
+                  <div class="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-6 mb-6 border border-slate-200 dark:border-slate-700">
+                    <h3 class="text-xl font-bold text-slate-800 dark:text-slate-100 mb-4">Reserva Asociada</h3>
                     <div *ngIf="reservaAsociada; else sinReserva" class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                       <div>
-                        <span class="text-slate-500 dark:text-slate-400">ID Reserva:</span>
-                        <span class="ml-2 font-medium">#{{ reservaAsociada?.idReserva }}</span>
+                        <p class="font-semibold text-slate-500 dark:text-slate-400">ID Reserva</p>
+                        <p class="text-base text-slate-900 dark:text-white">#{{ reservaAsociada?.idReserva }}</p>
                       </div>
                       <div>
-                        <span class="text-slate-500 dark:text-slate-400">Estado:</span>
-                        <span class="ml-2">
-                          <span [class]="'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ' + getEstadoClass(reservaAsociada?.estadoReserva || '')">
-                            {{ getEstadoLabel(reservaAsociada?.estadoReserva || '') || 'No informado' }}
-                          </span>
+                        <p class="font-semibold text-slate-500 dark:text-slate-400">Estado</p>
+                        <span [class]="'inline-flex items-center px-3 py-1 rounded-full text-sm font-medium mt-1 ' + getEstadoClass(reservaAsociada?.estadoReserva || '')">
+                          {{ getEstadoLabel(reservaAsociada?.estadoReserva || '') || 'No informado' }}
                         </span>
                       </div>
                       <div>
-                        <span class="text-slate-500 dark:text-slate-400">Fecha Inicio:</span>
-                        <span class="ml-2 font-medium">{{ reservaAsociada?.fechaReservaInicio ? formatDateLong(reservaAsociada.fechaReservaInicio) : 'No informado' }}</span>
+                        <p class="font-semibold text-slate-500 dark:text-slate-400">ID Solicitud</p>
+                        <p class="text-base text-slate-900 dark:text-white">{{ reservaAsociada?.idSolicitud ? ('#' + reservaAsociada.idSolicitud) : 'No informado' }}</p>
+                      </div>
+                      
+                      <div class="md:col-span-3 h-px bg-slate-200 dark:bg-slate-700 my-2"></div>
+
+                      <div>
+                        <p class="font-semibold text-slate-500 dark:text-slate-400">Fecha de Inicio</p>
+                        <p class="text-base text-slate-900 dark:text-white">{{ reservaAsociada?.fechaReservaInicio ? formatDateLong(reservaAsociada.fechaReservaInicio) : 'No informado' }}</p>
                       </div>
                       <div>
-                        <span class="text-slate-500 dark:text-slate-400">Fecha Fin:</span>
-                        <span class="ml-2 font-medium">{{ reservaAsociada?.fechaReservaFin ? formatDateLong(reservaAsociada.fechaReservaFin) : 'No informado' }}</span>
+                        <p class="font-semibold text-slate-500 dark:text-slate-400">Fecha de Fin</p>
+                        <p class="text-base text-slate-900 dark:text-white">{{ reservaAsociada?.fechaReservaFin ? formatDateLong(reservaAsociada.fechaReservaFin) : 'No informado' }}</p>
                       </div>
                       <div>
-                        <span class="text-slate-500 dark:text-slate-400">ID Solicitud:</span>
-                        <span class="ml-2 font-medium">{{ reservaAsociada?.idSolicitud ? ('#' + reservaAsociada.idSolicitud) : 'No informado' }}</span>
+                        <p class="font-semibold text-slate-500 dark:text-slate-400">ID Proveedor</p>
+                        <p class="text-base text-slate-900 dark:text-white">{{ reservaAsociada?.idProveedor ? ('#' + reservaAsociada.idProveedor) : 'No informado' }}</p>
+                      </div>
+
+                      <div>
+                        <p class="font-semibold text-slate-500 dark:text-slate-400">ID Organizador</p>
+                        <p class="text-base text-slate-900 dark:text-white">{{ reservaAsociada?.idOrganizador ? ('#' + reservaAsociada.idOrganizador) : 'No informado' }}</p>
                       </div>
                       <div>
-                        <span class="text-slate-500 dark:text-slate-400">Proveedor:</span>
-                        <span class="ml-2 font-medium">{{ reservaAsociada?.idProveedor ? ('#' + reservaAsociada.idProveedor) : 'No informado' }}</span>
+                        <p class="font-semibold text-slate-500 dark:text-slate-400">Fecha de Creación</p>
+                        <p class="text-base text-slate-900 dark:text-white">{{ reservaAsociada?.fechaCreacion ? formatDateLong(reservaAsociada.fechaCreacion) : 'No informado' }}</p>
                       </div>
                       <div>
-                        <span class="text-slate-500 dark:text-slate-400">Organizador:</span>
-                        <span class="ml-2 font-medium">{{ reservaAsociada?.idOrganizador ? ('#' + reservaAsociada.idOrganizador) : 'No informado' }}</span>
-                      </div>
-                      <div>
-                        <span class="text-slate-500 dark:text-slate-400">Creación:</span>
-                        <span class="ml-2 font-medium">{{ reservaAsociada?.fechaCreacion ? formatDateLong(reservaAsociada.fechaCreacion) : 'No informado' }}</span>
-                      </div>
-                      <div>
-                        <span class="text-slate-500 dark:text-slate-400">Actualización:</span>
-                        <span class="ml-2 font-medium">{{ reservaAsociada?.fechaActualizacion ? formatDateLong(reservaAsociada.fechaActualizacion) : 'No informado' }}</span>
+                        <p class="font-semibold text-slate-500 dark:text-slate-400">Última Actualización</p>
+                        <p class="text-base text-slate-900 dark:text-white">{{ reservaAsociada?.fechaActualizacion ? formatDateLong(reservaAsociada.fechaActualizacion) : 'No informado' }}</p>
                       </div>
                     </div>
                     <ng-template #sinReserva>
                       <p class="text-sm text-slate-600 dark:text-slate-400">No hay una reserva asociada a esta solicitud.</p>
                     </ng-template>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="flex justify-end gap-3 px-6 py-4 border-t border-slate-200 dark:border-slate-800">
-              <button (click)="cerrarModal()" class="px-4 py-2 rounded-lg text-sm font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700">Cerrar</button>
-            </div>
-          </div>
-        </div>
+                  </div>
+                </div>
+              </div>
+            </div>             <div class="flex justify-end gap-3 px-6 py-4 border-t border-slate-200 dark:border-slate-800">
+              <button (click)="cerrarModal()" class="px-4 py-2 rounded-lg text-sm font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700">Cerrar</button>
+            </div>
+          </div>
+        </div>
         
         <app-responder-solicitud
           *ngIf="modalResponderVisible"

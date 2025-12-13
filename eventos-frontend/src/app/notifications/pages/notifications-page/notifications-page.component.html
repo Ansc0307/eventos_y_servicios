@@ -1,0 +1,111 @@
+<div class="min-h-screen bg-background-light dark:bg-background-dark">
+  <!-- Contenido principal -->
+  <main class="px-10 flex flex-1 justify-center py-8">
+    <div class="layout-content-container flex flex-col w-full max-w-4xl flex-1">
+      <!-- Header de notificaciones -->
+      <div class="flex flex-wrap justify-between gap-4 p-4 border-b border-black/10 dark:border-white/10">
+        <p class="text-slate-900 dark:text-slate-100 text-4xl font-black leading-tight tracking-[-0.033em] min-w-72">
+          Notificaciones
+          <span *ngIf="contarNoLeidas() > 0" 
+                class="ml-2 inline-flex items-center rounded-full bg-primary/20 px-2 py-1 text-xs font-medium text-primary">
+            {{ contarNoLeidas() }} no leídas
+          </span>
+        </p>
+        <div class="flex items-center gap-4">
+          <app-notification-filter 
+            [filtros]="filtros"
+            (filtrosCambiados)="onFiltrosCambiados($event)">
+          </app-notification-filter>
+          
+          <button 
+            (click)="marcarTodasComoLeidas()"
+            [disabled]="contarNoLeidas() === 0"
+            class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary/20 text-primary hover:bg-primary/30 text-sm font-bold leading-normal tracking-[0.015em] transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+            <span class="material-symbols-outlined text-lg mr-2">check_circle</span>
+            <span class="truncate">Marcar todas como leídas</span>
+          </button>
+          
+          <button 
+            (click)="onCrearNotificacion()"
+            class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white hover:bg-primary/90 text-sm font-bold leading-normal tracking-[0.015em] transition-colors">
+            <span class="material-symbols-outlined text-lg mr-2">add</span>
+            <span class="truncate">Nueva Notificación</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Loader -->
+      <app-loader *ngIf="isLoading"></app-loader>
+
+      <!-- Error -->
+      <div *ngIf="error && !isLoading" class="mt-8 p-6 bg-red-500/10 border border-red-500/20 rounded-lg">
+        <div class="flex items-center gap-3 text-red-600 dark:text-red-400">
+          <span class="material-symbols-outlined text-2xl">error</span>
+          <div class="flex-1">
+            <h4 class="font-semibold mb-1">Error al cargar notificaciones</h4>
+            <p class="text-sm">{{ error }}</p>
+          </div>
+        </div>
+        <button 
+          (click)="recargarNotificaciones()"
+          class="mt-4 px-4 py-2 bg-red-600 text-white text-sm font-medium rounded hover:bg-red-700 transition-colors flex items-center gap-2">
+          <span class="material-symbols-outlined text-sm">refresh</span>
+          Reintentar
+        </button>
+      </div>
+
+      <!-- Contenido principal -->
+      <div *ngIf="!isLoading && !error">
+        <!-- Estado vacío -->
+        <app-empty-state 
+          *ngIf="filteredNotificaciones.length === 0"
+          [titulo]="'No hay notificaciones'"
+          [mensaje]="'No se encontraron notificaciones con los filtros aplicados.'"
+          [mostrarBoton]="true"
+          [textoBoton]="'Limpiar filtros'"
+          (botonClick)="onFiltrosCambiados({leido: null, prioridad: null, tipo: null})">
+        </app-empty-state>
+
+        <!-- Lista de notificaciones -->
+        <div *ngIf="filteredNotificaciones.length > 0" 
+             class="flex flex-col divide-y divide-black/10 dark:divide-white/10 mt-4">
+          <app-notification-item 
+            *ngFor="let notificacion of filteredNotificaciones"
+            [notificacion]="notificacion"
+            (marcarComoLeida)="onMarcarComoLeida(notificacion.id)"
+            (eliminar)="onEliminarNotificacion(notificacion.id)">
+          </app-notification-item>
+        </div>
+
+        <!-- Estadísticas -->
+        <div class="mt-8 p-4 bg-black/5 dark:bg-white/5 rounded-lg">
+          <div class="flex flex-wrap gap-4">
+            <div class="flex items-center gap-2">
+              <span class="text-slate-600 dark:text-slate-400 text-sm">Total:</span>
+              <span class="font-medium text-slate-900 dark:text-slate-100">{{ notificaciones.length }}</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-slate-600 dark:text-slate-400 text-sm">No leídas:</span>
+              <span class="font-medium text-primary">{{ contarNoLeidas() }}</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-slate-600 dark:text-slate-400 text-sm">Mostrando:</span>
+              <span class="font-medium text-slate-900 dark:text-slate-100">{{ filteredNotificaciones.length }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal para nueva notificación -->
+  <app-modal-notificacion 
+    *ngIf="mostrarModalNuevaNotificacion"
+    [titulo]="'Crear Nueva Notificación'"
+    [prioridades]="prioridades"
+    [tipos]="tipos"
+    [loading]="creandoNotificacion"
+    (cerrar)="cerrarModalNuevaNotificacion()"
+    (guardar)="crearNotificacion($event)">
+  </app-modal-notificacion>
+</div>

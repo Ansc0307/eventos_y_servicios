@@ -12,7 +12,7 @@
     <div class="hidden md:flex items-center gap-4">
       <a class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-primary/20 text-sm font-medium text-text-light dark:text-text-dark" routerLink="/usuarios" routerLinkActive="!text-primary">
         <span class="material-symbols-outlined">group</span>
-        <span>Usuarios</span>
+        <span>Perfil</span>
       </a>
       <a class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-primary/20 text-sm font-medium text-text-light dark:text-text-dark" routerLink="/reservas" routerLinkActive="!text-primary">
         <span class="material-symbols-outlined">event</span>
@@ -30,7 +30,7 @@
         <span class="material-symbols-outlined">storefront</span>
         <span>Ofertas</span>
       </a>
-      <a class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-primary/20 text-sm font-medium text-text-light dark:text-text-dark" routerLink="/ms-notificaciones" routerLinkActive="!text-primary">
+      <a class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-primary/20 text-sm font-medium text-text-light dark:text-text-dark" routerLink="/notifications" routerLinkActive="!text-primary">
         <span class="material-symbols-outlined">notifications</span>
         <span>Notificaciones</span>
       </a>
@@ -38,8 +38,19 @@
 
     <!-- Actions -->
     <div class="flex items-center gap-2">
-     
-      <button class="flex h-10 px-3 rounded-lg bg-border-light dark:bg-border-dark text-text-light dark:text-text-dark hover:bg-primary/20 transition-colors" (click)="logout()">
+      <button
+        *ngIf="!isLoggedIn"
+        class="flex h-10 px-3 rounded-lg bg-border-light dark:bg-border-dark text-text-light dark:text-text-dark hover:bg-primary/20 transition-colors"
+        (click)="login()"
+      >
+        <span class="material-symbols-outlined">login</span>
+      </button>
+
+      <button
+        *ngIf="isLoggedIn"
+        class="flex h-10 px-3 rounded-lg bg-border-light dark:bg-border-dark text-text-light dark:text-text-dark hover:bg-primary/20 transition-colors"
+        (click)="logout()"
+      >
         <span class="material-symbols-outlined">logout</span>
       </button>
     </div>

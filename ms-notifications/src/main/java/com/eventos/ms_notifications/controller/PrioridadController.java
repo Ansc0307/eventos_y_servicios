@@ -26,7 +26,7 @@ public class PrioridadController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PROVEEDOR', 'ORGANIZADOR')")
     @Operation(summary = "Listar todas las prioridades", description = "Obtiene una lista completa de las prioridades registradas")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Lista obtenida correctamente"),
@@ -37,7 +37,7 @@ public class PrioridadController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PROVEEDOR', 'ORGANIZADOR')")
     @Operation(summary = "Obtener prioridad por ID", description = "Devuelve una prioridad según su identificador")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Prioridad encontrada correctamente"),

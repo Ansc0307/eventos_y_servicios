@@ -136,130 +136,150 @@ import { forkJoin } from 'rxjs'; // 🟢 Importar forkJoin para llamadas paralel
           </table>
         </div>
 
-        <div *ngIf="mostrarModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div class="w-full max-w-3xl bg-white dark:bg-slate-900 rounded-xl shadow-lg border border-slate-200 dark:border-slate-800">
-            <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800">
-              <h2 class="text-xl font-bold text-slate-900 dark:text-white">Detalle de Solicitud</h2>
-              <button (click)="cerrarModal()" class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
+        <div *ngIf="mostrarModal" (click)="cerrarModal()" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div (click)="$event.stopPropagation()" class="bg-white dark:bg-slate-900 rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-auto flex flex-col">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-primary/5">
+              <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-3xl text-primary">description</span>
+                <div>
+                  <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Detalle de Solicitud</h2>
+                  <p class="text-sm text-slate-500 dark:text-slate-400">Información completa</p>
+                </div>
+              </div>
+              <button (click)="cerrarModal()" class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
                 <span class="material-symbols-outlined text-slate-600 dark:text-slate-300">close</span>
               </button>
             </div>
 
-            <div class="p-6">
-              <div *ngIf="loadingDetalle" class="flex items-center justify-center py-6">
-                <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
-              </div>
+            <div class="flex-1 p-6">
+              <div *ngIf="solicitudSeleccionada">
 
-              <div *ngIf="errorDetalle && !loadingDetalle" class="mb-4 bg-red-100 dark:bg-red-900/40 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded">
-                {{ errorDetalle }}
-              </div>
-
-              <div *ngIf="!loadingDetalle">
+                <div *ngIf="loadingDetalle" class="flex items-center justify-center py-6">
+                  <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
+                </div>
                 
-                <div class="mb-6">
-                  <h3 class="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-3">Solicitud</h3>
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <span class="text-slate-500 dark:text-slate-400">ID:</span>
-                      <span class="ml-2 font-medium">#{{ solicitudSeleccionada?.idSolicitud }}</span>
-                    </div>
-                    <div>
-                      <span class="text-slate-500 dark:text-slate-400">Fecha:</span>
-                      <span class="ml-2 font-medium">{{ formatDateLong(solicitudSeleccionada?.fechaSolicitud || '') }}</span>
-                    </div>
-                    <div>
-                      <span class="text-slate-500 dark:text-slate-400">Estado:</span>
-                      <span class="ml-2">
-                        <span [class]="'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ' + getEstadoClass(solicitudSeleccionada?.estadoSolicitud || '')">
-                          {{ getEstadoLabel(solicitudSeleccionada?.estadoSolicitud || '') }}
-                        </span>
-                      </span>
-                    </div>
-                    <div>
-                      <span class="text-slate-500 dark:text-slate-400">Organizador:</span>
-                      <span class="ml-2 font-medium">#{{ solicitudSeleccionada?.idOrganizador }}</span>
-                    </div>
-                    <div>
-                      <span class="text-slate-500 dark:text-slate-400">Proveedor:</span>
-                      <span class="ml-2 font-medium">#{{ solicitudSeleccionada?.idProovedor }}</span>
-                    </div>
-                  </div>
+                <div *ngIf="errorDetalle && !loadingDetalle" class="mb-4 bg-red-100 dark:bg-red-900/40 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded">
+                  {{ errorDetalle }}
                 </div>
 
-                <div *ngIf="solicitudSeleccionada?.idOferta" class="mb-6">
-                  <h3 class="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-3">Oferta Asociada</h3>
+                <div *ngIf="!loadingDetalle">
                   
-                  <div *ngIf="loadingOferta" class="flex items-center justify-center py-3">
-                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                  <div class="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-6 mb-6 border border-slate-200 dark:border-slate-700">
+                    <h3 class="text-xl font-bold text-slate-800 dark:text-slate-100 mb-4">Información de la Solicitud</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                      <div>
+                        <p class="font-semibold text-slate-500 dark:text-slate-400">ID Solicitud</p>
+                        <p class="text-base text-slate-900 dark:text-white">#{{ solicitudSeleccionada.idSolicitud }}</p>
+                      </div>
+                      <div>
+                        <p class="font-semibold text-slate-500 dark:text-slate-400">Estado</p>
+                        <span [class]="'inline-flex items-center px-3 py-1 rounded-full text-sm font-medium mt-1 ' + getEstadoClass(solicitudSeleccionada.estadoSolicitud)">
+                          {{ getEstadoLabel(solicitudSeleccionada.estadoSolicitud) }}
+                        </span>
+                      </div>
+                      <div>
+                        <p class="font-semibold text-slate-500 dark:text-slate-400">Fecha de Solicitud</p>
+                        <p class="text-base text-slate-900 dark:text-white">{{ formatDateLong(solicitudSeleccionada.fechaSolicitud) }}</p>
+                      </div>
+                      <div>
+                        <p class="font-semibold text-slate-500 dark:text-slate-400">ID Organizador</p>
+                        <p class="text-base text-slate-900 dark:text-white">#{{ solicitudSeleccionada.idOrganizador }}</p>
+                      </div>
+                      <div>
+                        <p class="font-semibold text-slate-500 dark:text-slate-400">ID Proveedor</p>
+                        <p class="text-base text-slate-900 dark:text-white">#{{ solicitudSeleccionada.idProovedor }}</p>
+                      </div>
+                      
+                      <div>
+                        <p class="font-semibold text-slate-500 dark:text-slate-400">ID Oferta (en Solicitud)</p>
+                        <p class="text-base text-slate-900 dark:text-white">#{{ solicitudSeleccionada.idOferta }}</p>
+                      </div>
+                    </div>
                   </div>
                   
-                  <div *ngIf="ofertaAsociada" class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <span class="text-slate-500 dark:text-slate-400">ID Oferta:</span>
-                      <span class="ml-2 font-medium">#{{ ofertaAsociada.id }}</span>
+                  <div *ngIf="solicitudSeleccionada.idOferta" class="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-6 mb-6 border border-slate-200 dark:border-slate-700">
+                    <h3 class="text-xl font-bold text-slate-800 dark:text-slate-100 mb-4">Detalles de la Oferta</h3>
+                    <div *ngIf="loadingOferta" class="flex items-center justify-center py-6">
+                      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                      <p class="ml-3 text-slate-600 dark:text-slate-300">Cargando oferta...</p>
                     </div>
-                    <div class="md:col-span-2">
-                      <span class="text-slate-500 dark:text-slate-400">Título:</span>
-                      <a class="ml-2 font-medium text-primary cursor-pointer" 
+                    <div *ngIf="errorOferta && !loadingOferta" class="bg-red-100 dark:bg-red-900/40 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded">
+                      {{ errorOferta }}
+                    </div>
+
+                    <div *ngIf="ofertaAsociada" class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                      <div>
+                        <p class="font-semibold text-slate-500 dark:text-slate-400">ID Oferta</p>
+                        <p class="text-base text-slate-900 dark:text-white">#{{ ofertaAsociada.id }}</p>
+                      </div>
+                      <div class="md:col-span-2">
+                        <p class="font-semibold text-slate-500 dark:text-slate-400">Título</p>
+                        <a class="text-base text-primary font-medium hover:underline cursor-pointer" 
                             [routerLink]="['/oferta', ofertaAsociada.id]">
                           {{ ofertaAsociada.titulo }}
-                      </a>
+                        </a>
+                      </div>
+                      <div>
+                        <p class="font-semibold text-slate-500 dark:text-slate-400">Precio Base</p>
+                        <p class="text-base text-slate-900 dark:text-white">{{ ofertaAsociada.precioBase || 'N/A' }}</p> 
+                      </div>
+                      <div>
+                        <p class="font-semibold text-slate-500 dark:text-slate-400">Estado de Oferta</p>
+                        <p class="text-base text-slate-900 dark:text-white">{{ ofertaAsociada.estado }}</p>
+                      </div>
                     </div>
                   </div>
-                  
-                  <div *ngIf="errorOferta && !loadingOferta" class="mb-4 bg-red-100 dark:bg-red-900/40 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded">
-                    {{ errorOferta }}
-                  </div>
-                </div>
 
-
-                <div>
-                  <h3 class="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-3">Reserva Asociada</h3>
-                  <div *ngIf="reservaAsociada; else sinReserva" class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <span class="text-slate-500 dark:text-slate-400">ID Reserva:</span>
-                      <span class="ml-2 font-medium">#{{ reservaAsociada?.idReserva }}</span>
-                    </div>
-                    <div>
-                      <span class="text-slate-500 dark:text-slate-400">Estado:</span>
-                      <span class="ml-2">
-                        <span [class]="'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ' + getEstadoClass(reservaAsociada?.estadoReserva || '')">
+                  <div class="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-6 mb-6 border border-slate-200 dark:border-slate-700">
+                    <h3 class="text-xl font-bold text-slate-800 dark:text-slate-100 mb-4">Reserva Asociada</h3>
+                    <div *ngIf="reservaAsociada; else sinReserva" class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                      <div>
+                        <p class="font-semibold text-slate-500 dark:text-slate-400">ID Reserva</p>
+                        <p class="text-base text-slate-900 dark:text-white">#{{ reservaAsociada?.idReserva }}</p>
+                      </div>
+                      <div>
+                        <p class="font-semibold text-slate-500 dark:text-slate-400">Estado</p>
+                        <span [class]="'inline-flex items-center px-3 py-1 rounded-full text-sm font-medium mt-1 ' + getEstadoClass(reservaAsociada?.estadoReserva || '')">
                           {{ getEstadoLabel(reservaAsociada?.estadoReserva || '') || 'No informado' }}
                         </span>
-                      </span>
+                      </div>
+                      <div>
+                        <p class="font-semibold text-slate-500 dark:text-slate-400">ID Solicitud</p>
+                        <p class="text-base text-slate-900 dark:text-white">{{ reservaAsociada?.idSolicitud ? ('#' + reservaAsociada.idSolicitud) : 'No informado' }}</p>
+                      </div>
+                      
+                      <div class="md:col-span-3 h-px bg-slate-200 dark:bg-slate-700 my-2"></div>
+
+                      <div>
+                        <p class="font-semibold text-slate-500 dark:text-slate-400">Fecha de Inicio</p>
+                        <p class="text-base text-slate-900 dark:text-white">{{ reservaAsociada?.fechaReservaInicio ? formatDateLong(reservaAsociada.fechaReservaInicio) : 'No informado' }}</p>
+                      </div>
+                      <div>
+                        <p class="font-semibold text-slate-500 dark:text-slate-400">Fecha de Fin</p>
+                        <p class="text-base text-slate-900 dark:text-white">{{ reservaAsociada?.fechaReservaFin ? formatDateLong(reservaAsociada.fechaReservaFin) : 'No informado' }}</p>
+                      </div>
+                      <div>
+                        <p class="font-semibold text-slate-500 dark:text-slate-400">ID Proveedor</p>
+                        <p class="text-base text-slate-900 dark:text-white">{{ reservaAsociada?.idProveedor ? ('#' + reservaAsociada.idProveedor) : 'No informado' }}</p>
+                      </div>
+
+                      <div>
+                        <p class="font-semibold text-slate-500 dark:text-slate-400">ID Organizador</p>
+                        <p class="text-base text-slate-900 dark:text-white">{{ reservaAsociada?.idOrganizador ? ('#' + reservaAsociada.idOrganizador) : 'No informado' }}</p>
+                      </div>
+                      <div>
+                        <p class="font-semibold text-slate-500 dark:text-slate-400">Fecha de Creación</p>
+                        <p class="text-base text-slate-900 dark:text-white">{{ reservaAsociada?.fechaCreacion ? formatDateLong(reservaAsociada.fechaCreacion) : 'No informado' }}</p>
+                      </div>
+                      <div>
+                        <p class="font-semibold text-slate-500 dark:text-slate-400">Última Actualización</p>
+                        <p class="text-base text-slate-900 dark:text-white">{{ reservaAsociada?.fechaActualizacion ? formatDateLong(reservaAsociada.fechaActualizacion) : 'No informado' }}</p>
+                      </div>
                     </div>
-                    <div>
-                      <span class="text-slate-500 dark:text-slate-400">Fecha Inicio:</span>
-                      <span class="ml-2 font-medium">{{ reservaAsociada?.fechaReservaInicio ? formatDateLong(reservaAsociada.fechaReservaInicio) : 'No informado' }}</span>
-                    </div>
-                    <div>
-                      <span class="text-slate-500 dark:text-slate-400">Fecha Fin:</span>
-                      <span class="ml-2 font-medium">{{ reservaAsociada?.fechaReservaFin ? formatDateLong(reservaAsociada.fechaReservaFin) : 'No informado' }}</span>
-                    </div>
-                    <div>
-                      <span class="text-slate-500 dark:text-slate-400">ID Solicitud:</span>
-                      <span class="ml-2 font-medium">{{ reservaAsociada?.idSolicitud ? ('#' + reservaAsociada.idSolicitud) : 'No informado' }}</span>
-                    </div>
-                    <div>
-                      <span class="text-slate-500 dark:text-slate-400">Proveedor:</span>
-                      <span class="ml-2 font-medium">{{ reservaAsociada?.idProveedor ? ('#' + reservaAsociada.idProveedor) : 'No informado' }}</span>
-                    </div>
-                    <div>
-                      <span class="text-slate-500 dark:text-slate-400">Organizador:</span>
-                      <span class="ml-2 font-medium">{{ reservaAsociada?.idOrganizador ? ('#' + reservaAsociada.idOrganizador) : 'No informado' }}</span>
-                    </div>
-                    <div>
-                      <span class="text-slate-500 dark:text-slate-400">Creación:</span>
-                      <span class="ml-2 font-medium">{{ reservaAsociada?.fechaCreacion ? formatDateLong(reservaAsociada.fechaCreacion) : 'No informado' }}</span>
-                    </div>
-                    <div>
-                      <span class="text-slate-500 dark:text-slate-400">Actualización:</span>
-                      <span class="ml-2 font-medium">{{ reservaAsociada?.fechaActualizacion ? formatDateLong(reservaAsociada.fechaActualizacion) : 'No informado' }}</span>
-                    </div>
+                    <ng-template #sinReserva>
+                      <p class="text-sm text-slate-600 dark:text-slate-400">No hay una reserva asociada a esta solicitud.</p>
+                    </ng-template>
                   </div>
-                  <ng-template #sinReserva>
-                    <p class="text-sm text-slate-600 dark:text-slate-400">No hay una reserva asociada a esta solicitud.</p>
-                  </ng-template>
                 </div>
               </div>
             </div>

@@ -1,0 +1,141 @@
+<div class="relative">
+  <!-- Botón principal de filtros -->
+  <div class="flex items-center gap-2">
+    <button 
+      (click)="mostrarPanelFiltros = !mostrarPanelFiltros"
+      class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors text-sm font-medium text-slate-700 dark:text-slate-300">
+      <span class="material-symbols-outlined">filter_list</span>
+      <span>Filtrar</span>
+      <!-- Indicadores de filtros activos -->
+      <span *ngIf="filtros.leido !== null" class="size-2 rounded-full bg-primary"></span>
+      <span *ngIf="filtros.prioridad !== null" class="size-2 rounded-full bg-blue-500"></span>
+      <span *ngIf="filtros.tipo !== null" class="size-2 rounded-full bg-purple-500"></span>
+    </button>
+    
+    <!-- Filtros rápidos (siempre visibles en desktop) -->
+    <div class="hidden md:flex items-center gap-2">
+      <!-- Estado rápido -->
+      <div class="flex rounded-lg border border-slate-300 dark:border-slate-700 p-1">
+        <button *ngFor="let opcion of estadoOpciones"
+                (click)="filtros.leido = opcion.value; onFiltroChange()"
+                [class]="filtros.leido === opcion.value 
+                  ? 'bg-primary text-white' 
+                  : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'"
+                class="px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-base">{{ opcion.icon }}</span>
+          <span class="hidden lg:inline">{{ opcion.label }}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel desplegable de filtros -->
+  <div *ngIf="mostrarPanelFiltros" 
+       class="absolute right-0 mt-2 w-80 lg:w-96 bg-white dark:bg-slate-800 rounded-xl shadow-2xl z-50 border border-slate-200 dark:border-slate-700 p-6 animate-fade-in">
+    <!-- Header del panel -->
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h3 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Filtros avanzados</h3>
+        <p class="text-sm text-slate-600 dark:text-slate-400">Personaliza qué notificaciones ver</p>
+      </div>
+      <button 
+        (click)="mostrarPanelFiltros = false"
+        class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+
+    <div class="space-y-6">
+      <!-- Sección: Estado de lectura -->
+      <div>
+        <h4 class="text-sm font-medium text-slate-900 dark:text-slate-100 mb-3 flex items-center gap-2">
+          <span class="material-symbols-outlined text-lg">visibility</span>
+          Estado de lectura
+        </h4>
+        <div class="grid grid-cols-3 gap-2">
+          <button *ngFor="let opcion of estadoOpciones"
+                  (click)="filtros.leido = opcion.value; onFiltroChange()"
+                  [class]="filtros.leido === opcion.value 
+                    ? 'bg-primary/10 border-primary text-primary' 
+                    : 'bg-slate-50 dark:bg-slate-700/50 border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'"
+                  class="flex flex-col items-center justify-center p-3 rounded-lg border transition-all duration-200">
+            <span class="material-symbols-outlined text-xl mb-1.5">{{ opcion.icon }}</span>
+            <span class="text-xs font-medium">{{ opcion.label }}</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Sección: Prioridades -->
+      <div>
+        <h4 class="text-sm font-medium text-slate-900 dark:text-slate-100 mb-3 flex items-center gap-2">
+          <span class="material-symbols-outlined text-lg">priority_high</span>
+          Prioridad
+        </h4>
+        <div class="flex flex-wrap gap-2">
+          <button (click)="filtros.prioridad = null; onFiltroChange()"
+                  [class]="filtros.prioridad === null 
+                    ? 'bg-primary text-white' 
+                    : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'"
+                  class="px-3 py-2 rounded-lg text-sm font-medium transition-colors">
+            Todas
+          </button>
+          <button *ngFor="let prioridad of prioridades"
+                  (click)="filtros.prioridad = prioridad.id; onFiltroChange()"
+                  [class]="filtros.prioridad === prioridad.id 
+                    ? 'border-2 ' + getPrioridadColor(prioridad.nombre) 
+                    : 'border ' + getPrioridadColor(prioridad.nombre)"
+                  class="px-3 py-2 rounded-lg text-sm font-medium transition-colors border">
+            {{ prioridad.nombre }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Sección: Tipos -->
+      <div>
+        <h4 class="text-sm font-medium text-slate-900 dark:text-slate-100 mb-3 flex items-center gap-2">
+          <span class="material-symbols-outlined text-lg">category</span>
+          Tipo de notificación
+        </h4>
+        <div class="grid grid-cols-2 gap-2">
+          <button (click)="filtros.tipo = null; onFiltroChange()"
+                  [class]="filtros.tipo === null 
+                    ? 'bg-primary text-white' 
+                    : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'"
+                  class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors justify-center">
+            <span class="material-symbols-outlined">all_inbox</span>
+            Todos los tipos
+          </button>
+          <button *ngFor="let tipo of tipos"
+                  (click)="filtros.tipo = tipo.id; onFiltroChange()"
+                  [class]="filtros.tipo === tipo.id 
+                    ? 'bg-slate-100 dark:bg-slate-700 border-2 border-primary' 
+                    : 'bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700/50'"
+                  class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 transition-colors">
+            <span class="material-symbols-outlined">{{ getTipoIcon(tipo.nombre) }}</span>
+            {{ tipo.nombre }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer del panel -->
+    <div class="flex justify-between items-center mt-8 pt-6 border-t border-slate-200 dark:border-slate-700">
+      <button (click)="limpiarFiltros()"
+              [disabled]="!filtros.leido && !filtros.prioridad && !filtros.tipo"
+              class="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+        <span class="material-symbols-outlined">refresh</span>
+        Limpiar filtros
+      </button>
+      <button (click)="mostrarPanelFiltros = false"
+              class="px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors flex items-center gap-2">
+        <span class="material-symbols-outlined">check</span>
+        Aplicar
+      </button>
+    </div>
+  </div>
+
+  <!-- Overlay para cerrar al hacer clic fuera -->
+  <div *ngIf="mostrarPanelFiltros" 
+       class="fixed inset-0 z-40" 
+       (click)="mostrarPanelFiltros = false"></div>
+</div>

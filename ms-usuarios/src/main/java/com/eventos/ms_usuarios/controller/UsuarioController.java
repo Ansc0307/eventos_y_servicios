@@ -23,6 +23,7 @@ import org.springframework.data.domain.Pageable;
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
 @RestController
 @RequestMapping("/usuarios")
@@ -31,6 +32,26 @@ public class UsuarioController {
 
   @Autowired
   private UsuarioService usuarioService;
+
+  @Operation(summary = "Mi usuario", description = "Devuelve el usuario autenticado (por sub de Keycloak) y activa en BD si el email ya fue verificado")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Operación exitosa"),
+      @ApiResponse(responseCode = "401", description = "No autenticado. Debe enviar Bearer token"),
+      @ApiResponse(responseCode = "404", description = "Usuario no encontrado en BD para ese sub")
+  })
+  @GetMapping("/me")
+  @PreAuthorize("isAuthenticated()")
+  @SecurityRequirement(name = "bearerAuth")
+  public ResponseEntity<UsuarioDto> me(JwtAuthenticationToken authentication) {
+    String sub = authentication.getToken().getSubject();
+    String accessToken = authentication.getToken().getTokenValue();
+    Boolean emailVerifiedClaim = null;
+    try {
+      emailVerifiedClaim = authentication.getToken().getClaimAsBoolean("email_verified");
+    } catch (Exception ignore) {
+    }
+    return ResponseEntity.ok(usuarioService.obtenerMiUsuario(sub, accessToken, emailVerifiedClaim));
+  }
 
   @Operation(summary = "Crear usuario", description = "Crea un nuevo usuario")
   @ApiResponses(value = {

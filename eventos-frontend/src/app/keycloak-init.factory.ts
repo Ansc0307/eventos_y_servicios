@@ -11,7 +11,9 @@ export function initializeKeycloakFactory(keycloak: KeycloakService) {
         clientId: environment.clientId
       },
       initOptions: {
-        onLoad: 'login-required',
+        // Permite rutas públicas (p.ej. /registro) sin forzar login.
+        // Las rutas privadas se protegen con un guard.
+        onLoad: 'check-sso',
         checkLoginIframe: false
       }
     });

@@ -21,6 +21,9 @@ public class Usuario {
   @Column(nullable = false, length = 150)
   private String email;
 
+  @Column(name = "keycloak_id", length = 36)
+  private String keycloakId;
+
   @Column(nullable = false, length = 255)
   private String password;
 
@@ -91,6 +94,14 @@ public class Usuario {
 
   public void setEmail(String email) {
     this.email = email;
+  }
+
+  public String getKeycloakId() {
+    return keycloakId;
+  }
+
+  public void setKeycloakId(String keycloakId) {
+    this.keycloakId = keycloakId;
   }
 
   public String getPassword() {

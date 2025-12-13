@@ -26,7 +26,7 @@ public class TipoNotificacionController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PROVEEDOR', 'ORGANIZADOR')")
     @Operation(summary = "Listar todos los tipos de notificación", description = "Obtiene la lista completa de tipos de notificación registrados")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Lista obtenida correctamente"),
@@ -37,7 +37,7 @@ public class TipoNotificacionController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PROVEEDOR', 'ORGANIZADOR')")
     @Operation(summary = "Obtener un tipo de notificación por ID", description = "Devuelve un tipo de notificación según su identificador")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Tipo de notificación encontrado correctamente"),

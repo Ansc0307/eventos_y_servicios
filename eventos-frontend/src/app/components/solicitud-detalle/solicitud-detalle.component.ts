@@ -118,12 +118,37 @@ import { OfertasService } from '../../services/ofertas.service';
 
           <!-- RESERVA -->
           <div *ngIf="reserva" class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-6 border mt-6">
-            <h3 class="text-xl font-bold mb-4">Reserva Asociada</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div><b>ID Reserva:</b> #{{ reserva.idReserva }}</div>
-              <div><b>Estado:</b> {{ getEstadoLabel(reserva.estado) }}</div>
-            </div>
-          </div>
+  <h3 class="text-xl font-bold mb-4">Reserva Asociada</h3>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div>
+      <b>ID Reserva:</b> #{{ reserva.idReserva }}
+    </div>
+
+    <div>
+      <b>Estado:</b> {{ getEstadoLabel(reserva.estado) }}
+    </div>
+
+    <div>
+      <p class="text-sm font-semibold text-slate-500 dark:text-slate-400">
+        Fecha Inicio Reserva
+      </p>
+      <p class="text-base text-slate-900 dark:text-white">
+        {{ formatDateLong(reserva.fechaReservaInicio) }}
+      </p>
+    </div>
+
+    <div>
+      <p class="text-sm font-semibold text-slate-500 dark:text-slate-400">
+        Fecha Fin Reserva
+      </p>
+      <p class="text-base text-slate-900 dark:text-white">
+        {{ formatDateLong(reserva.fechaReservaFin) }}
+      </p>
+    </div>
+  </div>
+</div>
+
 
         </div>
 

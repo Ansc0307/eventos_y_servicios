@@ -1,17 +1,20 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { KeycloakService } from 'keycloak-angular';
 import { ReservasService } from '../services/reservas.service';
+import { OfertasService } from '../services/ofertas.service'; // 🟢 Importar OfertasService
 import { Solicitud } from '../models/solicitud.model';
+import { Oferta } from '../models/oferta.model';
 import { NoDisponibilidadesService } from '../services/no-disponibilidades.service';
 import { Reserva } from '../models/reserva.model';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-organizador-reservas-list',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule,RouterLink],
   template: `
   <div class="font-display bg-background-light dark:bg-background-dark text-[#18181B] dark:text-gray-200 min-h-screen">
     <div class="relative flex min-h-screen w-full">
@@ -244,6 +247,39 @@ import { Reserva } from '../models/reserva.model';
           </div>
         </div>
 
+         <div *ngIf="solicitudSeleccionada?.idOferta" class="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-6 mb-6 border border-slate-200 dark:border-slate-700">
+                    <h3 class="text-xl font-bold text-slate-800 dark:text-slate-100 mb-4">Detalles de la Oferta</h3>
+                    <div *ngIf="loadingOferta" class="flex items-center justify-center py-6">
+                      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                      <p class="ml-3 text-slate-600 dark:text-slate-300">Cargando oferta...</p>
+                    </div>
+                    <div *ngIf="errorOferta && !loadingOferta" class="bg-red-100 dark:bg-red-900/40 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded">
+                      {{ errorOferta }}
+                    </div>
+
+                    <div *ngIf="ofertaAsociada" class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                      <div>
+                        <p class="font-semibold text-slate-500 dark:text-slate-400">ID Oferta</p>
+                        <p class="text-base text-slate-900 dark:text-white">#{{ ofertaAsociada.id }}</p>
+                      </div>
+                      <div class="md:col-span-2">
+                        <p class="font-semibold text-slate-500 dark:text-slate-400">Título</p>
+                        <a class="text-base text-primary font-medium hover:underline cursor-pointer" 
+                            [routerLink]="['/oferta', ofertaAsociada.id]">
+                          {{ ofertaAsociada.titulo }}
+                        </a>
+                      </div>
+                      <div>
+                        <p class="font-semibold text-slate-500 dark:text-slate-400">Precio Base</p>
+                        <p class="text-base text-slate-900 dark:text-white">{{ ofertaAsociada.precioBase || 'N/A' }}</p> 
+                      </div>
+                      <div>
+                        <p class="font-semibold text-slate-500 dark:text-slate-400">Estado de Oferta</p>
+                        <p class="text-base text-slate-900 dark:text-white">{{ ofertaAsociada.estado }}</p>
+                      </div>
+                    </div>
+                  </div>
+
         <!-- Loading del modal -->
         <div *ngIf="loadingDetalle" class="flex items-center justify-center py-12">
           <div class="text-center">
@@ -277,6 +313,10 @@ export class OrganizadorReservasListComponent implements OnInit {
   loadingDetalle = false;
   reservaSeleccionada: Reserva | null = null;
   solicitudSeleccionada: Solicitud | null = null;
+    ofertaAsociada: Oferta | null = null;
+    loadingOferta = false;
+    errorOferta: string | null = null;
+
 
   get todasLasReservas(): Reserva[] {
     return this.reservas.sort((a, b) => new Date(b.fechaReservaInicio).getTime() - new Date(a.fechaReservaInicio).getTime());
@@ -286,6 +326,7 @@ export class OrganizadorReservasListComponent implements OnInit {
     private router: Router,
     private keycloak: KeycloakService,
     private reservasService: ReservasService,
+    private ofertasService: OfertasService,
     private cdr: ChangeDetectorRef,
     private noDispService: NoDisponibilidadesService
   ) {}
@@ -376,30 +417,64 @@ export class OrganizadorReservasListComponent implements OnInit {
     });
   }
 
-  verDetalle(reserva: Reserva): void {
-    this.reservaSeleccionada = reserva;
-    this.loadingDetalle = true;
-    this.mostrarModal = true;
+ verDetalle(reserva: Reserva): void {
+    this.reservaSeleccionada = reserva;
+    this.loadingDetalle = true;
+    this.mostrarModal = true;
+    
+    // Limpiar estados de oferta previos
+    this.ofertaAsociada = null;
+    this.loadingOferta = false;
+    this.errorOferta = null;
 
-    this.reservasService.getSolicitudByReservaId(reserva.idReserva).subscribe({
-      next: (solicitud: Solicitud) => {
-        this.solicitudSeleccionada = solicitud;
-        this.loadingDetalle = false;
-        this.cdr.detectChanges();
-      },
-      error: (err: any) => {
-        console.error('Error cargando solicitud:', err);
-        this.loadingDetalle = false;
-        this.cdr.detectChanges();
-      }
-    });
-  }
+
+    // 1. Obtener la Solicitud asociada a la Reserva
+    this.reservasService.getSolicitudByReservaId(reserva.idReserva).subscribe({
+      next: (solicitud: Solicitud) => {
+        this.solicitudSeleccionada = solicitud;
+        
+        // 2. Comprobar y cargar la Oferta
+        if (solicitud.idOferta) {
+          this.loadingOferta = true;
+          this.ofertasService.getOfertaById(solicitud.idOferta).subscribe({
+            next: (oferta: Oferta) => {
+              this.ofertaAsociada = oferta;
+              this.loadingOferta = false;
+              this.loadingDetalle = false;
+              this.cdr.detectChanges();
+            },
+            error: (err) => {
+              console.error('Error cargando oferta:', err);
+              this.errorOferta = 'Error al cargar la oferta asociada.';
+              this.loadingOferta = false;
+              this.loadingDetalle = false;
+              this.cdr.detectChanges();
+            }
+          });
+        } else {
+          // Si no hay oferta, solo actualizamos el estado de carga del detalle
+          this.loadingDetalle = false;
+          this.cdr.detectChanges();
+        }
+
+      },
+      error: (err: any) => {
+        console.error('Error cargando solicitud:', err);
+        this.loadingDetalle = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
 
   cerrarModal(): void {
-    this.mostrarModal = false;
-    this.reservaSeleccionada = null;
-    this.solicitudSeleccionada = null;
-  }
+    this.mostrarModal = false;
+    this.reservaSeleccionada = null;
+    this.solicitudSeleccionada = null;
+    // También limpiamos los estados de la oferta al cerrar el modal
+    this.ofertaAsociada = null;
+    this.errorOferta = null;
+    this.loadingOferta = false;
+  }
 
   irASolicitudes(): void {
     this.router.navigate(['/solicitudes/organizador']);

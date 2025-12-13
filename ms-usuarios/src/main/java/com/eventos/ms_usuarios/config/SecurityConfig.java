@@ -42,6 +42,7 @@ public class SecurityConfig {
         .authorizeHttpRequests(auth -> auth
             .requestMatchers("/openapi/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
             .requestMatchers("/actuator/health", "/actuator/info").permitAll()
+            .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
             .requestMatchers(HttpMethod.GET, "/usuarios", "/usuarios/**").authenticated()
             .requestMatchers(HttpMethod.POST, "/usuarios/**").hasAnyRole("ADMIN", "ORGANIZADOR")
             .requestMatchers(HttpMethod.DELETE, "/usuarios/**").hasAnyRole("ADMIN", "ORGANIZADOR")
