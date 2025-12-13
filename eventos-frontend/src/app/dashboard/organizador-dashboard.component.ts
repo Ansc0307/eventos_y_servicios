@@ -164,7 +164,7 @@ import { forkJoin } from 'rxjs';
                       <div *ngIf="proximasReservas.length > 0" class="flex flex-col gap-4">
                         <div *ngFor="let reserva of proximasReservas" 
                              class="flex items-start gap-4 p-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-lg">
-                          <div class="flex flex-col items-center justify-center p-3 w-16 h-16 bg-primary/20 text-primary rounded-lg">
+                          <div [class]="'flex flex-col items-center justify-center p-3 w-16 h-16 rounded-lg ' + getCalendarioBadgeClass(reserva.estado)">
                             <span class="text-sm font-bold uppercase">{{ getMonthName(reserva.fechaReservaInicio) }}</span>
                             <span class="text-2xl font-black">{{ getDay(reserva.fechaReservaInicio) }}</span>
                           </div>
@@ -306,9 +306,9 @@ export class OrganizadorDashboardComponent implements OnInit {
   }
 
   get reservasConfirmadas(): number {
-    // Contar reservas confirmadas y pendientes (todas las reservas activas)
+    // Contar solo reservas aprobadas y confirmadas
     return this.reservas.filter(r => 
-      r.estado?.toUpperCase() === 'CONFIRMADA' || r.estado?.toUpperCase() === 'PENDIENTE'
+      r.estado?.toUpperCase() === 'CONFIRMADA' || r.estado?.toUpperCase() === 'APROBADA'
     ).length;
   }
 
@@ -324,12 +324,12 @@ export class OrganizadorDashboardComponent implements OnInit {
       .slice(0, 3);
   }
 
-  // Próximas reservas (ordenadas por fecha de inicio) - incluye CONFIRMADA y PENDIENTE
+  // Próximas reservas (ordenadas por fecha de inicio) - incluye CONFIRMADA y APROBADA
   get proximasReservas(): Reserva[] {
     return this.reservas
       .filter(r => {
         const estadoUpper = r.estado?.toUpperCase() || '';
-        return estadoUpper === 'CONFIRMADA' || estadoUpper === 'PENDIENTE';
+        return estadoUpper === 'CONFIRMADA' || estadoUpper === 'APROBADA';
       })
       .sort((a, b) => new Date(a.fechaReservaInicio).getTime() - new Date(b.fechaReservaInicio).getTime())
       .slice(0, 3);
@@ -480,6 +480,18 @@ export class OrganizadorDashboardComponent implements OnInit {
   getDay(dateString: string): string {
     const date = new Date(dateString);
     return date.getDate().toString();
+  }
+
+  getCalendarioBadgeClass(estado: string): string {
+    const estadoUpper = estado?.toUpperCase() || '';
+    switch (estadoUpper) {
+      case 'APROBADA':
+        return 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300';
+      case 'CONFIRMADA':
+        return 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300';
+      default:
+        return 'bg-primary/20 text-primary';
+    }
   }
 
   buscarOfertas() {
