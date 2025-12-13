@@ -38,8 +38,25 @@
 
     <!-- Actions -->
     <div class="flex items-center gap-2">
-     
-      <button class="flex h-10 px-3 rounded-lg bg-border-light dark:bg-border-dark text-text-light dark:text-text-dark hover:bg-primary/20 transition-colors" (click)="logout()">
+      <a
+        *ngIf="!isLoggedIn"
+        class="flex h-10 items-center px-3 rounded-lg hover:bg-primary/20 text-sm font-medium text-text-light dark:text-text-dark"
+        routerLink="/registro"
+      >Registro</a>
+
+      <button
+        *ngIf="!isLoggedIn"
+        class="flex h-10 px-3 rounded-lg bg-border-light dark:bg-border-dark text-text-light dark:text-text-dark hover:bg-primary/20 transition-colors"
+        (click)="login()"
+      >
+        <span class="material-symbols-outlined">login</span>
+      </button>
+
+      <button
+        *ngIf="isLoggedIn"
+        class="flex h-10 px-3 rounded-lg bg-border-light dark:bg-border-dark text-text-light dark:text-text-dark hover:bg-primary/20 transition-colors"
+        (click)="logout()"
+      >
         <span class="material-symbols-outlined">logout</span>
       </button>
     </div>

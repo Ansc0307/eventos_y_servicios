@@ -14,24 +14,44 @@ import { NoDisponibilidadesListComponent } from './NoDisponibilidad/NoDisponibil
 import { ProveedorReservasListComponent } from './reservas/proveedor-reservas-list.component';
 import { ProveedorSolicitudesListComponent } from './solicitudes/proveedor-solicitudes-list.component';
 import { CalendarioDetalladoComponent } from './NoDisponibilidad/calendario_disponibilidad_prov';
+import { authGuard } from './auth/auth.guard';
+import { LandingComponent } from './auth/landing/landing.component';
 
 export const routes: Routes = [
-  { path: '', component: RoleDashboardComponent },
-  { path: 'dashboard', component: RoleDashboardComponent },
-  { path: 'dashboard/organizador', component: OrganizadorDashboardComponent },
-  { path: 'dashboard/proveedor', component: ProveedorDashboardComponent },
-  { path: 'proveedor/reservas', component: ProveedorReservasListComponent },
-  { path: 'proveedor/solicitudes', component: ProveedorSolicitudesListComponent },
-   { path: 'proveedor/no-disponibilidades', component: CalendarioDetalladoComponent },
+  // Ruta pública inicial
+  { path: '', component: LandingComponent },
+
+  // Ruta pública: registro (se consume /usuarios/auth/register)
+  {
+    path: 'registro',
+    loadComponent: () =>
+      import('./auth/registro/registro.component').then((m) => m.RegistroComponent)
+  },
+
+  // Rutas privadas (antes estaban implícitamente protegidas por login-required)
+  { path: 'dashboard', component: RoleDashboardComponent, canActivate: [authGuard] },
+  {
+    path: 'dashboard/organizador',
+    component: OrganizadorDashboardComponent,
+    canActivate: [authGuard]
+  },
+  {
+    path: 'dashboard/proveedor',
+    component: ProveedorDashboardComponent,
+    canActivate: [authGuard]
+  },
+  { path: 'proveedor/reservas', component: ProveedorReservasListComponent, canActivate: [authGuard] },
+  { path: 'proveedor/solicitudes', component: ProveedorSolicitudesListComponent, canActivate: [authGuard] },
+  { path: 'proveedor/no-disponibilidades', component: CalendarioDetalladoComponent, canActivate: [authGuard] },
   // Ruta legacy previa
-  { path: 'dashboard/legacy', component: DashboardComponent },
+  { path: 'dashboard/legacy', component: DashboardComponent, canActivate: [authGuard] },
 
   //rutas para notificaciones
   // Ruta principal de notificaciones
-  { path: 'ms-notificaciones', component: NotificacionesMainComponent },
-  { path: 'prioridades', component: PrioridadesListComponent },
-  { path: 'tipos-notificacion', component: TiposListComponent},
-  { path: 'notificaciones', component: NotificacionesListComponent },
+  { path: 'ms-notificaciones', component: NotificacionesMainComponent, canActivate: [authGuard] },
+  { path: 'prioridades', component: PrioridadesListComponent, canActivate: [authGuard] },
+  { path: 'tipos-notificacion', component: TiposListComponent, canActivate: [authGuard] },
+  { path: 'notificaciones', component: NotificacionesListComponent, canActivate: [authGuard] },
 
 //   { 
 //     path: 'usuarios', 
@@ -39,20 +59,27 @@ export const routes: Routes = [
 //   },
   { 
     path: 'reservas', 
-    component: ReservasListComponent 
+    component: ReservasListComponent,
+    canActivate: [authGuard]
   },
 
     { 
     path: 'solicitudes', 
-    component: SolicitudesListComponent 
+    component: SolicitudesListComponent,
+    canActivate: [authGuard]
   },
 
 { 
     path: 'no-disponibilidades', 
-    component: NoDisponibilidadesListComponent 
+    component: NoDisponibilidadesListComponent,
+    canActivate: [authGuard]
   },
 
-  { path: 'ofertas', loadComponent: () => import('./ofertas/oferta-list.component').then(m => m.OfertaListComponent) },
+  {
+    path: 'ofertas',
+    loadComponent: () => import('./ofertas/oferta-list.component').then(m => m.OfertaListComponent),
+    canActivate: [authGuard]
+  },
 //   { 
 //     path: 'ofertas', 
 //     loadChildren: () => import('./ofertas/ofertas.module').then(m => m.OfertasModule) 

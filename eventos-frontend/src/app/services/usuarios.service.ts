@@ -25,6 +25,16 @@ export class UsuariosService {
     return this.http.get<Usuario>('/usuarios/me');
   }
 
+  register(payload: {
+    nombre: string;
+    email: string;
+    password: string;
+    telefono: string | null;
+    rol: 'ORGANIZADOR' | 'PROVEEDOR';
+  }): Observable<Usuario> {
+    return this.http.post<Usuario>('/usuarios/auth/register', payload);
+  }
+
   listar(): Observable<Usuario[]> {
     return this.http.get<Usuario[]>(this.base);
   }
