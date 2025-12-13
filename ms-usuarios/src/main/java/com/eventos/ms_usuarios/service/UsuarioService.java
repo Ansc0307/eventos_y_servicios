@@ -20,6 +20,7 @@ import org.springframework.util.StringUtils;
 import com.eventos.ms_usuarios.model.RolUsuario;
 import com.eventos.ms_usuarios.exception.RecursoNoEncontradoException;
 import com.eventos.ms_usuarios.exception.PasswordDebilException;
+import java.util.Optional;
 
 @Service
 public class UsuarioService {
@@ -28,6 +29,25 @@ public class UsuarioService {
   private UsuarioRepository usuarioRepository;
   @Autowired
   private PasswordEncoder passwordEncoder;
+
+  @Autowired
+  private KeycloakUserInfoService keycloakUserInfoService;
+
+  @Transactional
+  public UsuarioDto obtenerMiUsuario(String keycloakId, String accessToken, Boolean emailVerifiedClaim) {
+    Usuario u = usuarioRepository.findByKeycloakId(keycloakId)
+        .orElseThrow(() -> new RecursoNoEncontradoException("Usuario", keycloakId));
+
+    Optional<Boolean> emailVerifiedFromUserInfo = keycloakUserInfoService.getEmailVerified(accessToken);
+    boolean emailVerified = emailVerifiedFromUserInfo.orElse(emailVerifiedClaim != null ? emailVerifiedClaim : false);
+
+    if (emailVerified && !u.isActivo()) {
+      u.setActivo(true);
+      u = usuarioRepository.save(u);
+    }
+
+    return toDto(u);
+  }
 
   @Transactional
   public UsuarioDto crearUsuario(UsuarioCreacionDto dto) {
@@ -49,71 +69,41 @@ public class UsuarioService {
       usuario.setActivo(dto.getActivo());
     }
     Usuario guardado = usuarioRepository.save(usuario);
-    UsuarioDto res = new UsuarioDto();
-    res.setId(guardado.getId());
-    res.setKeycloakId(guardado.getKeycloakId());
-    res.setNombre(guardado.getNombre());
-    res.setEmail(guardado.getEmail());
-    res.setTelefono(guardado.getTelefono());
-    res.setRol(guardado.getRol());
-    res.setActivo(guardado.isActivo());
-    res.setCreadoEn(guardado.getCreadoEn());
-    res.setActualizadoEn(guardado.getActualizadoEn());
-    return res;
+    return toDto(guardado);
   }
 
   @Transactional(readOnly = true)
   public UsuarioDto obtenerPorId(Long id) {
     Usuario u = usuarioRepository.findById(id)
         .orElseThrow(() -> new RecursoNoEncontradoException("Usuario", id));
-    UsuarioDto res = new UsuarioDto();
-    res.setId(u.getId());
-    res.setKeycloakId(u.getKeycloakId());
-    res.setNombre(u.getNombre());
-    res.setEmail(u.getEmail());
-    res.setTelefono(u.getTelefono());
-    res.setRol(u.getRol());
-    res.setActivo(u.isActivo());
-    res.setCreadoEn(u.getCreadoEn());
-    res.setActualizadoEn(u.getActualizadoEn());
-    return res;
+    return toDto(u);
   }
 
   @Transactional(readOnly = true)
   public List<UsuarioDto> listar() {
     return usuarioRepository.findAll().stream()
-        .map(u -> {
-          UsuarioDto d = new UsuarioDto();
-          d.setId(u.getId());
-          d.setKeycloakId(u.getKeycloakId());
-          d.setNombre(u.getNombre());
-          d.setEmail(u.getEmail());
-          d.setTelefono(u.getTelefono());
-          d.setRol(u.getRol());
-          d.setActivo(u.isActivo());
-          d.setCreadoEn(u.getCreadoEn());
-          d.setActualizadoEn(u.getActualizadoEn());
-          return d;
-        })
+        .map(this::toDto)
         .collect(Collectors.toList());
   }
 
   @Transactional(readOnly = true)
   public Page<UsuarioDto> listar(Pageable pageable) {
     return usuarioRepository.findAll(pageable)
-        .map(u -> {
-          UsuarioDto d = new UsuarioDto();
-          d.setId(u.getId());
-          d.setKeycloakId(u.getKeycloakId());
-          d.setNombre(u.getNombre());
-          d.setEmail(u.getEmail());
-          d.setTelefono(u.getTelefono());
-          d.setRol(u.getRol());
-          d.setActivo(u.isActivo());
-          d.setCreadoEn(u.getCreadoEn());
-          d.setActualizadoEn(u.getActualizadoEn());
-          return d;
-        });
+        .map(this::toDto);
+  }
+
+  private UsuarioDto toDto(Usuario u) {
+    UsuarioDto d = new UsuarioDto();
+    d.setId(u.getId());
+    d.setKeycloakId(u.getKeycloakId());
+    d.setNombre(u.getNombre());
+    d.setEmail(u.getEmail());
+    d.setTelefono(u.getTelefono());
+    d.setRol(u.getRol());
+    d.setActivo(u.isActivo());
+    d.setCreadoEn(u.getCreadoEn());
+    d.setActualizadoEn(u.getActualizadoEn());
+    return d;
   }
 
   @Transactional(readOnly = true)

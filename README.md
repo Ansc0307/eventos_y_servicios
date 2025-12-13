@@ -73,6 +73,19 @@ KEYCLOAK_SMTP_SSL=false
 
 Con esto, cuando registres un usuario y se dispare `execute-actions-email`, el correo debe aparecer en Mailpit.
 
+### ¿Para qué sirve el link de verificación?
+
+El link es un “action link” generado por Keycloak (incluye un token temporal). Sirve para:
+- Confirmar que el usuario **tiene acceso** a ese correo.
+- Marcar el usuario en Keycloak como `emailVerified=true`.
+
+Cómo sabes que sí funcionó:
+- Abres el correo en Mailpit y haces click en el link.
+- Keycloak muestra una pantalla tipo “Account updated / Email verified”.
+- Si luego entras al Admin Console, el usuario aparece con **Email verified = true**.
+
+Nota: hoy tu BD guarda `activo=false` hasta que implementemos el paso de “activación” (pendiente: `/usuarios/me`). Keycloak ya puede quedar verificado aunque la BD todavía no se actualice.
+
 ### Habilitar SMTP con Gmail
 
 Requisitos (Gmail):
@@ -118,6 +131,13 @@ Luego reinicia el stack:
 - `docker compose up -d --build`
 
 Si `KEYCLOAK_SMTP_HOST` está vacío, el init no configura SMTP y Keycloak no enviará correos.
+
+### Cambiar entre Mailpit (local) y Gmail (Internet)
+
+- Para DEV estable: deja Mailpit (`KEYCLOAK_SMTP_HOST=mailpit`) y revisa correos en `http://localhost:8025`.
+- Para probar entrega real por Internet: cambia `.env` a Gmail (smtp.gmail.com + App Password) y ejecuta:
+	- `docker compose up -d keycloak-init --force-recreate`
+	Luego registra un usuario con tu correo real y revisa Inbox/Spam.
 
 ### Troubleshooting (Gmail)
 
