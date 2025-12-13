@@ -17,6 +17,24 @@ export class UsuariosService {
 
   constructor(private http: HttpClient) {}
 
+  /**
+   * HU_5: sincroniza el usuario autenticado.
+   * Al llamar esto, el backend puede marcar activo=true si Keycloak ya tiene email_verified=true.
+   */
+  me(): Observable<Usuario> {
+    return this.http.get<Usuario>('/usuarios/me');
+  }
+
+  register(payload: {
+    nombre: string;
+    email: string;
+    password: string;
+    telefono: string | null;
+    rol: 'ORGANIZADOR' | 'PROVEEDOR';
+  }): Observable<Usuario> {
+    return this.http.post<Usuario>('/usuarios/auth/register', payload);
+  }
+
   listar(): Observable<Usuario[]> {
     return this.http.get<Usuario[]>(this.base);
   }
