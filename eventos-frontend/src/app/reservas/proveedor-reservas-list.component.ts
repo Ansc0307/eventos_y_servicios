@@ -8,6 +8,9 @@ import { ReservasService } from '../services/reservas.service';
 import { NoDisponibilidadesService } from '../services/no-disponibilidades.service';
 import { Reserva } from '../models/reserva.model';
 import { Solicitud } from '../models/solicitud.model';
+
+import { Oferta } from '../models/oferta.model';
+import { OfertasService } from '../services/ofertas.service';
 // import { forkJoin } from 'rxjs';
 
 @Component({
@@ -227,6 +230,49 @@ import { Solicitud } from '../models/solicitud.model';
                 
               </div>
             </div>
+             <!-- INFORMACIÓN OFERTA -->
+          <div *ngIf="solicitudSeleccionada?.idOferta"
+               class="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-6 border border-slate-200 dark:border-slate-700">
+
+            <div class="flex items-center gap-2 mb-4">
+              <span class="material-symbols-outlined text-primary">local_offer</span>
+              <h3 class="text-xl font-bold text-slate-900 dark:text-white">Información de la Oferta</h3>
+            </div>
+
+            <div *ngIf="loadingOferta" class="flex items-center gap-3">
+              <div class="animate-spin h-5 w-5 border-b-2 border-primary rounded-full"></div>
+              <span>Cargando oferta...</span>
+            </div>
+
+            <div *ngIf="errorOferta" class="text-red-600">
+              {{ errorOferta }}
+            </div>
+
+            <div *ngIf="oferta" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <p class="text-sm font-semibold text-slate-500">ID Oferta</p>
+                <p>#{{ oferta.id }}</p>
+              </div>
+
+              <div>
+                <p class="text-sm font-semibold text-slate-500">Título</p>
+                <p class="font-medium text-primary">{{ oferta.titulo }}</p>
+              </div>
+
+              <div>
+                <p class="text-sm font-semibold text-slate-500">Precio Base</p>
+                <p>{{ oferta.precioBase | currency }}</p>
+              </div>
+
+              <div>
+                <p class="text-sm font-semibold text-slate-500">Estado Oferta</p>
+                <span class="inline-flex px-3 py-1 rounded-full text-sm font-medium mt-1"
+                      [ngClass]="getEstadoClass(oferta.estado)">
+                  {{ getEstadoLabel(oferta.estado) }}
+                </span>
+              </div>
+            </div>
+          </div>
 
             <!-- Información de la Solicitud -->
             <div class="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-6 border border-slate-200 dark:border-slate-700">
@@ -363,21 +409,25 @@ export class ProveedorReservasListComponent implements OnInit {
   // Filtros
   filtroFecha: 'futuro' | 'todas' = 'futuro';
   filtroEstado: string = '';
-  
+    oferta: Oferta | null = null;
+  loadingOferta = false;
+  errorOferta: string | null = null;
 
   get todasLasReservas(): Reserva[] {
     return this.reservas
       .sort((a, b) => new Date(b.fechaReservaInicio).getTime() - new Date(a.fechaReservaInicio).getTime());
   }
 
-  constructor(
-    private router: Router,
-    private keycloak: KeycloakService,
-    private solicitudesService: SolicitudesService,
-    private reservasService: ReservasService,
-    private cdr: ChangeDetectorRef,
-    private noDispService: NoDisponibilidadesService
-  ) {}
+ constructor(
+    private router: Router,
+    private keycloak: KeycloakService,
+    private solicitudesService: SolicitudesService,
+    private reservasService: ReservasService,
+    private cdr: ChangeDetectorRef,
+    private noDispService: NoDisponibilidadesService,
+    // AÑADIR ESTA LÍNEA
+    private ofertasService: OfertasService 
+  ) {}
 
   ngOnInit(): void {
     try {
@@ -411,6 +461,24 @@ export class ProveedorReservasListComponent implements OnInit {
 
   volverDashboard(): void {
     this.router.navigate(['/dashboard/proveedor']);
+  }
+
+cargarOferta(idOferta: number) {
+    this.loadingOferta = true;
+    this.errorOferta = null;
+
+    this.ofertasService.getOfertaById(idOferta).subscribe({
+      next: (data) => {
+        this.oferta = data;
+        this.loadingOferta = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.errorOferta = 'No se pudo cargar la oferta';
+        this.loadingOferta = false;
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   getEstadoClass(estado: string): string {
@@ -471,35 +539,37 @@ export class ProveedorReservasListComponent implements OnInit {
     });
   }
 
-  verDetalle(reserva: Reserva): void {
-    console.log('verDetalle llamado con reserva:', reserva);
-    this.reservaSeleccionada = reserva;
-    this.loadingDetalle = true;
-    this.mostrarModal = true;
-    console.log('mostrarModal = true');
-    
-    // Cargar la solicitud asociada desde el endpoint de reservas
-    console.log('Cargando solicitud del servidor usando endpoint de reservas, ID reserva:', reserva.idReserva);
-    this.reservasService.getSolicitudByReservaId(reserva.idReserva).subscribe({
-      next: (solicitud) => {
-        console.log('Solicitud cargada del servidor:', solicitud);
-        this.solicitudSeleccionada = solicitud;
-        this.loadingDetalle = false;
-        this.cdr.detectChanges();
-      },
-      error: (err) => {
-        console.error('Error cargando solicitud:', err);
-        // Intentar con el método alternativo si falla
-        const solicitudMemoria = this.solicitudes.find(s => s.idSolicitud === reserva.idSolicitud);
-        if (solicitudMemoria) {
-          console.log('Usando solicitud de memoria como fallback');
-          this.solicitudSeleccionada = solicitudMemoria;
-        }
-        this.loadingDetalle = false;
-        this.cdr.detectChanges();
-      }
-    });
-  }
+ verDetalle(reserva: Reserva): void {
+    console.log('verDetalle llamado con reserva:', reserva);
+    this.reservaSeleccionada = reserva;
+    this.loadingDetalle = true;
+    this.mostrarModal = true;
+    // AÑADIR ESTAS LÍNEAS PARA LIMPIAR EL ESTADO DE OFERTA
+    this.oferta = null;
+    this.errorOferta = null;
+    
+    console.log('mostrarModal = true');
+    
+    // Cargar la solicitud asociada desde el endpoint de reservas
+    console.log('Cargando solicitud del servidor usando endpoint de reservas, ID reserva:', reserva.idReserva);
+    this.reservasService.getSolicitudByReservaId(reserva.idReserva).subscribe({
+      next: (solicitud) => {
+        console.log('Solicitud cargada del servidor:', solicitud);
+        this.solicitudSeleccionada = solicitud;
+
+        // AÑADIR ESTA LÓGICA PARA CARGAR LA OFERTA
+        if (solicitud.idOferta) {
+          this.cargarOferta(solicitud.idOferta);
+        }
+
+        this.loadingDetalle = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        // ... (el resto del código de error)
+      }
+    });
+  }
 
   cerrarModal(): void {
     this.mostrarModal = false;
