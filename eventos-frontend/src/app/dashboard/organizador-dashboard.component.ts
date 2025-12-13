@@ -135,6 +135,12 @@ import { forkJoin } from 'rxjs';
                               <span class="material-symbols-outlined !text-base">{{ getEstadoIcon(solicitud.estadoSolicitud) }}</span>
                               <span>{{ solicitud.estadoSolicitud }}</span>
                             </div>
+                            <div class="flex items-center gap-2 w-full sm:w-auto">
+                              <button (click)="verDetalleSolicitud(solicitud)"
+                                      class="text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary text-sm font-bold py-2 px-4 rounded-lg border border-slate-300 dark:border-slate-700">
+                                Ver Detalle
+                              </button>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -180,6 +186,110 @@ import { forkJoin } from 'rxjs';
       </main>
     </div>
   </div>
+
+  <!-- Modal Detalle Solicitud (simple, reusa estilo del proveedor) -->
+  <div *ngIf="modalVisible" (click)="cerrarModal()" 
+       class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div (click)="$event.stopPropagation()" 
+         class="bg-white dark:bg-slate-900 rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+      <!-- Header -->
+      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-primary/5">
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-3xl text-primary">description</span>
+          <div>
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Detalle de Solicitud</h2>
+            <p class="text-sm text-slate-500 dark:text-slate-400">Información completa</p>
+          </div>
+        </div>
+        <button (click)="cerrarModal()" 
+                class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
+          <span class="material-symbols-outlined text-slate-600 dark:text-slate-300">close</span>
+        </button>
+      </div>
+
+      <!-- Content -->
+      <div class="flex-1 overflow-y-auto p-6" *ngIf="selectedSolicitud">
+        <div class="space-y-6">
+          <!-- Información de la Solicitud -->
+          <div class="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-6 border border-slate-200 dark:border-slate-700">
+            <div class="flex items-center gap-2 mb-4">
+              <span class="material-symbols-outlined text-primary">description</span>
+              <h3 class="text-xl font-bold text-slate-900 dark:text-white">Información de la Solicitud</h3>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <p class="text-sm font-semibold text-slate-500 dark:text-slate-400">ID Solicitud</p>
+                <p class="text-base text-slate-900 dark:text-white">#{{ selectedSolicitud.idSolicitud }}</p>
+              </div>
+              <div>
+                <p class="text-sm font-semibold text-slate-500 dark:text-slate-400">Estado</p>
+                <span [class]="'inline-flex items-center px-3 py-1 rounded-full text-sm font-medium mt-1 ' + getEstadoClass(selectedSolicitud.estadoSolicitud)">
+                  {{ selectedSolicitud.estadoSolicitud }}
+                </span>
+              </div>
+              <div>
+                <p class="text-sm font-semibold text-slate-500 dark:text-slate-400">Fecha Solicitud</p>
+                <p class="text-base text-slate-900 dark:text-white">{{ formatDateLong(selectedSolicitud.fechaSolicitud) }}</p>
+              </div>
+              <div>
+                <p class="text-sm font-semibold text-slate-500 dark:text-slate-400">Organizador</p>
+                <p class="text-base text-slate-900 dark:text-white">#{{ selectedSolicitud.idOrganizador }}</p>
+              </div>
+              <div>
+                <p class="text-sm font-semibold text-slate-500 dark:text-slate-400">Proveedor</p>
+                <p class="text-base text-slate-900 dark:text-white">#{{ selectedSolicitud.idProovedor }}</p>
+              </div>
+              <div *ngIf="selectedSolicitud.idOferta">
+                <p class="text-sm font-semibold text-slate-500 dark:text-slate-400">Oferta</p>
+                <p class="text-base text-slate-900 dark:text-white">#{{ selectedSolicitud.idOferta }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Información de la Reserva asociada (si existe en memoria) -->
+          <div class="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-6 border border-slate-200 dark:border-slate-700">
+            <div class="flex items-center gap-2 mb-4">
+              <span class="material-symbols-outlined text-primary">event</span>
+              <h3 class="text-xl font-bold text-slate-900 dark:text-white">Reserva Asociada</h3>
+            </div>
+            <ng-container *ngIf="selectedReserva; else sinReservaDash">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <p class="text-sm font-semibold text-slate-500 dark:text-slate-400">ID Reserva</p>
+                  <p class="text-base text-slate-900 dark:text-white">#{{ selectedReserva.idReserva }}</p>
+                </div>
+                <div>
+                  <p class="text-sm font-semibold text-slate-500 dark:text-slate-400">Estado</p>
+                  <span [class]="'inline-flex items-center px-3 py-1 rounded-full text-sm font-medium mt-1 ' + getEstadoClass(selectedReserva.estado)">
+                    {{ getEstadoLabel(selectedReserva.estado) }}
+                  </span>
+                </div>
+                <div>
+                  <p class="text-sm font-semibold text-slate-500 dark:text-slate-400">Fecha Inicio</p>
+                  <p class="text-base text-slate-900 dark:text-white">{{ formatDateLong(selectedReserva.fechaReservaInicio) }}</p>
+                </div>
+                <div>
+                  <p class="text-sm font-semibold text-slate-500 dark:text-slate-400">Fecha Fin</p>
+                  <p class="text-base text-slate-900 dark:text-white">{{ formatDateLong(selectedReserva.fechaReservaFin) }}</p>
+                </div>
+              </div>
+            </ng-container>
+            <ng-template #sinReservaDash>
+              <p class="text-sm text-slate-600 dark:text-slate-400">No hay una reserva asociada cargada.</p>
+            </ng-template>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/30">
+        <button (click)="cerrarModal()" 
+                class="px-6 py-2.5 rounded-lg text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 font-semibold transition-colors">
+          Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
   `
 })
 export class OrganizadorDashboardComponent implements OnInit {
@@ -208,7 +318,10 @@ export class OrganizadorDashboardComponent implements OnInit {
 
   // Solicitudes recientes (últimas 3)
   get solicitudesRecientes(): Solicitud[] {
-    return this.solicitudes.slice(0, 3);
+    return this.solicitudes
+      .slice() // copia para no mutar
+      .sort((a, b) => new Date(b.fechaSolicitud).getTime() - new Date(a.fechaSolicitud).getTime())
+      .slice(0, 3);
   }
 
   // Próximas reservas (ordenadas por fecha de inicio) - incluye CONFIRMADA y PENDIENTE
@@ -220,6 +333,20 @@ export class OrganizadorDashboardComponent implements OnInit {
       })
       .sort((a, b) => new Date(a.fechaReservaInicio).getTime() - new Date(b.fechaReservaInicio).getTime())
       .slice(0, 3);
+  }
+
+  private normalizeReserva(r: any): Reserva {
+    const toNum = (v: any) => (v === null || v === undefined ? v : Number(v));
+    return {
+      ...r,
+      idReserva: toNum(r.idReserva),
+      idSolicitud: toNum(r.idSolicitud || r.id_solicitud || r.solicitudId),
+      estado: r.estado || r.estadoReserva || '',
+      fechaReservaInicio: r.fechaReservaInicio || r.fechaReserva || r.fechaInicio || '',
+      fechaReservaFin: r.fechaReservaFin || r.fechaReserva || r.fechaFin || '',
+      fechaCreacion: r.fechaCreacion || r.fecha_creacion || '',
+      fechaActualizacion: r.fechaActualizacion || r.fecha_actualizacion || ''
+    } as Reserva;
   }
 
   constructor(
@@ -243,7 +370,7 @@ export class OrganizadorDashboardComponent implements OnInit {
       console.log('Cargando reservas del organizador en dashboard (endpoint directo):', this.idOrganizador);
       this.reservasService.getByOrganizador(this.idOrganizador).subscribe({
         next: (reservas) => {
-          this.reservas = Array.isArray(reservas) ? reservas : [];
+          this.reservas = Array.isArray(reservas) ? reservas.map((r: any) => this.normalizeReserva(r)) : [];
           // Opcional: cargar solicitudes del organizador para métricas del dashboard
           this.solicitudesService.getByOrganizador(this.idOrganizador).subscribe({
             next: (solicitudes) => {
@@ -305,12 +432,43 @@ export class OrganizadorDashboardComponent implements OnInit {
     }
   }
 
+  getEstadoLabel(estado: string): string {
+    const estadoUpper = estado?.toUpperCase() || '';
+    switch (estadoUpper) {
+      case 'PENDIENTE':
+        return 'Pendiente';
+      case 'EN_NEGOCIACION':
+        return 'En Negociación';
+      case 'APROBADA':
+        return 'Aprobada';
+      case 'CONFIRMADA':
+        return 'Confirmada';
+      case 'RECHAZADA':
+        return 'Rechazada';
+      case 'CANCELADA':
+        return 'Cancelada';
+      default:
+        return estado || 'Desconocido';
+    }
+  }
+
   formatDate(dateString: string): string {
     const date = new Date(dateString);
     return date.toLocaleDateString('es-ES', { 
       day: '2-digit', 
       month: 'short',
       year: 'numeric'
+    });
+  }
+
+  formatDateLong(dateString: string): string {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('es-ES', {
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
     });
   }
 
@@ -326,6 +484,25 @@ export class OrganizadorDashboardComponent implements OnInit {
 
   buscarOfertas() {
     this.router.navigate(['/solicitud-reserva']);
+  }
+
+  // Modal de detalle de solicitud (simple)
+  modalVisible = false;
+  selectedSolicitud: Solicitud | null = null;
+  selectedReserva: Reserva | null = null;
+
+  verDetalleSolicitud(solicitud: Solicitud) {
+    this.selectedSolicitud = solicitud;
+    const idSolNum = Number(solicitud.idSolicitud);
+    // Busca la reserva asociada si ya está cargada
+    this.selectedReserva = this.reservas.find(r => Number(r.idSolicitud) === idSolNum) || null;
+    this.modalVisible = true;
+  }
+
+  cerrarModal() {
+    this.modalVisible = false;
+    this.selectedSolicitud = null;
+    this.selectedReserva = null;
   }
 
   // Navegación a listados completos
