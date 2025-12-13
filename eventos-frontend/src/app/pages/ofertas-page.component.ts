@@ -22,7 +22,8 @@ import { CategoriaFilterComponent } from '../components/categoria-filter/categor
 export class OfertasPageComponent implements OnInit {
 
   categorias: Categoria[] = [];
-  ofertas: Oferta[] = [];
+  ofertasOriginales: Oferta[] = []; // 🔹 TODAS
+  ofertas: Oferta[] = [];           
   selectedCategory: number | null = null;
 
   constructor(
@@ -43,19 +44,41 @@ export class OfertasPageComponent implements OnInit {
   }
 
   loadOfertas() {
-    this.ofertasService.getOfertas().subscribe((data: Oferta[]) => {
-      console.log('Ofertas recibidas (raw):', data);
-      this.ofertas = data || [];
-      console.log('Ofertas asignadas this.ofertas length=', this.ofertas.length);
-      // Force change detection in case something runs outside zone
-      try { this.cdr.detectChanges(); } catch (e) { /* noop */ }
-    }, (err) => {
+  this.ofertasService.getOfertas().subscribe({
+    next: (data: Oferta[]) => {
+      this.ofertasOriginales = data || [];
+      this.ofertas = [...this.ofertasOriginales]; // 👈 mostrar todo
+      this.selectedCategory = null;
+
+      try { this.cdr.detectChanges(); } catch {}
+    },
+    error: (err) => {
       console.error('Error cargando ofertas', err);
+      this.ofertasOriginales = [];
       this.ofertas = [];
-    });
+    }
+  });
+}
+
+
+ filterByCategory(catId: number) {
+  this.selectedCategory =
+    this.selectedCategory === catId ? null : catId;
+}
+aplicarFiltros() {
+
+  // Si no hay categoría, mostrar todo
+  if (this.selectedCategory === null) {
+    this.ofertas = [...this.ofertasOriginales];
+    return;
   }
 
-  filterByCategory(catId: number) {
-    this.selectedCategory = catId;
-  }
+  this.ofertas = this.ofertasOriginales.filter(
+    o => o.idCategoria === this.selectedCategory
+  );
+}
+limpiarFiltros() {
+  this.selectedCategory = null;
+  this.ofertas = [...this.ofertasOriginales];
+}
 }
