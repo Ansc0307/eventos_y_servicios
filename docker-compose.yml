@@ -1,6 +1,16 @@
 
 
 services:
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: mailpit
+    restart: unless-stopped
+    ports:
+      - "8025:8025" # UI
+      - "1025:1025" # SMTP
+    networks:
+      - eventos-net
+
   keycloak:
     image: quay.io/keycloak/keycloak:25.0.1
     command:
@@ -21,6 +31,25 @@ services:
       interval: 10s
       timeout: 5s
       retries: 6
+
+  keycloak-init:
+    image: quay.io/keycloak/keycloak:25.0.1
+    depends_on:
+      keycloak:
+        condition: service_healthy
+    env_file:
+      - ./.env
+    environment:
+      KEYCLOAK_BASE_URL: http://keycloak:8080
+      KEYCLOAK_REALM: eventos
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    volumes:
+      - ./keycloak/configure-smtp.sh:/opt/keycloak/configure-smtp.sh:ro
+    entrypoint: ["/bin/sh", "/opt/keycloak/configure-smtp.sh"]
+    networks:
+      - eventos-net
+    restart: "no"
 
   eureka-server:
     build:
