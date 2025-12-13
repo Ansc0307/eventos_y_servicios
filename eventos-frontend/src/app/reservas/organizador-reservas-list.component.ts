@@ -112,6 +112,13 @@ import { Reserva } from '../models/reserva.model';
               <p class="mt-4 text-slate-500 dark:text-slate-400">No hay reservas que coincidan con los filtros</p>
             </div>
             <div *ngIf="todasLasReservas.length > 0 && reservasFiltradas.length > 0" class="overflow-x-auto">
+              <!-- Mensaje informativo -->
+              <div class="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-400 p-4 mb-4">
+                <p class="text-sm text-blue-800 dark:text-blue-300">
+                  <span class="font-semibold">Nota:</span> Si deseas ver tus reservas pendientes, ve a 
+                  <a (click)="irASolicitudes()" class="underline hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer font-semibold">Mis Solicitudes</a>.
+                </p>
+              </div>
               <table class="w-full text-left">
                 <thead class="border-b border-slate-200 dark:border-slate-800">
                   <tr>
@@ -392,5 +399,9 @@ export class OrganizadorReservasListComponent implements OnInit {
     this.mostrarModal = false;
     this.reservaSeleccionada = null;
     this.solicitudSeleccionada = null;
+  }
+
+  irASolicitudes(): void {
+    this.router.navigate(['/solicitudes/organizador']);
   }
 }
