@@ -5,6 +5,7 @@ import { OfertasService } from '../services/ofertas.service';
 import { Oferta } from '../models/oferta.model';
 import { KeycloakService } from 'keycloak-angular';
 import { OfertaCardProveedorComponent } from '../components/oferta-card/oferta-card-proveedor.component';
+import { UsuariosService } from '../services/usuarios.service';
 
 @Component({
   selector: 'app-proveedor-ofertas-page',
@@ -20,26 +21,34 @@ export class ProveedorOfertasPageComponent implements OnInit {
 
   constructor(
     private ofertasService: OfertasService,
-    private keycloak: KeycloakService
-    , private cdr: ChangeDetectorRef
+    private keycloak: KeycloakService,
+    private usuariosService: UsuariosService,
+    private cdr: ChangeDetectorRef
   ) {}
-loadProveedorId() {
-  //const tokenParsed: any = this.keycloak.getKeycloakInstance().tokenParsed;
-  //console.log('ProveedorOfertasPage - tokenParsed:', tokenParsed);
-  this.idProveedor = 1; // <-- el proveedor que está logueado
-}
+  loadProveedorId(): void {
+    this.usuariosService.me().subscribe({
+      next: (u) => {
+        this.idProveedor = u.id;
+        this.loadMisOfertas();
+      },
+      error: (err) => {
+        console.error('No se pudo obtener el usuario actual (/usuarios/me).', err);
+        this.idProveedor = 0;
+        this.loading = false;
+        try { this.cdr.detectChanges(); } catch { /* ignore */ }
+      }
+    });
+  }
 
   async ngOnInit(): Promise<void> {
-  await this.keycloak.isLoggedIn();
+    const loggedIn = await this.keycloak.isLoggedIn();
+    if (!loggedIn) {
+      console.warn('Usuario no autenticado, no se cargan ofertas del proveedor');
+      this.loading = false;
+      return;
+    }
 
-  this.loadProveedorId();
-
-  if (this.idProveedor > 0) {
-    this.loadMisOfertas();
-  } else {
-    console.warn('Proveedor ID inválido, no se cargan ofertas');
-    this.loading = false;
-  }
+    this.loadProveedorId();
 }
 
 

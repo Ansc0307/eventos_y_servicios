@@ -7,6 +7,7 @@ import { SolicitudReservaFormComponent } from '../solicitudes/solicitud-reserva-
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Descuento } from '../models/descuento.model';
 import { KeycloakService } from 'keycloak-angular';
+import { UsuariosService } from '../services/usuarios.service';
 
 @Component({
   selector: 'app-oferta-detalle',
@@ -31,7 +32,7 @@ export class OfertaDetalleComponent implements OnInit {
   // ESTADO DE USUARIO
   isLoggedIn = false;
   esProveedor = false;
-  usuarioIdActual: number = 1; // ID Hardcodeado temporalmente para pruebas
+  usuarioIdActual?: number;
 
   puedeEditar = false;
   mostrarModalDescuento = false;
@@ -43,7 +44,8 @@ export class OfertaDetalleComponent implements OnInit {
     private descuentosService: DescuentosService,
     private cdr: ChangeDetectorRef,
     private fb: FormBuilder,
-    private keycloak: KeycloakService
+    private keycloak: KeycloakService,
+    private usuariosService: UsuariosService
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -70,7 +72,24 @@ export class OfertaDetalleComponent implements OnInit {
     this.idOfertaActual = isNaN(id) ? undefined : id;
 
     if (this.idOfertaActual) {
-      this.cargarOferta();
+      // Si hay sesión, primero obtenemos el ID real del usuario.
+      // Eso evita comparar contra un hardcode y define bien si puede editar.
+      if (this.isLoggedIn) {
+        this.usuariosService.me().subscribe({
+          next: (u) => {
+            this.usuarioIdActual = u.id;
+            this.cargarOferta();
+          },
+          error: (err) => {
+            console.error('No se pudo obtener el usuario actual (/usuarios/me).', err);
+            // Igual cargamos la oferta, pero no podrá editar.
+            this.usuarioIdActual = undefined;
+            this.cargarOferta();
+          }
+        });
+      } else {
+        this.cargarOferta();
+      }
     }
     
     this.initForm();
@@ -95,11 +114,12 @@ export class OfertaDetalleComponent implements OnInit {
         
         console.log('--- DEPURACIÓN PERMISOS ---');
         console.log('ID Proveedor en Oferta:', data.proveedorId, typeof data.proveedorId);
-        console.log('ID Usuario Actual (Hardcode):', this.usuarioIdActual, typeof this.usuarioIdActual);
+        console.log('ID Usuario Actual:', this.usuarioIdActual, typeof this.usuarioIdActual);
         console.log('Rol Proveedor:', this.esProveedor);
 
-        // COMPARACIÓN SEGURA (Convierte ambos a String para comparar)
-        const sonElMismoId = String(data.proveedorId) === String(this.usuarioIdActual);
+        const sonElMismoId =
+          this.usuarioIdActual !== undefined &&
+          String(data.proveedorId) === String(this.usuarioIdActual);
 
         this.puedeEditar = this.isLoggedIn && this.esProveedor && sonElMismoId;
         

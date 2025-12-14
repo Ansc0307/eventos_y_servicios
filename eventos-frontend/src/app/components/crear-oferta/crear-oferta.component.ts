@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { OfertasService } from '../../services/ofertas.service';
 import { CategoriasService } from '../../services/categorias.service';
+import { UsuariosService } from '../../services/usuarios.service';
 import { Categoria } from '../../models/categoria.model';
 import { Oferta } from '../../models/oferta.model';
 
@@ -23,12 +24,13 @@ export class CrearOfertaComponent implements OnInit {
     private fb: FormBuilder,
     private ofertasService: OfertasService,
     private categoriasService: CategoriasService,
+    private usuariosService: UsuariosService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
     this.ofertaForm = this.fb.group({
-      proveedorId: [1, Validators.required],
+      proveedorId: [null, Validators.required],
       titulo: ['', Validators.required],
       descripcion: ['', Validators.required],
 
@@ -38,6 +40,16 @@ export class CrearOfertaComponent implements OnInit {
       precioBase: [null, Validators.required],
       estado: ['publicado'],
       activo: [true]
+    });
+
+    // Quita hardcode: toma el ID numérico del usuario autenticado desde ms-usuarios.
+    // (Este endpoint ya sincroniza HU_5 por detrás.)
+    this.usuariosService.me().subscribe({
+      next: (u) => this.ofertaForm.patchValue({ proveedorId: u.id }),
+      error: (err) => {
+        console.error('No se pudo obtener el usuario actual (/usuarios/me).', err);
+        // Dejamos proveedorId en null para que el form no pase validación.
+      }
     });
 
     this.cargarCategorias();
@@ -109,7 +121,7 @@ crearOferta() {
     
     // Opción A: Limpiar formulario
     this.ofertaForm.reset({
-      proveedorId: 1, 
+      proveedorId: this.ofertaForm.get('proveedorId')?.value ?? null,
       estado: 'publicado', 
       activo: true 
     });
