@@ -53,6 +53,27 @@ public class UsuarioController {
     return ResponseEntity.ok(usuarioService.obtenerMiUsuario(sub, accessToken, emailVerifiedClaim));
   }
 
+  @Operation(summary = "Actualizar mi usuario (parcial)", description = "Actualiza parcialmente el usuario autenticado: nombre y teléfono")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Usuario actualizado"),
+      @ApiResponse(responseCode = "400", description = "Datos inválidos"),
+      @ApiResponse(responseCode = "401", description = "No autenticado. Debe enviar Bearer token"),
+      @ApiResponse(responseCode = "404", description = "Usuario no encontrado en BD para ese sub")
+  })
+  @PatchMapping("/me")
+  @PreAuthorize("isAuthenticated()")
+  @SecurityRequirement(name = "bearerAuth")
+  public ResponseEntity<UsuarioDto> actualizarMiUsuario(
+      JwtAuthenticationToken authentication,
+      @Valid @org.springframework.web.bind.annotation.RequestBody UsuarioActualizacionDto dto) {
+    String sub = authentication.getToken().getSubject();
+    // Seguridad: ignorar cualquier intento de cambiar rol desde /me
+    if (dto.getRol() != null) {
+      dto.setRol(null);
+    }
+    return ResponseEntity.ok(usuarioService.actualizarMiUsuario(sub, dto));
+  }
+
   @Operation(summary = "Crear usuario", description = "Crea un nuevo usuario")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "201", description = "Usuario creado"),

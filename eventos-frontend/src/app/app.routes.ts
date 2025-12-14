@@ -39,6 +39,13 @@ export const routes: Routes = [
 
   // Rutas privadas
   { path: 'dashboard', component: RoleDashboardComponent, canActivate: [authGuard] },
+
+  {
+    path: 'usuarios',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./pages/perfil-usuario-page.component').then((m) => m.PerfilUsuarioPageComponent)
+  },
   {
     path: 'dashboard/organizador',
     component: OrganizadorDashboardComponent,

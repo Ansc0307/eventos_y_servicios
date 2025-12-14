@@ -6,6 +6,7 @@ import { SolicitudesService } from '../services/solicitudes.service';
 // 🟢 Servicios y Tipos del detalle avanzado
 import { ReservasService } from '../services/reservas.service';
 import { OfertasService } from '../services/ofertas.service';
+import { UsuariosService } from '../services/usuarios.service';
 import { Oferta } from '../models/oferta.model'; 
 import { Solicitud } from '../models/solicitud.model';
 // -----------------------------------------------------
@@ -333,7 +334,7 @@ export class ProveedorSolicitudesListComponent implements OnInit {
   loading = true;
   error: string | null = null;
   userName = '';
-  idProveedor = 1;
+  idProveedor: number | null = null;
 
   // 🟢 Propiedades del modal de detalle
   mostrarModal = false;
@@ -355,6 +356,7 @@ export class ProveedorSolicitudesListComponent implements OnInit {
   constructor(
     private router: Router,
     private keycloak: KeycloakService,
+    private usuariosService: UsuariosService,
     private solicitudesService: SolicitudesService,
     // 🟢 Inyectar servicios de detalle
     private reservasService: ReservasService,
@@ -367,9 +369,28 @@ export class ProveedorSolicitudesListComponent implements OnInit {
     try {
       const tokenParsed = this.keycloak.getKeycloakInstance().tokenParsed;
       this.userName = tokenParsed?.['preferred_username'] || tokenParsed?.['name'] || 'Proveedor';
-      this.idProveedor = 1;
 
-      this.fetchSolicitudes();
+      this.loading = true;
+      this.usuariosService.me().subscribe({
+        next: (me) => {
+          const id = (me as any)?.id as number | undefined;
+          if (!id) {
+            this.error = 'No se pudo obtener el id del proveedor (GET /usuarios/me no devolvió id).';
+            this.loading = false;
+            this.cdr.detectChanges();
+            return;
+          }
+
+          this.idProveedor = id;
+          this.fetchSolicitudes();
+        },
+        error: (err) => {
+          console.error(err);
+          this.error = 'Error al obtener el usuario autenticado';
+          this.loading = false;
+          this.cdr.detectChanges();
+        }
+      });
     } catch (err) {
       console.error(err);
       this.error = 'Error al inicializar';
@@ -381,6 +402,13 @@ export class ProveedorSolicitudesListComponent implements OnInit {
   fetchSolicitudes() {
       this.loading = true;
       this.error = null;
+
+      if (!this.idProveedor) {
+        this.error = 'No se pudo obtener el id del proveedor.';
+        this.loading = false;
+        this.cdr.detectChanges();
+        return;
+      }
 
       this.solicitudesService.getByProveedor(this.idProveedor).subscribe({
         next: (data) => {

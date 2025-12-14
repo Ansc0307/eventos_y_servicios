@@ -50,6 +50,23 @@ public class UsuarioService {
   }
 
   @Transactional
+  public UsuarioDto actualizarMiUsuario(String keycloakId, UsuarioActualizacionDto dto) {
+    Usuario u = usuarioRepository.findByKeycloakId(keycloakId)
+        .orElseThrow(() -> new RecursoNoEncontradoException("Usuario", keycloakId));
+
+    // Un usuario normal solo puede actualizar sus propios datos básicos.
+    if (dto.getNombre() != null) {
+      u.setNombre(dto.getNombre());
+    }
+    if (dto.getTelefono() != null) {
+      u.setTelefono(dto.getTelefono());
+    }
+
+    Usuario guardado = usuarioRepository.save(u);
+    return toDto(guardado);
+  }
+
+  @Transactional
   public UsuarioDto crearUsuario(UsuarioCreacionDto dto) {
     // Validación sencilla: email único
     if (usuarioRepository.existsByEmail(dto.getEmail())) {
