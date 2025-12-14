@@ -1,5 +1,6 @@
 package com.eventos.ms_usuarios.controller;
 
+import com.eventos.ms_usuarios.dto.UsuarioActualizacionDto;
 import com.eventos.ms_usuarios.dto.UsuarioDto;
 import com.eventos.ms_usuarios.service.UsuarioService;
 
@@ -13,7 +14,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RestController;
+import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 @Tag(name = "Usuario", description = "REST API para usuarios")
@@ -40,5 +44,26 @@ public class MeController {
     } catch (Exception ignore) {
     }
     return ResponseEntity.ok(usuarioService.obtenerMiUsuario(sub, accessToken, emailVerifiedClaim));
+  }
+
+  @Operation(summary = "Actualizar mi usuario (parcial)", description = "Actualiza parcialmente el usuario autenticado: nombre y teléfono")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Operación exitosa"),
+      @ApiResponse(responseCode = "400", description = "Datos inválidos"),
+      @ApiResponse(responseCode = "401", description = "No autenticado. Debe enviar Bearer token"),
+      @ApiResponse(responseCode = "404", description = "Usuario no encontrado en BD para ese sub")
+  })
+  @PatchMapping("/me")
+  @PreAuthorize("isAuthenticated()")
+  @SecurityRequirement(name = "bearerAuth")
+  public ResponseEntity<UsuarioDto> actualizarMiUsuario(
+      JwtAuthenticationToken authentication,
+      @Valid @RequestBody UsuarioActualizacionDto dto) {
+    String sub = authentication.getToken().getSubject();
+    // Seguridad: desde /me no se permite cambiar rol
+    if (dto.getRol() != null) {
+      dto.setRol(null);
+    }
+    return ResponseEntity.ok(usuarioService.actualizarMiUsuario(sub, dto));
   }
 }
