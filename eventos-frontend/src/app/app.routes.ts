@@ -60,7 +60,11 @@ export const routes: Routes = [
   //rutas para notificaciones
   // Ruta principal de notificaciones
 
-  { path: 'notifications', component: NotificationsPageComponent },
+  { 
+    path: 'notifications', 
+    component: NotificationsPageComponent,
+    canActivate: [authGuard]
+  },
   //estos de aquí abajo eran para el 3er parcial, luego borrarlos!!
   { path: 'ms-notificaciones', component: NotificacionesMainComponent },
   { path: 'prioridades', component: PrioridadesListComponent },

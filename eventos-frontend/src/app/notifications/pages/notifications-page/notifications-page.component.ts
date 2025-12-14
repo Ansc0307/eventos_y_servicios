@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject, takeUntil } from 'rxjs';
 import { NotificacionesService } from '../../../services/notificaciones.service';
+import { UsuariosService } from '../../../services/usuarios.service'; // <-- AGREGAR ESTO
 import { Notificacion, NotificacionCreate } from '../../../models/notifications/notification.model';
 import { Prioridad } from '../../../models/notifications/prioridad.model';
 import { TipoNotificacion } from '../../../models/notifications/tipo-notificacion.model';
@@ -23,7 +24,6 @@ import { ModalNotificacionComponent } from '../../components/modal-notification/
     ModalNotificacionComponent 
   ],
   templateUrl: './notifications-page.component.html',
-  //styleUrls: ['./notifications-page.component.css']
 })
 export class NotificationsPageComponent implements OnInit, OnDestroy {
   notificaciones: Notificacion[] = [];
@@ -39,6 +39,9 @@ export class NotificationsPageComponent implements OnInit, OnDestroy {
   prioridades: Prioridad[] = [];
   tipos: TipoNotificacion[] = [];
   
+  // ID del usuario logueado (inicializar en 0 como tus compañeros)
+  usuarioId: number = 0; // <-- AGREGAR ESTO
+  
   // Filtros
   filtros = {
     leido: null as boolean | null,
@@ -50,11 +53,12 @@ export class NotificationsPageComponent implements OnInit, OnDestroy {
 
   constructor(
     private notificacionesService: NotificacionesService,
+    private usuariosService: UsuariosService, // <-- AGREGAR ESTO
     private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
-    this.cargarNotificaciones();
+    this.cargarUsuarioYNotificaciones(); // <-- CAMBIAR NOMBRE
     this.cargarDatosModales();
   }
 
@@ -63,34 +67,62 @@ export class NotificationsPageComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  cargarNotificaciones(): void {
+  // NUEVO MÉTODO: Cargar usuario primero
+  cargarUsuarioYNotificaciones(): void {
     this.isLoading = true;
     this.error = null;
     this.cdr.detectChanges();
     
-    console.log('Cargando notificaciones...');
+    console.log('🔄 Obteniendo usuario desde /me...');
     
-    this.notificacionesService.getNotificacionesPorUsuario()
+    this.usuariosService.me()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (user) => {
+          this.usuarioId = user.id; // <-- ASIGNAR ID REAL
+          console.log('✅ Usuario obtenido desde /me:', this.usuarioId);
+          
+          // Una vez tenemos el usuario, cargamos sus notificaciones
+          this.cargarNotificaciones();
+        },
+        error: (err) => {
+          console.error('❌ Error obteniendo usuario:', err);
+          this.error = 'No se pudo obtener la información del usuario';
+          this.isLoading = false;
+          this.cdr.detectChanges();
+        }
+      });
+  }
+
+  cargarNotificaciones(): void {
+    if (!this.usuarioId || this.usuarioId === 0) {
+      console.log('⚠️ No hay usuarioId, esperando...');
+      return;
+    }
+
+    this.isLoading = true;
+    this.error = null;
+    this.cdr.detectChanges();
+    
+    console.log('🔄 Cargando notificaciones para usuario:', this.usuarioId);
+    
+    // CAMBIAR: Agregar this.usuarioId como parámetro
+    this.notificacionesService.getNotificacionesPorUsuario(this.usuarioId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (data) => {
-          console.log('Notificaciones cargadas:', data);
+          console.log('✅ Notificaciones cargadas:', data);
           this.notificaciones = data || [];
           this.aplicarFiltros();
           this.isLoading = false;
           this.cdr.detectChanges();
         },
         error: (err) => {
-          console.error('Error al cargar notificaciones:', err);
+          console.error('❌ Error al cargar notificaciones:', err);
           this.error = this.obtenerMensajeError(err);
           this.isLoading = false;
           this.notificaciones = [];
           this.filteredNotificaciones = [];
-          this.cdr.detectChanges();
-        },
-        complete: () => {
-          console.log('Carga completada');
-          this.isLoading = false;
           this.cdr.detectChanges();
         }
       });
@@ -158,7 +190,7 @@ export class NotificationsPageComponent implements OnInit, OnDestroy {
   }
 
   recargarNotificaciones(): void {
-    this.cargarNotificaciones();
+    this.cargarUsuarioYNotificaciones(); // <-- CAMBIAR: Recargar usuario también
   }
 
   onMarcarComoLeida(id: number): void {
@@ -253,6 +285,11 @@ export class NotificationsPageComponent implements OnInit, OnDestroy {
   // ========== MÉTODOS PARA EL MODAL PERSONALIZADO ==========
 
   onCrearNotificacion(): void {
+    if (!this.usuarioId || this.usuarioId === 0) {
+      this.mostrarSweetAlert('error', 'Error', 'No se pudo identificar al usuario');
+      return;
+    }
+    
     if (this.prioridades.length === 0 || this.tipos.length === 0) {
       this.mostrarSweetAlert('warning', 'Espera', 'Cargando datos, por favor espera...');
       return;
@@ -269,13 +306,19 @@ export class NotificationsPageComponent implements OnInit, OnDestroy {
   }
 
   crearNotificacion(formData: any): void {
+    if (!this.usuarioId || this.usuarioId === 0) {
+      this.mostrarSweetAlert('error', 'Error', 'Usuario no identificado');
+      return;
+    }
+
     this.creandoNotificacion = true;
     this.cdr.detectChanges();
 
+    // CAMBIAR: Usar this.usuarioId en lugar de 1
     const nuevaNotificacion: NotificacionCreate = {
       asunto: formData.asunto,
       mensaje: formData.mensaje,
-      userId: 1, // TODO: Obtener del servicio de autenticación
+      userId: this.usuarioId, // <-- CAMBIAR AQUÍ
       prioridad: { id: formData.prioridadId },
       tipoNotificacion: { id: formData.tipoId }
     };
