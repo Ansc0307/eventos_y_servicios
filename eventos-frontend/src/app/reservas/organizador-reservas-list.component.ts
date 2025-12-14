@@ -5,6 +5,7 @@ import { Router, RouterLink } from '@angular/router';
 import { KeycloakService } from 'keycloak-angular';
 import { ReservasService } from '../services/reservas.service';
 import { OfertasService } from '../services/ofertas.service'; // 🟢 Importar OfertasService
+import { UsuariosService } from '../services/usuarios.service';
 import { Solicitud } from '../models/solicitud.model';
 import { Oferta } from '../models/oferta.model';
 import { NoDisponibilidadesService } from '../services/no-disponibilidades.service';
@@ -306,7 +307,7 @@ export class OrganizadorReservasListComponent implements OnInit {
   loading = true;
   error: string | null = null;
   userName = '';
-  idOrganizador = 14;
+  idOrganizador: number | null = null;
   filtroFecha: 'futuro' | 'todas' = 'futuro';
   filtroEstado: string = '';
   mostrarModal = false;
@@ -325,6 +326,7 @@ export class OrganizadorReservasListComponent implements OnInit {
   constructor(
     private router: Router,
     private keycloak: KeycloakService,
+    private usuariosService: UsuariosService,
     private reservasService: ReservasService,
     private ofertasService: OfertasService,
     private cdr: ChangeDetectorRef,
@@ -335,20 +337,39 @@ export class OrganizadorReservasListComponent implements OnInit {
     try {
       const tokenParsed = this.keycloak.getKeycloakInstance().tokenParsed;
       this.userName = tokenParsed?.['preferred_username'] || tokenParsed?.['name'] || 'Organizador';
-      this.idOrganizador = 14;
 
-      this.reservasService.getByOrganizador(this.idOrganizador).subscribe({
-        next: (reservas: Reserva[]) => {
-          // Excluir reservas en estado PENDIENTE
-          const filtradas = (Array.isArray(reservas) ? reservas : []).filter(r => (r.estado || '').toUpperCase() !== 'PENDIENTE');
-          this.reservas = filtradas;
-          this.aplicarFiltros();
-          this.loading = false;
-          this.cdr.detectChanges();
+      this.loading = true;
+      this.usuariosService.me().subscribe({
+        next: (me) => {
+          const id = (me as any)?.id as number | undefined;
+          if (!id) {
+            this.error = 'No se pudo obtener el id del organizador (GET /usuarios/me no devolvió id).';
+            this.loading = false;
+            this.cdr.detectChanges();
+            return;
+          }
+
+          this.idOrganizador = id;
+          this.reservasService.getByOrganizador(id).subscribe({
+            next: (reservas: Reserva[]) => {
+              // Excluir reservas en estado PENDIENTE
+              const filtradas = (Array.isArray(reservas) ? reservas : []).filter(r => (r.estado || '').toUpperCase() !== 'PENDIENTE');
+              this.reservas = filtradas;
+              this.aplicarFiltros();
+              this.loading = false;
+              this.cdr.detectChanges();
+            },
+            error: (err: any) => {
+              console.error('Error cargando reservas del organizador:', err);
+              this.error = 'Error al cargar las reservas del organizador: ' + (err.message || err.statusText || 'Error desconocido');
+              this.loading = false;
+              this.cdr.detectChanges();
+            }
+          });
         },
         error: (err: any) => {
-          console.error('Error cargando reservas del organizador:', err);
-          this.error = 'Error al cargar las reservas del organizador: ' + (err.message || err.statusText || 'Error desconocido');
+          console.error('Error obteniendo usuario actual (/usuarios/me):', err);
+          this.error = 'Error al obtener el usuario autenticado: ' + (err.message || err.statusText || 'Error desconocido');
           this.loading = false;
           this.cdr.detectChanges();
         }

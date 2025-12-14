@@ -5,6 +5,7 @@ import { KeycloakService } from 'keycloak-angular';
 import { SolicitudesService } from '../services/solicitudes.service';
 import { ReservasService } from '../services/reservas.service';
 import { OfertasService } from '../services/ofertas.service'; // 🟢 Importar OfertasService
+import { UsuariosService } from '../services/usuarios.service';
 import { Solicitud } from '../models/solicitud.model';
 import { Oferta } from '../models/oferta.model'; 
 import { Reserva } from '../models/reserva.model';
@@ -334,7 +335,7 @@ export class OrganizadorDashboardComponent implements OnInit {
   loading = true;
   error: string | null = null;
   userName = '';
-  idOrganizador = 14; // Por defecto, se puede obtener del backend más adelante
+  idOrganizador: number | null = null;
 
 mostrarModal = false;
   loadingDetalle = false;
@@ -397,6 +398,7 @@ mostrarModal = false;
 
   constructor(
     private keycloak: KeycloakService,
+    private usuariosService: UsuariosService,
     private solicitudesService: SolicitudesService,
     private reservasService: ReservasService,
     private cdr: ChangeDetectorRef,
@@ -409,32 +411,50 @@ mostrarModal = false;
       // Obtener nombre de usuario desde Keycloak (sin cargar perfil completo)
       const tokenParsed = this.keycloak.getKeycloakInstance().tokenParsed;
       this.userName = tokenParsed?.['preferred_username'] || tokenParsed?.['name'] || 'Usuario';
-      
-      // Por ahora usamos un ID fijo. TODO: Obtener del backend según el usuario autenticado
-      this.idOrganizador = 14;
 
-      // Cargar reservas del organizador directamente (nuevo endpoint)
-      console.log('Cargando reservas del organizador en dashboard (endpoint directo):', this.idOrganizador);
-      this.reservasService.getByOrganizador(this.idOrganizador).subscribe({
-        next: (reservas) => {
-          this.reservas = Array.isArray(reservas) ? reservas.map((r: any) => this.normalizeReserva(r)) : [];
-          // Opcional: cargar solicitudes del organizador para métricas del dashboard
-          this.solicitudesService.getByOrganizador(this.idOrganizador).subscribe({
-            next: (solicitudes) => {
-              this.solicitudes = Array.isArray(solicitudes) ? solicitudes : [];
-              this.loading = false;
-              this.cdr.detectChanges();
+      this.loading = true;
+      this.usuariosService.me().subscribe({
+        next: (me) => {
+          const id = (me as any)?.id as number | undefined;
+          if (!id) {
+            this.error = 'No se pudo obtener el id del organizador (GET /usuarios/me no devolvió id).';
+            this.loading = false;
+            this.cdr.detectChanges();
+            return;
+          }
+
+          this.idOrganizador = id;
+
+          // Cargar reservas del organizador directamente (nuevo endpoint)
+          console.log('Cargando reservas del organizador en dashboard (endpoint directo):', id);
+          this.reservasService.getByOrganizador(id).subscribe({
+            next: (reservas) => {
+              this.reservas = Array.isArray(reservas) ? reservas.map((r: any) => this.normalizeReserva(r)) : [];
+              // Opcional: cargar solicitudes del organizador para métricas del dashboard
+              this.solicitudesService.getByOrganizador(id).subscribe({
+                next: (solicitudes) => {
+                  this.solicitudes = Array.isArray(solicitudes) ? solicitudes : [];
+                  this.loading = false;
+                  this.cdr.detectChanges();
+                },
+                error: () => {
+                  // Si falla la carga de solicitudes, seguimos mostrando reservas
+                  this.loading = false;
+                  this.cdr.detectChanges();
+                }
+              });
             },
-            error: () => {
-              // Si falla la carga de solicitudes, seguimos mostrando reservas
+            error: (err) => {
+              console.error('Error cargando reservas del organizador en dashboard:', err);
+              this.error = 'Error al cargar las reservas: ' + (err.message || err.statusText || 'Error desconocido');
               this.loading = false;
               this.cdr.detectChanges();
             }
           });
         },
         error: (err) => {
-          console.error('Error cargando reservas del organizador en dashboard:', err);
-          this.error = 'Error al cargar las reservas: ' + (err.message || err.statusText || 'Error desconocido');
+          console.error('Error obteniendo usuario actual (/usuarios/me):', err);
+          this.error = 'Error al obtener el usuario autenticado: ' + (err.message || err.statusText || 'Error desconocido');
           this.loading = false;
           this.cdr.detectChanges();
         }

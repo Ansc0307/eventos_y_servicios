@@ -9,6 +9,7 @@ import { NoDisponibilidadesService } from '../services/no-disponibilidades.servi
 import { Reserva } from '../models/reserva.model';
 import { Solicitud } from '../models/solicitud.model';
 
+import { UsuariosService } from '../services/usuarios.service';
 import { Oferta } from '../models/oferta.model';
 import { OfertasService } from '../services/ofertas.service';
 // import { forkJoin } from 'rxjs';
@@ -396,7 +397,7 @@ export class ProveedorReservasListComponent implements OnInit {
   loading = true;
   error: string | null = null;
   userName = '';
-  idProveedor = 1;
+  idProveedor: number | null = null;
   mostrarModal = false;
   loadingDetalle = false;
   reservaSeleccionada: Reserva | null = null;
@@ -421,6 +422,7 @@ export class ProveedorReservasListComponent implements OnInit {
  constructor(
     private router: Router,
     private keycloak: KeycloakService,
+    private usuariosService: UsuariosService,
     private solicitudesService: SolicitudesService,
     private reservasService: ReservasService,
     private cdr: ChangeDetectorRef,
@@ -433,20 +435,38 @@ export class ProveedorReservasListComponent implements OnInit {
     try {
       const tokenParsed = this.keycloak.getKeycloakInstance().tokenParsed;
       this.userName = tokenParsed?.['preferred_username'] || tokenParsed?.['name'] || 'Proveedor';
-      
-      this.idProveedor = 1;
 
-      console.log('Cargando reservas del proveedor (endpoint directo):', this.idProveedor);
-      this.reservasService.getByProveedor(this.idProveedor).subscribe({
-        next: (reservas: Reserva[]) => {
-          this.reservas = Array.isArray(reservas) ? reservas : [];
-          this.aplicarFiltros();
+      this.loading = true;
+      this.usuariosService.me().subscribe({
+        next: (me) => {
+          const id = (me as any)?.id as number | undefined;
+          if (!id) {
+            this.error = 'No se pudo obtener el id del proveedor (GET /usuarios/me no devolvió id).';
             this.loading = false;
-          this.cdr.detectChanges();
+            this.cdr.detectChanges();
+            return;
+          }
+
+          this.idProveedor = id;
+          console.log('Cargando reservas del proveedor (endpoint directo):', id);
+          this.reservasService.getByProveedor(id).subscribe({
+            next: (reservas: Reserva[]) => {
+              this.reservas = Array.isArray(reservas) ? reservas : [];
+              this.aplicarFiltros();
+              this.loading = false;
+              this.cdr.detectChanges();
+            },
+            error: (err: any) => {
+              console.error('Error cargando reservas del proveedor:', err);
+              this.error = 'Error al cargar las reservas del proveedor: ' + (err.message || err.statusText || 'Error desconocido');
+              this.loading = false;
+              this.cdr.detectChanges();
+            }
+          });
         },
         error: (err: any) => {
-          console.error('Error cargando reservas del proveedor:', err);
-          this.error = 'Error al cargar las reservas del proveedor: ' + (err.message || err.statusText || 'Error desconocido');
+          console.error('Error obteniendo usuario actual (/usuarios/me):', err);
+          this.error = 'Error al obtener el usuario autenticado: ' + (err.message || err.statusText || 'Error desconocido');
           this.loading = false;
           this.cdr.detectChanges();
         }
