@@ -25,6 +25,10 @@ export class UsuariosService {
     return this.http.get<Usuario>('/usuarios/me');
   }
 
+  actualizarMiPerfil(payload: UsuarioUpdateRequest): Observable<Usuario> {
+    return this.http.patch<Usuario>('/usuarios/me', payload);
+  }
+
   register(payload: {
     nombre: string;
     email: string;
