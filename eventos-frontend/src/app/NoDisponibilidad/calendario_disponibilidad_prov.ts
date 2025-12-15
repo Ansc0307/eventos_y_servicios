@@ -6,6 +6,7 @@ import { KeycloakService } from 'keycloak-angular';
 import { NoDisponibilidadesService } from '../services/no-disponibilidades.service';
 import { NoDisponibilidad } from '../models/NoDisponibilidad.model';
 import { RefreshService } from '../services/refresh.service';
+import { UsuariosService } from '../services/usuarios.service';
 
 interface CalendarDay {
   date: Date;
@@ -194,7 +195,7 @@ interface CalendarDay {
 })
 export class CalendarioDetalladoComponent implements OnInit {
   userName: string = '';
-idProveedor = 1;
+  idProveedor: number | null = null;
   //userName: string = 'Proveedor';
 
 
@@ -209,6 +210,7 @@ idProveedor = 1;
 constructor(
     private router: Router,
     private keycloak: KeycloakService,
+    private usuariosService: UsuariosService,
     private service: NoDisponibilidadesService,
     private cd: ChangeDetectorRef
   ) {}
@@ -217,12 +219,26 @@ ngOnInit() {
     const tokenParsed = this.keycloak.getKeycloakInstance().tokenParsed;
     this.userName = tokenParsed?.['preferred_username'] || tokenParsed?.['name'] || 'Proveedor';
 
-    // ID fijo o dinámico según tu caso
-    this.idProveedor = 1; 
+    this.usuariosService.me().subscribe({
+      next: (me) => {
+        const id = (me as any)?.id as number | undefined;
+        if (id) {
+          this.idProveedor = id;
+        }
 
-    // Carga inicial
-    this.fetchNoDisponibilidades();
-    this.buildCalendar();
+        // Carga inicial
+        this.fetchNoDisponibilidades();
+        this.buildCalendar();
+        this.cd.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error obteniendo usuario actual (/usuarios/me):', err);
+        // Igual cargamos el calendario aunque falle el id
+        this.fetchNoDisponibilidades();
+        this.buildCalendar();
+        this.cd.detectChanges();
+      }
+    });
   } catch (err) {
     console.error('Error al inicializar calendario:', err);
     this.userName = 'Proveedor';

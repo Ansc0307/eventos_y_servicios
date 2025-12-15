@@ -10,6 +10,7 @@ import { forkJoin } from 'rxjs';
 import { SolicitudDetalleComponent } from '../components/solicitud-detalle/solicitud-detalle.component';
 import { ResponderSolicitudComponent } from '../components/solicitud-detalle/app-responder-solicitud';
 import { OfertasService } from '../services/ofertas.service';
+import { UsuariosService } from '../services/usuarios.service';
 import { Oferta } from '../models/oferta.model';
 import { OfertaCardComponent } from '../components/oferta-card/oferta-card.component';
 
@@ -422,7 +423,7 @@ export class ProveedorDashboardComponent implements OnInit {
   loading = true;
   error: string | null = null;
   userName = '';
-  idProveedor = 1; // Por defecto
+  idProveedor: number | null = null;
   misOfertas: Oferta[] = [];
 oferta: Oferta | null = null;
   loadingOferta = false;
@@ -433,31 +434,60 @@ oferta: Oferta | null = null;
       // Obtener nombre de usuario desde Keycloak
       const tokenParsed = this.keycloak.getKeycloakInstance().tokenParsed;
       this.userName = tokenParsed?.['preferred_username'] || tokenParsed?.['name'] || 'Proveedor';
-      
-      this.idProveedor = 1;
 
-      // Cargar reservas del proveedor directamente (nuevo endpoint)
-      console.log('Cargando reservas del proveedor en dashboard (endpoint directo):', this.idProveedor);
-      this.reservasService.getByProveedor(this.idProveedor).subscribe({
-        next: (reservas) => {
-          this.reservas = Array.isArray(reservas) ? reservas : [];
-          // Opcional: cargar solicitudes del proveedor para métricas del dashboard
-          this.solicitudesService.getByProveedor(this.idProveedor).subscribe({
-            next: (solicitudes) => {
-              this.solicitudes = Array.isArray(solicitudes) ? solicitudes : [];
-              this.loading = false;
-              this.cdr.detectChanges();
+      this.loading = true;
+      this.usuariosService.me().subscribe({
+        next: (me) => {
+          const id = (me as any)?.id as number | undefined;
+          if (!id) {
+            this.error = 'No se pudo obtener el id del proveedor (GET /usuarios/me no devolvió id).';
+            this.loading = false;
+            this.cdr.detectChanges();
+            return;
+          }
+
+          this.idProveedor = id;
+
+          // Cargar reservas del proveedor directamente (nuevo endpoint)
+          console.log('Cargando reservas del proveedor en dashboard (endpoint directo):', id);
+          this.reservasService.getByProveedor(id).subscribe({
+            next: (reservas) => {
+              this.reservas = Array.isArray(reservas) ? reservas : [];
+
+              // Opcional: cargar solicitudes del proveedor para métricas del dashboard
+              this.solicitudesService.getByProveedor(id).subscribe({
+                next: (solicitudes) => {
+                  this.solicitudes = Array.isArray(solicitudes) ? solicitudes : [];
+                  this.loading = false;
+                  this.cdr.detectChanges();
+                },
+                error: () => {
+                  // Si falla la carga de solicitudes, seguimos mostrando reservas
+                  this.loading = false;
+                  this.cdr.detectChanges();
+                }
+              });
             },
-            error: () => {
-              // Si falla la carga de solicitudes, seguimos mostrando reservas
+            error: (err) => {
+              console.error('Error cargando reservas del proveedor en dashboard:', err);
+              this.error = 'Error al cargar las reservas: ' + (err.message || err.statusText || 'Error desconocido');
               this.loading = false;
               this.cdr.detectChanges();
             }
           });
+
+          // MIS OFERTAS
+          this.ofertasService.getOfertasPorProveedor(id).subscribe({
+            next: (ofertas) => {
+              this.misOfertas = ofertas;
+              console.log('Ofertas del proveedor:', this.misOfertas);
+            },
+            error: (err) => console.error('Error cargando ofertas del proveedor', err)
+          });
         },
         error: (err) => {
-          console.error('Error cargando reservas del proveedor en dashboard:', err);
-          this.error = 'Error al cargar las reservas: ' + (err.message || err.statusText || 'Error desconocido');
+          console.error('Error obteniendo usuario actual (/usuarios/me):', err);
+          this.error = 'Error al obtener el usuario autenticado: ' + (err.message || err.statusText || 'Error desconocido');
           this.loading = false;
           this.cdr.detectChanges();
         }
@@ -468,14 +498,6 @@ oferta: Oferta | null = null;
       this.loading = false;
       this.cdr.detectChanges();
     }
-    //MIS OFERTAS
-    this.ofertasService.getOfertasPorProveedor(this.idProveedor).subscribe({
-      next: (ofertas) => {
-        this.misOfertas = ofertas;  // Cambié 'ofertas' por 'misOfertas'
-        console.log('Ofertas del proveedor:', this.misOfertas);
-      },
-      error: (err) => console.error('Error cargando ofertas del proveedor', err)
-    });
   }
   // Estadísticas
   get solicitudesPendientes(): number {
@@ -531,6 +553,7 @@ oferta: Oferta | null = null;
 
   constructor(
     private keycloak: KeycloakService,
+    private usuariosService: UsuariosService,
     private solicitudesService: SolicitudesService,
     private reservasService: ReservasService,
     private ofertasService: OfertasService, 

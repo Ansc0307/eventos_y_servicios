@@ -5,6 +5,7 @@ import { Router, RouterLink } from '@angular/router';
 import { SolicitudesService } from '../services/solicitudes.service';
 import { ReservasService } from '../services/reservas.service';
 import { OfertasService } from '../services/ofertas.service'; // 🟢 Importar OfertasService
+import { UsuariosService } from '../services/usuarios.service';
 import { Solicitud } from '../models/solicitud.model';
 import { Oferta } from '../models/oferta.model'; // 🟢 Importar el modelo Oferta
 import { FormsModule } from '@angular/forms';
@@ -301,7 +302,7 @@ export class OrganizadorSolicitudesListComponent implements OnInit {
   loading = true;
   error: string | null = null;
   userName = '';
-  idOrganizador = 14;
+  idOrganizador: number | null = null;
   filtroFecha: 'futuro' | 'todas' = 'futuro';
   filtroEstado: string = '';
   mostrarModal = false;
@@ -317,6 +318,7 @@ export class OrganizadorSolicitudesListComponent implements OnInit {
   constructor(
         private router: Router,
         private keycloak: KeycloakService,
+      private usuariosService: UsuariosService,
         private solicitudesService: SolicitudesService,
         private reservasService: ReservasService,
         private ofertasService: OfertasService, // 🟢 Inyectar OfertasService
@@ -327,18 +329,37 @@ export class OrganizadorSolicitudesListComponent implements OnInit {
     try {
       const tokenParsed = this.keycloak.getKeycloakInstance().tokenParsed;
       this.userName = tokenParsed?.['preferred_username'] || tokenParsed?.['name'] || 'Organizador';
-      this.idOrganizador = 14;
 
-      this.solicitudesService.getByOrganizador(this.idOrganizador).subscribe({
-        next: (solicitudes: Solicitud[]) => {
-          this.solicitudes = Array.isArray(solicitudes) ? solicitudes : [];
-          this.aplicarFiltros();
-          this.loading = false;
-          this.cdr.detectChanges();
+      this.loading = true;
+      this.usuariosService.me().subscribe({
+        next: (me) => {
+          const id = (me as any)?.id as number | undefined;
+          if (!id) {
+            this.error = 'No se pudo obtener el id del organizador (GET /usuarios/me no devolvió id).';
+            this.loading = false;
+            this.cdr.detectChanges();
+            return;
+          }
+
+          this.idOrganizador = id;
+          this.solicitudesService.getByOrganizador(id).subscribe({
+            next: (solicitudes: Solicitud[]) => {
+              this.solicitudes = Array.isArray(solicitudes) ? solicitudes : [];
+              this.aplicarFiltros();
+              this.loading = false;
+              this.cdr.detectChanges();
+            },
+            error: (err: any) => {
+              console.error('Error cargando solicitudes del organizador:', err);
+              this.error = 'Error al cargar las solicitudes del organizador: ' + (err.message || err.statusText || 'Error desconocido');
+              this.loading = false;
+              this.cdr.detectChanges();
+            }
+          });
         },
         error: (err: any) => {
-          console.error('Error cargando solicitudes del organizador:', err);
-          this.error = 'Error al cargar las solicitudes del organizador: ' + (err.message || err.statusText || 'Error desconocido');
+          console.error('Error obteniendo usuario actual (/usuarios/me):', err);
+          this.error = 'Error al obtener el usuario autenticado: ' + (err.message || err.statusText || 'Error desconocido');
           this.loading = false;
           this.cdr.detectChanges();
         }

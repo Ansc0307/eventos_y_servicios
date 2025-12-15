@@ -6,6 +6,8 @@ import { Router } from '@angular/router';
 import { SolicitudesService } from '../services/solicitudes.service';
 import { ReservasService } from '../services/reservas.service';
 import { NoDisponibilidadesService } from '../services/no-disponibilidades.service';
+import { UsuariosService } from '../services/usuarios.service';
+import { OfertasService } from '../services/ofertas.service';
 import { Solicitud } from '../models/solicitud.model';
 import { Reserva } from '../models/reserva.model';
 import { NoDisponibilidad } from '../models/NoDisponibilidad.model';
@@ -119,6 +121,8 @@ export class SolicitudReservaFormComponent implements OnInit {
   private solicitudesService: SolicitudesService,
   private reservasService: ReservasService,
   private noDispService: NoDisponibilidadesService,
+    private usuariosService: UsuariosService,
+    private ofertasService: OfertasService,
   private cdr: ChangeDetectorRef
 ) {}
 
@@ -338,15 +342,36 @@ ngOnInit(): void {
         return;
     }
     
-    const solicitudPayload = {
-      fechaSolicitud: new Date().toISOString(),
-      idOrganizador: 14, 
-      idProovedor: 1, 
-      idOferta: this.idOferta, 
-      estadoSolicitud: 'PENDIENTE'
-    };
+        forkJoin({
+            me: this.usuariosService.me(),
+            oferta: this.ofertasService.getOfertaById(this.idOferta)
+        }).subscribe({
+            next: ({ me, oferta }) => {
+                const organizadorId = (me as any)?.id as number | undefined;
+                const proveedorId = (oferta as any)?.proveedorId as number | undefined;
 
-    this.solicitudesService.create(solicitudPayload).subscribe({
+                if (!organizadorId) {
+                    this.loading = false;
+                    this.error = 'No se pudo obtener el id del organizador (GET /usuarios/me no devolvió id).';
+                    return;
+                }
+
+                if (!proveedorId) {
+                    this.loading = false;
+                    this.error = 'No se pudo obtener el id del proveedor desde la oferta.';
+                    return;
+                }
+
+                const solicitudPayload = {
+                    fechaSolicitud: new Date().toISOString(),
+                    idOrganizador: organizadorId,
+                    // Nota: el backend usa el nombre 'idProovedor' (typo heredado)
+                    idProovedor: proveedorId,
+                    idOferta: this.idOferta,
+                    estadoSolicitud: 'PENDIENTE'
+                };
+
+                this.solicitudesService.create(solicitudPayload).subscribe({
       next: (solicitud: Solicitud) => {
         const reservaPayload = {
           idSolicitud: solicitud.idSolicitud,
@@ -374,11 +399,18 @@ this.cdr.detectChanges();
 
 
 
-      error: (err) => {
-        this.loading = false;
-        this.error = 'Error creando solicitud: ' + (err?.error?.message || err?.message || 'Error desconocido');
-      }
-    });
+            error: (err) => {
+                this.loading = false;
+                this.error = 'Error creando solicitud: ' + (err?.error?.message || err?.message || 'Error desconocido');
+            }
+        });
+            },
+            error: (err) => {
+                console.error('Error obteniendo ids para crear solicitud:', err);
+                this.loading = false;
+                this.error = 'Error obteniendo datos del usuario/oferta. Intenta nuevamente.';
+            }
+        });
   }
 
   // 🟢 Redirige al dashboard al cerrar la confirmación
