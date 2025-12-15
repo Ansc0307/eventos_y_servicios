@@ -95,7 +95,7 @@ crearOferta() {
     this.ofertasService.crearOferta(nuevaOferta).subscribe({
       next: () => {
         alert('Oferta creada con éxito');
-        this.router.navigate(['/mis-ofertas']); // Redirigir al éxito
+        this.router.navigate(['/proveedor/ofertas']); // Redirigir al éxito
       },
       error: (err) => {
         console.error(err);
@@ -112,7 +112,7 @@ crearOferta() {
 
   // Botón "Cancelar"
   cancelar() {
-    this.router.navigate(['/mis-ofertas']); // O la ruta que prefieras
+    this.router.navigate(['/proveedor/ofertas']); // O la ruta que prefieras
   }
 
   // Botón "Eliminar" (En contexto de crear, sería limpiar o descartar)

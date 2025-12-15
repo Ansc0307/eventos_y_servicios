@@ -562,7 +562,7 @@ mostrarModal = false;
   }
 
   buscarOfertas() {
-    this.router.navigate(['/solicitud-reserva']);
+    this.router.navigate(['/ofertas']);
   }
 
   // Modal de detalle de solicitud (simple)
