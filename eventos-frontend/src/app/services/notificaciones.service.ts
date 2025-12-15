@@ -93,4 +93,34 @@ export class NotificacionesService {
   eliminarTipoNotificacion(id: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/tipos-notificacion/${id}`);
   }
+
+  /**
+   * Envía una notificación a un usuario específico
+   * @param asunto Asunto de la notificación
+   * @param mensaje Contenido del mensaje
+   * @param userId ID del usuario destinatario
+   * @param prioridadId ID de la prioridad (ej: 1=BAJA, 2=MEDIA, 3=ALTA)
+   * @param tipoId ID del tipo de notificación (ej: 1=RECORDATORIO, 2=ALERTA, 3=INFORMATIVA, 4=PROMOCIÓN, 5=SISTEMA)
+   */
+  enviarNotificacion(
+    asunto: string, 
+    mensaje: string, 
+    userId: number, 
+    prioridadId: number, 
+    tipoId: number
+  ): Observable<Notificacion> {
+    
+    const notificacion: NotificacionCreate = {
+      asunto,
+      mensaje,
+      userId,
+      prioridad: { id: prioridadId },
+      tipoNotificacion: { id: tipoId }
+    };
+    
+    console.log('Enviando notificación:', { asunto, userId, prioridadId, tipoId });
+    
+    return this.crearNotificacion(notificacion);
+  }
 }
+
