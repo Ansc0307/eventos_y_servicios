@@ -5,6 +5,7 @@ import { SolicitudesService } from '../services/solicitudes.service';
 import { RefreshService } from '../services/refresh.service';
 import { Solicitud } from '../models/solicitud.model';
 import { ChangeDetectorRef } from '@angular/core';
+import { NotificacionesService } from '../services/notificaciones.service';
 
 @Component({
   selector: 'app-solicitudes-list',
@@ -181,7 +182,9 @@ export class SolicitudesListComponent {
   errorCreate: string | null = null;
   successMessage: string | null = null;
 
-  constructor(private service: SolicitudesService, private refreshService: RefreshService, private cd: ChangeDetectorRef) {}
+  constructor(private service: SolicitudesService, private refreshService: RefreshService, 
+    private notificacionesService: NotificacionesService,
+    private cd: ChangeDetectorRef) {}
 
   ngOnInit() {
     this.fetchAll();
@@ -253,6 +256,15 @@ export class SolicitudesListComponent {
       next: (data: Solicitud) => {
         console.log('[SolicitudesList] Solicitud creada:', data);
         this.successMessage = `✓ Solicitud creada exitosamente (ID: ${data.idSolicitud})`;
+        
+        // 🟢 ENVIAR NOTIFICACIONES A LAS PARTES INVOLUCRADAS
+        this.enviarNotificacionesCreacionManual(
+          data.idSolicitud,
+          this.nuevaSolicitud.idOrganizador!,
+          this.nuevaSolicitud.idProovedor!,
+          this.nuevaSolicitud.estadoSolicitud.toUpperCase()
+        );
+        
         this.limpiarFormulario();
         this.loadingCreate = false;
         this.fetchAll(); // Recargar listado completo de solicitudes
@@ -270,6 +282,67 @@ export class SolicitudesListComponent {
         this.loadingCreate = false;
         try { this.cd.detectChanges(); } catch(e) {}
       }
+    });
+  }
+
+  /**
+   * 🔔 Envía notificaciones cuando un administrador crea una solicitud manualmente
+   */
+  private enviarNotificacionesCreacionManual(
+    solicitudId: number,
+    organizadorId: number,
+    proveedorId: number,
+    estadoSolicitud: string
+  ): void {
+    
+    // 1. NOTIFICACIÓN AL PROVEEDOR (si la solicitud está PENDIENTE o necesita acción)
+    if (estadoSolicitud === 'PENDIENTE') {
+      this.notificacionesService.enviarNotificacion(
+        'Nueva Solicitud Administrativa',
+        `Un administrador creó la solicitud #${solicitudId} en tu nombre. Por favor revisa y responde.`,
+        proveedorId,
+        1, // ALTA - necesita atención
+        2  // ALERTA
+      ).subscribe({
+        next: () => console.log(`📬 Notificación administrativa enviada al proveedor #${proveedorId}`),
+        error: (err) => console.warn('⚠️ No se pudo notificar al proveedor:', err.message)
+      });
+    }
+
+    // 2. NOTIFICACIÓN AL ORGANIZADOR (para todos los estados)
+    let asuntoOrg = '';
+    let mensajeOrg = '';
+    
+    switch (estadoSolicitud) {
+      case 'PENDIENTE':
+        asuntoOrg = 'Solicitud Creada por Administrador';
+        mensajeOrg = `Un administrador creó la solicitud #${solicitudId} en tu nombre. Está pendiente de respuesta del proveedor.`;
+        break;
+        
+      case 'APROBADA':
+        asuntoOrg = '¡Solicitud Aprobada!';
+        mensajeOrg = `Un administrador creó y aprobó la solicitud #${solicitudId} en tu nombre.`;
+        break;
+        
+      case 'RECHAZADA':
+        asuntoOrg = 'Solicitud Rechazada';
+        mensajeOrg = `Un administrador creó y rechazó la solicitud #${solicitudId} en tu nombre.`;
+        break;
+        
+      default:
+        asuntoOrg = 'Solicitud Administrativa Creada';
+        mensajeOrg = `Un administrador creó la solicitud #${solicitudId} en tu nombre. Estado: ${estadoSolicitud}`;
+    }
+
+    this.notificacionesService.enviarNotificacion(
+      asuntoOrg,
+      mensajeOrg,
+      organizadorId,
+      estadoSolicitud === 'RECHAZADA' ? 1 : 2, // ALTA si es rechazada, MEDIA para otros
+      estadoSolicitud === 'RECHAZADA' ? 2 : 3 // ALERTA si es rechazada, INFORMATIVA para otros
+    ).subscribe({
+      next: () => console.log(`📬 Notificación administrativa enviada al organizador #${organizadorId}`),
+      error: (err) => console.warn('⚠️ No se pudo notificar al organizador:', err.message)
     });
   }
 

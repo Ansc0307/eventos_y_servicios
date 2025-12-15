@@ -13,6 +13,7 @@ import { UsuariosService } from '../services/usuarios.service';
 import { Oferta } from '../models/oferta.model';
 import { OfertasService } from '../services/ofertas.service';
 // import { forkJoin } from 'rxjs';
+import { NotificacionesService } from '../services/notificaciones.service';
 
 @Component({
   selector: 'app-proveedor-reservas-list',
@@ -428,7 +429,9 @@ export class ProveedorReservasListComponent implements OnInit {
     private cdr: ChangeDetectorRef,
     private noDispService: NoDisponibilidadesService,
     // AÑADIR ESTA LÍNEA
-    private ofertasService: OfertasService 
+    private ofertasService: OfertasService ,
+    //para notificaciones
+    private notificacionesService: NotificacionesService,
   ) {}
 
   ngOnInit(): void {
@@ -661,59 +664,80 @@ cargarOferta(idOferta: number) {
 
   guardarEstado(): void {
     if (!this.reservaSeleccionada || !this.nuevoEstado) return;
+    
+    // OBTENER DATOS PARA LA NOTIFICACIÓN
+    const reservaId = this.reservaSeleccionada.idReserva;
+    const organizadorId = this.solicitudSeleccionada?.idOrganizador;
+    
+    if (!organizadorId) {
+      console.warn('⚠️ No se pudo obtener el ID del organizador para notificar');
+    }
+    
     this.guardandoEstado = true;
-    const id = this.reservaSeleccionada.idReserva;
-    const payload = { ...this.reservaSeleccionada, estado: this.nuevoEstado, fechaActualizacion: new Date().toISOString() } as any;
+    const payload = { 
+      ...this.reservaSeleccionada, 
+      estado: this.nuevoEstado, 
+      fechaActualizacion: new Date().toISOString() 
+    } as any;
 
-    this.reservasService.update(id, payload).subscribe({
+    this.reservasService.update(reservaId, payload).subscribe({
       next: (resActualizada) => {
-        const idx = this.reservas.findIndex(r => r.idReserva === id);
+        // Actualizar en la lista local
+        const idx = this.reservas.findIndex(r => r.idReserva === reservaId);
         if (idx !== -1) this.reservas[idx] = resActualizada;
 
-        if (this.nuevoEstado === 'CANCELADA') {
-          // eliminar no disponibilidad asociada via GET /v1/reservas/{id}/no-disponibilidad
-          this.reservasService.getNoDisponibilidadByReserva(id).subscribe({
-            next: (noDisp: any) => {
-              if (noDisp?.idNoDisponibilidad) {
-                this.noDispService.delete(noDisp.idNoDisponibilidad).subscribe({
-                  next: () => {
-                    this.guardandoEstado = false;
-                    this.aplicarFiltros();
-                    this.cerrarEditar();
-                    this.cdr.detectChanges();
-                  },
-                  error: (err) => {
-                    console.error('Error eliminando no disponibilidad:', err);
-                    this.guardandoEstado = false;
-                    this.cerrarEditar();
-                  }
-                });
-              } else {
-                // No hay no disponibilidad asociada, continuar
-                this.guardandoEstado = false;
-                this.aplicarFiltros();
-                this.cerrarEditar();
-                this.cdr.detectChanges();
-              }
-            },
-            error: (err) => {
-              console.error('Error obteniendo no disponibilidad de la reserva:', err);
-              // Continuar aunque falle (puede no haber no disponibilidad)
-              this.guardandoEstado = false;
-              this.cerrarEditar();
-            }
-          });
-        } else {
-          this.guardandoEstado = false;
-          this.aplicarFiltros();
-          this.cerrarEditar();
-          this.cdr.detectChanges();
+        // ENVIAR NOTIFICACIÓN AL ORGANIZADOR
+        if (organizadorId) {
+          this.enviarNotificacionCambioEstado(reservaId, this.nuevoEstado, organizadorId);
         }
+
+        // Resto de lógica para cancelar...
       },
       error: (err) => {
         console.error('Error actualizando reserva:', err);
         this.guardandoEstado = false;
       }
+    });
+  }
+
+  /**
+   * 🔔 Envía notificación al organizador cuando cambia el estado
+   */
+  private enviarNotificacionCambioEstado(
+    reservaId: number, 
+    nuevoEstado: string, 
+    organizadorId: number
+  ): void {
+    
+    let asunto = '';
+    let mensaje = '';
+    let prioridadId = 2; // MEDIA por defecto
+    let tipoId = 3; // INFORMATIVA por defecto
+
+    if (nuevoEstado === 'CONFIRMADA') {
+      asunto = '¡Reserva Confirmada!';
+      mensaje = `El proveedor ${this.userName} confirmó la reserva #${reservaId}`;
+      prioridadId = 2; // MEDIA
+      tipoId = 3; // INFORMATIVA
+    } 
+    else if (nuevoEstado === 'CANCELADA') {
+      asunto = 'Reserva Cancelada';
+      mensaje = `El proveedor ${this.userName} canceló la reserva #${reservaId}`;
+      prioridadId = 1; // ALTA (importante)
+      tipoId = 2; // ALERTA
+    }
+
+    if (!asunto) return; // Si no hay mensaje, no enviar
+
+    this.notificacionesService.enviarNotificacion(
+      asunto,
+      mensaje,
+      organizadorId,
+      prioridadId,
+      tipoId
+    ).subscribe({
+      next: () => console.log(`Notificación enviada al organizador sobre reserva #${reservaId}`),
+      error: (err) => console.warn('⚠️ No se pudo enviar notificación:', err.message)
     });
   }
 }

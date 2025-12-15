@@ -26,6 +26,10 @@ export class NotificationItemComponent {
 
   getTiempoTranscurrido(): string {
     const fecha = new Date(this.notificacion.fechaCreacion);
+
+    // FIX rápido: restar 4 horas
+    fecha.setHours(fecha.getHours() - 4);
+
     const ahora = new Date();
     const diferencia = ahora.getTime() - fecha.getTime();
     const minutos = Math.floor(diferencia / (1000 * 60));

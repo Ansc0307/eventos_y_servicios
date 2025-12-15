@@ -15,6 +15,8 @@ import { ResponderSolicitudComponent } from '../components/solicitud-detalle/app
 import { finalize, timeout } from 'rxjs/operators';
 import { forkJoin } from 'rxjs';
 
+import { NotificacionesService } from '../services/notificaciones.service'; 
+
 @Component({
   selector: 'app-proveedor-solicitudes-list',
   standalone: true,
@@ -361,6 +363,8 @@ export class ProveedorSolicitudesListComponent implements OnInit {
     // 🟢 Inyectar servicios de detalle
     private reservasService: ReservasService,
     private ofertasService: OfertasService,
+
+    private notificacionesService: NotificacionesService,
     // ------------------------------------
     private cdr: ChangeDetectorRef
   ) {}
@@ -576,10 +580,70 @@ export class ProveedorSolicitudesListComponent implements OnInit {
   }
 
   actualizarSolicitud(solicitudActualizada: Solicitud) {
-    // Actualizar la lista de solicitudes localmente
-    const index = this.solicitudes.findIndex(s => s.idSolicitud === solicitudActualizada.idSolicitud);
-    if (index !== -1) this.solicitudes[index] = solicitudActualizada;
+    // Actualizar la lista de solicitudes localmente
+    const index = this.solicitudes.findIndex(s => s.idSolicitud === solicitudActualizada.idSolicitud);
+    if (index !== -1) this.solicitudes[index] = solicitudActualizada;
     this.aplicarFiltros(); // Refresca la lista filtrada
+    
+    // 🟢 ENVIAR NOTIFICACIÓN AL ORGANIZADOR
+    this.enviarNotificacionRespuesta(solicitudActualizada);
+  }
+
+  /**
+   * 🔔 Envía notificación al organizador cuando el proveedor responde a su solicitud
+   */
+  private enviarNotificacionRespuesta(solicitud: Solicitud): void {
+    const estado = solicitud.estadoSolicitud?.toUpperCase();
+    const organizadorId = solicitud.idOrganizador;
+    const proveedorNombre = this.userName || 'Un proveedor';
+    
+    if (!organizadorId || !estado) {
+      console.warn('⚠️ No se puede enviar notificación: faltan datos');
+      return;
+    }
+    
+    let asunto = '';
+    let mensaje = '';
+    let prioridadId = 2; // MEDIA por defecto
+    let tipoId = 3; // INFORMATIVA por defecto
+    
+    switch (estado) {
+      case 'APROBADA':
+        asunto = '¡Solicitud Aprobada!';
+        mensaje = `${proveedorNombre} aprobó tu solicitud #${solicitud.idSolicitud}`;
+        prioridadId = 2; // MEDIA
+        tipoId = 3; // INFORMATIVA
+        break;
+        
+      case 'RECHAZADA':
+        asunto = 'Solicitud Rechazada';
+        mensaje = `${proveedorNombre} rechazó tu solicitud #${solicitud.idSolicitud}`;
+        prioridadId = 1; // ALTA (importante saber)
+        tipoId = 2; // ALERTA
+        break;
+        
+      case 'EN_NEGOCIACION':
+        asunto = 'Solicitud en Negociación';
+        mensaje = `${proveedorNombre} quiere negociar tu solicitud #${solicitud.idSolicitud}`;
+        prioridadId = 2; // MEDIA
+        tipoId = 3; // INFORMATIVA
+        break;
+        
+      default:
+        // Para otros estados, no enviar notificación
+        return;
+    }
+    
+    this.notificacionesService.enviarNotificacion(
+      asunto,
+      mensaje,
+      organizadorId,
+      prioridadId,
+      tipoId
+    ).subscribe({
+      next: () => console.log(`📬 Notificación enviada al organizador #${organizadorId}`),
+      error: (err) => console.warn('⚠️ No se pudo enviar notificación:', err.message)
+    });
   }
 
 }

@@ -8,6 +8,9 @@ import { Reserva } from '../models/reserva.model';
 import { Solicitud } from '../models/solicitud.model';
 import { ChangeDetectorRef } from '@angular/core';
 
+import { NotificacionesService } from '../services/notificaciones.service';
+import { OfertasService } from '../services/ofertas.service';
+
 @Component({
   selector: 'app-reservas-list',
   standalone: true,
@@ -153,7 +156,10 @@ export class ReservasListComponent implements OnInit {
     private service: ReservasService,
     private solicitudesService: SolicitudesService,
     private refreshService: RefreshService,
-    private cd: ChangeDetectorRef
+    private cd: ChangeDetectorRef,
+
+    private notificacionesService: NotificacionesService, // <-- Añadir
+    private ofertasService: OfertasService, // <-- Añadir para obtener datos de la oferta
   ) {}
 
   ngOnInit(): void {
@@ -233,6 +239,8 @@ export class ReservasListComponent implements OnInit {
       next: (data: Reserva) => {
         console.log('[ReservasList] Reserva creada:', data);
         this.successMessage = `✓ Reserva creada exitosamente (ID: ${data.idReserva})`;
+        // 🔔 ENVIAR NOTIFICACIONES A LOS USUARIOS INVOLUCRADOS
+        this.enviarNotificacionesReservaCreada(data.idReserva, this.nuevaReserva.idSolicitud!);
         this.limpiarFormulario();
         this.loadingCreate = false;
         this.fetch(); // Recargar lista de reservas
@@ -249,6 +257,37 @@ export class ReservasListComponent implements OnInit {
         this.errorCreate = err?.error?.message || err?.message || 'Error al crear la reserva';
         this.loadingCreate = false;
         try { this.cd.detectChanges(); } catch (e) { /* noop */ }
+      }
+    });
+  }
+
+  // Función simplificada si no puedes obtener detalles de oferta
+  private enviarNotificacionesReservaCreada(reservaId: number, solicitudId: number): void {
+    this.solicitudesService.getById(solicitudId).subscribe({
+      next: (solicitud: Solicitud) => {
+        const fechaInicio = new Date(this.nuevaReserva.fechaReservaInicio).toLocaleDateString('es-PE');
+        
+        // Notificar ORGANIZADOR
+        if (solicitud.idOrganizador) {
+          this.notificacionesService.enviarNotificacion(
+            'Reserva Creada por Administrador',
+            `Un administrador creó la reserva #${reservaId} en tu nombre para el ${fechaInicio}`,
+            solicitud.idOrganizador,
+            2,
+            3
+          ).subscribe();
+        }
+        
+        // Notificar PROVEEDOR
+        if (solicitud.idProovedor) {
+          this.notificacionesService.enviarNotificacion(
+            'Nueva Reserva Administrativa',
+            `Un administrador creó la reserva #${reservaId} para una de tus ofertas. Fecha: ${fechaInicio}`,
+            solicitud.idProovedor,
+            1,
+            2
+          ).subscribe();
+        }
       }
     });
   }

@@ -13,6 +13,7 @@ import { Reserva } from '../models/reserva.model';
 import { NoDisponibilidad } from '../models/NoDisponibilidad.model';
 import { forkJoin } from 'rxjs';
 import { ChangeDetectorRef } from '@angular/core';
+import { NotificacionesService } from '../services/notificaciones.service';
 
 @Component({
   selector: 'app-solicitud-reserva-form',
@@ -123,6 +124,7 @@ export class SolicitudReservaFormComponent implements OnInit {
   private noDispService: NoDisponibilidadesService,
     private usuariosService: UsuariosService,
     private ofertasService: OfertasService,
+    private notificacionesService: NotificacionesService,
   private cdr: ChangeDetectorRef
 ) {}
 
@@ -335,83 +337,133 @@ ngOnInit(): void {
   }
 
   private createSolicitudAndReserva(inicioFormatted: string, finFormatted: string) {
-    
-    if (!this.idOferta) {
-        this.error = 'El ID de la oferta es requerido para crear la solicitud.';
-        this.loading = false;
-        return;
-    }
-    
-        forkJoin({
-            me: this.usuariosService.me(),
-            oferta: this.ofertasService.getOfertaById(this.idOferta)
-        }).subscribe({
-            next: ({ me, oferta }) => {
-                const organizadorId = (me as any)?.id as number | undefined;
-                const proveedorId = (oferta as any)?.proveedorId as number | undefined;
+    if (!this.idOferta) {
+        this.error = 'El ID de la oferta es requerido para crear la solicitud.';
+        this.loading = false;
+        return;
+    }
+    
+    forkJoin({
+        me: this.usuariosService.me(),
+        oferta: this.ofertasService.getOfertaById(this.idOferta)
+    }).subscribe({
+        next: ({ me, oferta }) => {
+        const organizadorId = (me as any)?.id as number | undefined;
+        const proveedorId = (oferta as any)?.proveedorId as number | undefined;
+        const organizadorNombre = (me as any)?.nombre || (me as any)?.username || 'Un organizador';
+        const ofertaTitulo = oferta.titulo || 'una oferta';
 
-                if (!organizadorId) {
-                    this.loading = false;
-                    this.error = 'No se pudo obtener el id del organizador (GET /usuarios/me no devolvió id).';
-                    return;
-                }
+        if (!organizadorId) {
+            this.loading = false;
+            this.error = 'No se pudo obtener el id del organizador (GET /usuarios/me no devolvió id).';
+            return;
+        }
 
-                if (!proveedorId) {
-                    this.loading = false;
-                    this.error = 'No se pudo obtener el id del proveedor desde la oferta.';
-                    return;
-                }
+        if (!proveedorId) {
+            this.loading = false;
+            this.error = 'No se pudo obtener el id del proveedor desde la oferta.';
+            return;
+        }
 
-                const solicitudPayload = {
-                    fechaSolicitud: new Date().toISOString(),
-                    idOrganizador: organizadorId,
-                    // Nota: el backend usa el nombre 'idProovedor' (typo heredado)
-                    idProovedor: proveedorId,
-                    idOferta: this.idOferta,
-                    estadoSolicitud: 'PENDIENTE'
-                };
+        const solicitudPayload = {
+            fechaSolicitud: new Date().toISOString(),
+            idOrganizador: organizadorId,
+            idProovedor: proveedorId,
+            idOferta: this.idOferta,
+            estadoSolicitud: 'PENDIENTE'
+        };
 
-                this.solicitudesService.create(solicitudPayload).subscribe({
-      next: (solicitud: Solicitud) => {
-        const reservaPayload = {
-          idSolicitud: solicitud.idSolicitud,
-          fechaReservaInicio: inicioFormatted, 
-          fechaReservaFin: finFormatted,      
-          estado: 'PENDIENTE'
-        };
+        this.solicitudesService.create(solicitudPayload).subscribe({
+            next: (solicitud: Solicitud) => {
+            const reservaPayload = {
+                idSolicitud: solicitud.idSolicitud,
+                fechaReservaInicio: inicioFormatted,
+                fechaReservaFin: finFormatted,
+                estado: 'PENDIENTE'
+            };
 
-        this.reservasService.create(reservaPayload).subscribe({
-          next: (reserva: Reserva) => {
-            this.loading = false;
-            // 🟢 Mostrar la confirmación SÓLO después de que la Reserva se creó con éxito
-            this.showConfirmation = true;
-this.cdr.detectChanges();
-
-          },
-          error: (err) => {
-            this.loading = false;
-            this.error = 'Error creando reserva: ' + (err?.error?.message || err?.message || 'Error desconocido');
-          }
-        });
-      },
-
-
-
-
-
-            error: (err) => {
+            this.reservasService.create(reservaPayload).subscribe({
+                next: (reserva: Reserva) => {
                 this.loading = false;
-                this.error = 'Error creando solicitud: ' + (err?.error?.message || err?.message || 'Error desconocido');
-            }
-        });
+                // 🟢 Mostrar la confirmación SÓLO después de que la Reserva se creó con éxito
+                this.showConfirmation = true;
+                this.cdr.detectChanges();
+                
+                // 🟢 ENVIAR NOTIFICACIONES A AMBAS PARTES
+                this.enviarNotificacionesCreacion(
+                    organizadorId,
+                    proveedorId,
+                    solicitud.idSolicitud,
+                    reserva.idReserva,
+                    organizadorNombre,
+                    ofertaTitulo,
+                    inicioFormatted
+                );
+                },
+                error: (err) => {
+                this.loading = false;
+                this.error = 'Error creando reserva: ' + (err?.error?.message || err?.message || 'Error desconocido');
+                }
+            });
             },
             error: (err) => {
-                console.error('Error obteniendo ids para crear solicitud:', err);
-                this.loading = false;
-                this.error = 'Error obteniendo datos del usuario/oferta. Intenta nuevamente.';
+            this.loading = false;
+            this.error = 'Error creando solicitud: ' + (err?.error?.message || err?.message || 'Error desconocido');
             }
         });
-  }
+        },
+        error: (err) => {
+        console.error('Error obteniendo ids para crear solicitud:', err);
+        this.loading = false;
+        this.error = 'Error obteniendo datos del usuario/oferta. Intenta nuevamente.';
+        }
+    });
+    }
+
+    /**
+     * 🔔 Envía notificaciones cuando se crea una nueva solicitud/reserva
+     */
+    private enviarNotificacionesCreacion(
+    organizadorId: number,
+    proveedorId: number,
+    solicitudId: number,
+    reservaId: number,
+    organizadorNombre: string,
+    ofertaTitulo: string,
+    fechaInicio: string
+    ): void {
+    const fechaFormateada = new Date(fechaInicio).toLocaleDateString('es-PE', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+
+    // 1. NOTIFICACIÓN AL PROVEEDOR (Alta prioridad - necesita responder)
+    this.notificacionesService.enviarNotificacion(
+        '¡Nueva Solicitud Recibida!',
+        `${organizadorNombre} solicitó "${ofertaTitulo}" para el ${fechaFormateada}. ID Solicitud: #${solicitudId}`,
+        proveedorId,
+        1, // ALTA - necesita atención inmediata
+        2  // ALERTA - requiere acción
+    ).subscribe({
+        next: () => console.log(`📬 Notificación enviada al proveedor #${proveedorId}`),
+        error: (err) => console.warn('⚠️ No se pudo notificar al proveedor:', err.message)
+    });
+
+    // 2. NOTIFICACIÓN AL ORGANIZADOR (Media prioridad - confirmación)
+    this.notificacionesService.enviarNotificacion(
+        'Solicitud Registrada',
+        `Tu solicitud #${solicitudId} para "${ofertaTitulo}" ha sido enviada al proveedor. Fecha: ${fechaFormateada}`,
+        organizadorId,
+        2, // MEDIA - informativo
+        3  // INFORMATIVA
+    ).subscribe({
+        next: () => console.log(`📬 Notificación de confirmación enviada al organizador #${organizadorId}`),
+        error: (err) => console.warn('⚠️ No se pudo notificar al organizador:', err.message)
+    });
+    }
 
   // 🟢 Redirige al dashboard al cerrar la confirmación
   closeConfirmation() {
